@@ -1,25 +1,14 @@
 #include "timer.h"
 #include "usart.h"
 #include "atk_ble03_uart.h"
+#include "bsp_button.h"
 
-//////////////////////////////////////////////////////////////////////////////////	 
-//本程序只供学习使用，未经作者许可，不得用于其它任何用途
-//ALIENTEK STM32F103开发板
-//定时器中断驱动代码	   
-//正点原子@ALIENTEK
-//技术论坛:www.openedv.com
-//创建日期:2019/11/15
-//版本：V1.0
-//版权所有，盗版必究。
-//Copyright(C) 广州市星翼电子科技有限公司 2014-2024
-//All rights reserved									  
-////////////////////////////////////////////////////////////////////////////////// 	
+
 //stm32f103rc就三个TIM（1、2、3）能用
-
-TIM_HandleTypeDef TIM3_Handler;      //定时器句柄 
-
 TIM_HandleTypeDef TIM2_Handler;      //定时器句柄 
 volatile unsigned long long FreeRTOSRunTimeTicks;//FreeRTOS 时间统计所用的节拍计数器
+
+TIM_HandleTypeDef TIM3_Handler;      //定时器句柄 
 
 //初始化 TIM2 使其为 FreeRTOS 的时间统计提供时基
 void ConfigureTimeForRunTimeStats(void)
@@ -68,7 +57,8 @@ void TIM3_Init(u16 arr,u16 psc)
     TIMx->EGR = TIM_PSCReloadMode_Immediate;
     所以初始化之后必须清空标志位，避免第一次启动马上就触发进入中断服务
     */
-    __HAL_TIM_CLEAR_IT(&TIM3_Handler,TIM_IT_UPDATE);
+    //__HAL_TIM_CLEAR_IT(&TIM3_Handler,TIM_IT_UPDATE);//非周期性定时调用
+	HAL_TIM_Base_Start_IT(&TIM3_Handler); //周期性产生中断
 }
 
 //定时器3中断服务函数
@@ -81,19 +71,19 @@ void TIM3_IRQHandler(void)
 //此函数会被HAL_TIM_Base_Init()函数调用
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef *htim)
 {
-    if(htim->Instance==TIM3)
-	{
-        //TIM3中断优先级要最高要低于uart1
-		__HAL_RCC_TIM3_CLK_ENABLE();            //使能TIM3时钟
-		HAL_NVIC_SetPriority(TIM3_IRQn,(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 3),3);    //设置中断优先级，抢占优先级1，子优先级3
-		HAL_NVIC_EnableIRQ(TIM3_IRQn);          //开启ITM3中断   
-	}
-    else if(htim->Instance==TIM2)
+    if(htim->Instance==TIM2)
 	{
         //做freertos时基的TIM中断优先级要最高
 		__HAL_RCC_TIM2_CLK_ENABLE();            //使能TIM2时钟
 		HAL_NVIC_SetPriority(TIM2_IRQn,(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY),3);    //设置中断优先级，抢占优先级1，子优先级3
 		HAL_NVIC_EnableIRQ(TIM2_IRQn);          //开启ITM2中断   
+	}
+    else if(htim->Instance==TIM3)
+	{
+        //TIM3中断优先级要最高要低于uart1
+		__HAL_RCC_TIM3_CLK_ENABLE();            //使能TIM3时钟
+		HAL_NVIC_SetPriority(TIM3_IRQn,(configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY + 3),3);    //设置中断优先级，抢占优先级1，子优先级3
+		HAL_NVIC_EnableIRQ(TIM3_IRQn);          //开启ITM3中断   
 	}
 }
 
@@ -105,14 +95,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         #if (1 == configGENERATE_RUN_TIME_STATS)
         FreeRTOSRunTimeTicks++; //freertos运行时间统计时基计数器加一
         #endif
-
+    }
+	else if(htim==(&TIM3_Handler))
+    {
         //处理uart1
         LOG_UART_RxIrqCheck();
 
         //处理uart5
         ATK_BLE03_UART_RxIrqCheck();
-    }
-	else if(htim==(&TIM3_Handler))
-    {
+
+        //处理button0、1、2
+        bsp_button_IrqCheck();
     }
 }

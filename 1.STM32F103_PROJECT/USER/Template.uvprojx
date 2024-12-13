@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\OBJ;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;.\UserCode\Peripheral;.\UserCode\Modules\task;.\UserCode\Components\InfoTime;..\SystemView\Config;..\SystemView\SEGGER;..\SystemView\Sample\FreeRTOSV10.4;.\UserCode\Modules\upgrade;.\UserCode\Components\DataCheck;.\UserCode\Components\DataEncrypt;.\UserCode\Components\StoreManage;.\UserCode\Modules\ble;.\UserCode\Modules\ble\ATK_BLE03;.\UserCode\Components\InfoProtocol;.\UserCode\Modules\InfoComm;.\UserCode\Components\DebugLog</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\OBJ;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;.\UserCode\Peripheral;.\UserCode\Modules\task;.\UserCode\Components\InfoTime;..\SystemView\Config;..\SystemView\SEGGER;..\SystemView\Sample\FreeRTOSV10.4;.\UserCode\Modules\upgrade;.\UserCode\Components\DataCheck;.\UserCode\Components\DataEncrypt;.\UserCode\Components\StoreManage;.\UserCode\Modules\ble;.\UserCode\Modules\ble\ATK_BLE03;.\UserCode\Components\InfoProtocol;.\UserCode\Modules\InfoComm;.\UserCode\Components\DebugLog;.\UserCode\Modules\button</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -696,6 +696,16 @@
               <FileType>1</FileType>
               <FilePath>.\UserCode\Peripheral\spi.c</FilePath>
             </File>
+            <File>
+              <FileName>led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Peripheral\led.c</FilePath>
+            </File>
+            <File>
+              <FileName>hw_gpio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Peripheral\hw_gpio.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -930,6 +940,21 @@
               <FileName>bsp_ble.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\UserCode\Modules\ble\bsp_ble.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MODU/button</GroupName>
+          <Files>
+            <File>
+              <FileName>bsp_button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Modules\button\bsp_button.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_button.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Modules\button\app_button.c</FilePath>
             </File>
           </Files>
         </Group>

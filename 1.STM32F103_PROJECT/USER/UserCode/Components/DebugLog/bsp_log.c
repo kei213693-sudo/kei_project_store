@@ -213,7 +213,9 @@ void bsp_log_cmd_handle(const uint8_t *pData,uint32_t u32len)
         else if(0 == strncmp("Upgrade",(const char *)pData,7))
         {//启动串口升级
             uint8_t u8Type = pData[7] - 0x30;//获取升级类型信息
-            app_task_create(APP_TASK_MODULE_UPGRADE);//先创建任务
+            // app_task_create(APP_TASK_MODULE_UPGRADE);//先创建任务
+            APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
+            app_task_opt_put(APP_TASK_OPT_CREATE,&eModule,sizeof(eModule));
             app_upgrade_opt_put(APP_UPGRADE_OPT_YMODEM,&u8Type,1);
         }
         else if(0 == strncmp("UpInfoGet",(const char *)pData,9))

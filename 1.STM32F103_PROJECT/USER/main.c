@@ -14,8 +14,9 @@
 #include "SEGGER_SYSVIEW.h"
 #endif
 
+//后续移动到对应模块中
 #include "hw_w25qxx.h"
-#include "atk_ble03.h"
+#include "led.h"
 
 /*
 //跳转到boot，带了freertos为什么跳不过去？软硬件重启是可以的
@@ -41,28 +42,6 @@ void app_jump_to_boot(void)
 }
 */
 
-void led_init(void)
-{
-	GPIO_InitTypeDef GPIO_Initure;
-	__HAL_RCC_GPIOA_CLK_ENABLE();           	//开启GPIOA时钟
-	__HAL_RCC_GPIOD_CLK_ENABLE();           	//开启GPIOD时钟
-	
-    GPIO_Initure.Pin=GPIO_PIN_8; 				//PA8
-    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_PP;  	//推挽输出
-    GPIO_Initure.Pull=GPIO_PULLUP;          	//上拉
-    GPIO_Initure.Speed=GPIO_SPEED_FREQ_HIGH;    //高速
-    HAL_GPIO_Init(GPIOA,&GPIO_Initure);
-
-	GPIO_Initure.Pin=GPIO_PIN_2; 				//PD2
-	HAL_GPIO_Init(GPIOD,&GPIO_Initure);
-
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET);		//PA8置1 
-	HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_RESET);		//PA8置0
-
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);		//PD2置1  			
-	HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_RESET);		//PD2置0
-}
-
 /**************************************************************
 *函数功能描述 ：各类外设初始化
 *函数参数 ：
@@ -73,10 +52,12 @@ static void app_peripheral_init(void)
 {
     uart_init(115200);
 	delay_init(72);//初始化延时和freertos滴答计时器
+	TIM3_Init((72 - 1),(TIMR_TIM3_BASE_US - 1));//定时1ms周期产生中断，用于给uart、button计时用
+    LED_Init();//后续移动到对应模块中
+
 	#if APP_WDT_ENABLE
 	IWDG_Init(IWDG_PRESCALER_64,(2500));//分频系数64时，每1000就是1.6s左右，这里定时4s	
     #endif
-    led_init();
 }
 
 /**************************************************************

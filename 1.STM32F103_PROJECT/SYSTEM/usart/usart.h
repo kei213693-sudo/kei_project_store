@@ -29,7 +29,7 @@
 #define USART_REC_LEN  			        (64)//200  	//定义单次最大接收字节数，限制调试指令长度
 #define EN_USART1_RX 			        1			//使能（1）/禁止（0）串口1接收
 #define RXBUFFERSIZE                    1 					//缓存大小
-#define LOG_UART_RX_IRQ_TIMEOUT         ((1*1000)/TIMR_TIM2_BASE_US)//rx irq超时时间，1ms
+#define LOG_UART_RX_IRQ_TIMEOUT         ((5*1000)/TIMR_TIM3_BASE_US)//rx irq超时时间，5ms
 
 extern u8 aRxBuffer[RXBUFFERSIZE];
 extern UART_HandleTypeDef UART1_Handler; 	//UART句柄

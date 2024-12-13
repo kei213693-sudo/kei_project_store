@@ -12,7 +12,7 @@
 #include "task.h"
 
 /*******************************宏定义*******************************/
-#define APP_TASK_STACK_DEPTH         (200)//栈空间大小，字，128*4 = 512bytes
+#define APP_TASK_STACK_DEPTH         (200)//栈空间大小，字，200*4 = 800bytes
 #define APP_TASK_PRIORITY            (configMAX_PRIORITIES - 1)//栈优先级，最高
 
 #define APP_TASK_QUEUE_LEN           (4)//队列能够容纳的最大项目数
@@ -79,14 +79,5 @@ extern int32_t app_task_deinit(void);
 
 extern int32_t app_task_opt_put(APP_TASK_OPT_E eOpt,uint8_t *pData,uint32_t u32Len);
 extern void app_task_sync_isr(APP_TASK_MODULE_E eModule);
-
-void app_task_sync(APP_TASK_MODULE_E eModule);
-void app_task_create(APP_TASK_MODULE_E eModule);
-void app_task_delete(APP_TASK_MODULE_E eModule);
-void app_task_suspend(APP_TASK_MODULE_E eModule);
-void app_task_resume(APP_TASK_MODULE_E eModule);
-void app_task_set_priority(APP_TASK_MODULE_E eModule,UBaseType_t uxNewPriority);
-void app_task_get_info(APP_TASK_MODULE_E eModule);
-void app_task_get_info_all(void);
 
 #endif /* APPLICATION_TASK__APP_TASK_H_ */

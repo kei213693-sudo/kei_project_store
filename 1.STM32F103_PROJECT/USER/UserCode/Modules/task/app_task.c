@@ -21,6 +21,7 @@
 #include "app_upgrade.h"
 #include "app_ble.h"
 #include "app_comm.h"
+#include "app_button.h"
 
 /*******************************全局变量定义*******************************/
 
@@ -38,7 +39,7 @@ static app_task_module_tab_t g_stTaskModuleManagerTab[] =
 {APP_TASK_MODULE_LOG,               app_log_init,          app_log_deinit,      &g_LogTaskHandle},
 {APP_TASK_MODULE_BLE,               app_ble_init,          app_ble_deinit,      &g_BleTaskHandle},
 {APP_TASK_MODULE_LED,               NULL,          NULL,NULL},
-{APP_TASK_MODULE_BUTTON,            NULL,          NULL,NULL},
+{APP_TASK_MODULE_BUTTON,            app_button_init,       app_button_deinit,   &g_ButtonTaskHandle},
 {APP_TASK_MODULE_COMM,              app_comm_init,         app_comm_deinit,     &g_CommTaskHandle},
 {APP_TASK_MODULE_UPGRADE,           app_upgrade_init,      app_upgrade_deinit,  &g_UpgradeTaskHandle}
 };
@@ -47,6 +48,15 @@ static app_task_module_tab_t g_stTaskModuleManagerTab[] =
 static void app_task(void* pvParameters);
 static uint8_t app_task_get_index(APP_TASK_MODULE_E eModule);
 static void app_task_vTimerCallback(TimerHandle_t xTimer);
+
+static void app_task_sync(APP_TASK_MODULE_E eModule);
+static void app_task_create(APP_TASK_MODULE_E eModule);
+static void app_task_delete(APP_TASK_MODULE_E eModule);
+static void app_task_suspend(APP_TASK_MODULE_E eModule);
+static void app_task_resume(APP_TASK_MODULE_E eModule);
+static void app_task_set_priority(APP_TASK_MODULE_E eModule,UBaseType_t uxNewPriority);
+static void app_task_get_info(APP_TASK_MODULE_E eModule);
+static void app_task_get_info_all(void);
 
 /*******************************实际函数的实现*******************************/
 /**************************************************************
@@ -353,7 +363,7 @@ void app_task_sync_isr(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_sync(APP_TASK_MODULE_E eModule)
+static void app_task_sync(APP_TASK_MODULE_E eModule)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -372,7 +382,7 @@ void app_task_sync(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_create(APP_TASK_MODULE_E eModule)
+static void app_task_create(APP_TASK_MODULE_E eModule)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -391,7 +401,7 @@ void app_task_create(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_delete(APP_TASK_MODULE_E eModule)
+static void app_task_delete(APP_TASK_MODULE_E eModule)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -410,7 +420,7 @@ void app_task_delete(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_suspend(APP_TASK_MODULE_E eModule)
+static void app_task_suspend(APP_TASK_MODULE_E eModule)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -429,7 +439,7 @@ void app_task_suspend(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_resume(APP_TASK_MODULE_E eModule)
+static void app_task_resume(APP_TASK_MODULE_E eModule)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -450,7 +460,7 @@ void app_task_resume(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_set_priority(APP_TASK_MODULE_E eModule,UBaseType_t uxNewPriority)
+static void app_task_set_priority(APP_TASK_MODULE_E eModule,UBaseType_t uxNewPriority)
 {
     uint8_t index = app_task_get_index(eModule);
 
@@ -469,7 +479,7 @@ void app_task_set_priority(APP_TASK_MODULE_E eModule,UBaseType_t uxNewPriority)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_get_info(APP_TASK_MODULE_E eModule)
+static void app_task_get_info(APP_TASK_MODULE_E eModule)
 {
     #if (1 == configUSE_TRACE_FACILITY)
     //获取指定某个任务的信息
@@ -506,7 +516,7 @@ void app_task_get_info(APP_TASK_MODULE_E eModule)
 *函数返回值 ：
 *备注 ：
 **************************************************************/
-void app_task_get_info_all(void)
+static void app_task_get_info_all(void)
 {
     #if (1 == configUSE_TRACE_FACILITY)
     //获取所有任务的信息——方法1

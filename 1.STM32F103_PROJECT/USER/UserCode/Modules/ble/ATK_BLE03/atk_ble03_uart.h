@@ -42,7 +42,7 @@
 #define ATK_BLE03_UART_RX_BUF_SIZE          512//ble5.1 mtu最多扩展到512
 #define ATK_BLE03_UART_TX_BUF_SIZE          128
 
-#define ATK_BLE03_UART_RX_IRQ_TIMEOUT       ((5*1000)/TIMR_TIM2_BASE_US)//rx irq超时时间，5ms
+#define ATK_BLE03_UART_RX_IRQ_TIMEOUT       ((5*1000)/TIMR_TIM3_BASE_US)//rx irq超时时间，5ms
 
 
 /* 操作函数 */

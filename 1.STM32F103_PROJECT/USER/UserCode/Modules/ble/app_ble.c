@@ -426,7 +426,9 @@ static void app_ble_cmdBleUpgradeStartReq(void *pData)
             uint8_t u8Name[32];//代码文件名称
             uint32_t u32TotalLen;//总长度，bytes，最大接收4095Mb的数据
         }Param_t;
-        app_task_create(APP_TASK_MODULE_UPGRADE);//先创建任务
+        //app_task_create(APP_TASK_MODULE_UPGRADE);//先创建任务
+        APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
+        app_task_opt_put(APP_TASK_OPT_CREATE,&eModule,sizeof(eModule));
         app_upgrade_opt_put(APP_UPGRADE_OPT_START,pData,sizeof(Param_t));//固定44bytes
     }
 }

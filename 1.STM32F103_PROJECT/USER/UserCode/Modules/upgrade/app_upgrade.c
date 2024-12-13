@@ -120,7 +120,9 @@ static void app_upgrade_task(void* pvParameters)
 
     if(NULL == g_hUpgradeQueue)
     {
-        app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
+        // app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
+        APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
+        app_task_opt_put(APP_TASK_OPT_DELETE,&eModule,sizeof(eModule));
     }
 
     while(1)
@@ -140,7 +142,9 @@ static void app_upgrade_task(void* pvParameters)
                     bsp_ymodem_recv((uint8_t)*pRec->pData);
                 }
                 
-                app_task_delete(APP_TASK_MODULE_UPGRADE);//删除任务
+                // app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
+                APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
+                app_task_opt_put(APP_TASK_OPT_DELETE,&eModule,sizeof(eModule));
             }
             else if(APP_UPGRADE_OPT_START == pRec->eOpt)
             {
@@ -261,12 +265,9 @@ static void app_upgrade_vTimerCallback(TimerHandle_t xTimer)
     {
         bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"upgrade timeout");
         g_pStBspUpgradeCtl->u8ReceiveFlag = 0;
-        app_task_delete(APP_TASK_MODULE_UPGRADE);
-        // uint32_t ulCount;
-        // ulCount = ( uint32_t ) pvTimerGetTimerID(xTimer);//获取该定时器的ID
-        // ulCount++;
-        // vTimerSetTimerID( xTimer, ( void * ) ulCount );//修改该定时器的ID
-        // printf("g_hBleTimer count:%d\r\n",ulCount);
+        // app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
+        APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
+        app_task_opt_put(APP_TASK_OPT_DELETE,&eModule,sizeof(eModule));
     }
 }
 
