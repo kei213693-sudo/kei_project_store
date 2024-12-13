@@ -70,16 +70,17 @@ int32_t app_task_init(void)
     int32_t i32ret = pdPASS;
 
     //创建队列
+    //也可以用sizeof(APP_TASK_QUEUE_REC_T *)，这样节省空间，但是每次传入的参数需要malloc，接收参数需要free
     g_hTaskQueue = xQueueCreate(APP_TASK_QUEUE_LEN,sizeof(APP_TASK_QUEUE_REC_T));
     if(NULL == g_hTaskQueue)
     {
-        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"Create g_hTaskQueue fail");
+        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_ERROR,"Create g_hTaskQueue fail");
     }
 
     //创建事件组
     if(pdFAIL == bsp_task_events_init())
     {
-        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"Create g_hEventGroup fail");
+        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_ERROR,"Create g_hEventGroup fail");
     }
 
     //创建task定时器
@@ -89,7 +90,7 @@ int32_t app_task_init(void)
                         ,app_task_vTimerCallback);
     if(NULL == g_hTaskTimer)
     {
-        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"Create g_hTaskTimer fail");
+        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_ERROR,"Create g_hTaskTimer fail");
     }
     else
     {
@@ -105,7 +106,7 @@ int32_t app_task_init(void)
                                 ,&g_TaskHandle);
     if(pdPASS != i32ret)
     {
-        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"Create app_task fail");
+        bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_ERROR,"Create app_task fail");
         i32ret = pdFAIL;
     }
     
@@ -138,7 +139,7 @@ int32_t app_task_deinit(void)
 **************************************************************/
 static void app_task(void* pvParameters)
 {   
-    APP_TASK_QUEUE_REC_T *pRec = NULL;
+    APP_TASK_QUEUE_REC_T stRec;
     APP_TASK_MODULE_E eModule = APP_TASK_MODULE_END;
 
     taskENTER_CRITICAL(); //进入临界区
@@ -153,61 +154,62 @@ static void app_task(void* pvParameters)
 
     while(1)
     {
-        if((pdPASS == xQueueReceive(g_hTaskQueue,(void *)&pRec,portMAX_DELAY))//阻塞等待队列有信息
-            && (NULL != pRec))//获取的信息不为NULL
-        {
-            bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_INFO,"app task opt:%d",pRec->eOpt);   
+        memset(&stRec,0,sizeof(APP_TASK_QUEUE_REC_T));
 
-            switch (pRec->eOpt)
+        if(pdPASS == xQueueReceive(g_hTaskQueue,(void *)&stRec,portMAX_DELAY))//阻塞等待队列有信息
+        {
+            bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_INFO,"app task opt:%d",stRec.eOpt);   
+
+            switch (stRec.eOpt)
             {
                 case APP_TASK_OPT_SYNC:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_sync(eModule);
                     }
                     break;
                 }
                 case APP_TASK_OPT_CREATE:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_create(eModule);
                     }
                     break;
                 }
                 case APP_TASK_OPT_DELETE:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_delete(eModule);
                     }
                     break;
                 }
                 case APP_TASK_OPT_SUSPEDN:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_suspend(eModule);
                     }
                     break;
                 }
                 case APP_TASK_OPT_RESUME:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_resume(eModule);
                     }
                     break;
                 }
                 case APP_TASK_OPT_SET_PRI:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
                         typedef struct
                         {
@@ -215,16 +217,16 @@ static void app_task(void* pvParameters)
                             UBaseType_t uxNewPriority;
                         }Param_t;
                         Param_t stData;
-                        memcpy((void *)&stData,(void *)pRec->pData,sizeof(Param_t));//将净荷数据copy到临时存储空间发然传递到信息队列中
+                        memcpy((void *)&stData,(void *)stRec.pData,sizeof(Param_t));//将净荷数据copy到临时存储空间发然传递到信息队列中
                         app_task_set_priority(stData.eModule,stData.uxNewPriority);
                     }
                     break;
                 }
                 case APP_TASK_OPT_GET_INFO:
                 {
-                    if(NULL != pRec->pData)
+                    if(NULL != stRec.pData)
                     {
-                        eModule = (APP_TASK_MODULE_E)*pRec->pData;
+                        eModule = (APP_TASK_MODULE_E)*stRec.pData;
                         app_task_get_info(eModule);
                     }
                     break;
@@ -235,16 +237,15 @@ static void app_task(void* pvParameters)
                     break;
                 }
                 default:
-                    bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"app task opt err:%d",pRec->eOpt);   
+                    bsp_log_print(BSP_LOG_MODULE_TASK,BSP_LOG_TYPE_WARNING,"app task opt err:%d",stRec.eOpt);   
                     break;
             }
 
             //处理完成，释放信息节点
-            if(NULL != pRec->pData)
+            if(NULL != stRec.pData)
             {
-                vPortFree(pRec->pData);
+                vPortFree(stRec.pData);
             }
-            vPortFree(pRec);
         }
     }
 }
@@ -278,38 +279,34 @@ static void app_task_vTimerCallback(TimerHandle_t xTimer)
 int32_t app_task_opt_put(APP_TASK_OPT_E eOpt,uint8_t *pData,uint32_t u32Len)
 {
     int32_t i32ret = pdFAIL;
-    APP_TASK_QUEUE_REC_T *pRec = NULL;
+    APP_TASK_QUEUE_REC_T stRec;
+    memset(&stRec,0,sizeof(APP_TASK_QUEUE_REC_T));
 
     if((eOpt < APP_TASK_OPT_END) && (NULL != g_hTaskQueue))
     {
-        pRec = pvPortMalloc(sizeof(APP_TASK_QUEUE_REC_T));//失败就在本函数释放，成功就在task中释放
-        if(NULL != pRec)
+        stRec.eOpt = eOpt;
+        if((NULL != pData) && (0 != u32Len))
         {
-            pRec->eOpt = eOpt;
-            if((NULL != pData) && (0 != u32Len))
+            stRec.u32Len = u32Len;
+            stRec.pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
+            if(NULL != stRec.pData)
             {
-                pRec->u32Len = u32Len;
-                pRec->pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
-                if(NULL != pRec->pData)
-                {
-                    memcpy(pRec->pData,pData,u32Len);
-                }
-                else
-                {
-                    vPortFree(pRec);
-                    return i32ret;
-                }
+                memcpy(stRec.pData,pData,u32Len);
             }
             else
             {
-                pRec->u32Len = 0;
-                pRec->pData = NULL;
+                return i32ret;
             }
-
-            //数据组包完成，放入队列，放满了就阻塞在这里
-            (int32_t)xQueueSend(g_hTaskQueue,(void *)&pRec,portMAX_DELAY);
-            i32ret = pdPASS;
         }
+        else
+        {
+            stRec.u32Len = 0;
+            stRec.pData = NULL;
+        }
+
+        //数据组包完成，放入队列，放满了就阻塞在这里
+        (int32_t)xQueueSend(g_hTaskQueue,(void *)&stRec,portMAX_DELAY);
+            i32ret = pdPASS;
     }
     
     return i32ret;

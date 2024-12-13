@@ -16,7 +16,6 @@
 
 //后续移动到对应模块中
 #include "hw_w25qxx.h"
-#include "led.h"
 
 /*
 //跳转到boot，带了freertos为什么跳不过去？软硬件重启是可以的
@@ -53,7 +52,7 @@ static void app_peripheral_init(void)
     uart_init(115200);
 	delay_init(72);//初始化延时和freertos滴答计时器
 	TIM3_Init((72 - 1),(TIMR_TIM3_BASE_US - 1));//定时1ms周期产生中断，用于给uart、button计时用
-    LED_Init();//后续移动到对应模块中
+    //LED_Init();//后续移动到对应模块中
 
 	#if APP_WDT_ENABLE
 	IWDG_Init(IWDG_PRESCALER_64,(2500));//分频系数64时，每1000就是1.6s左右，这里定时4s	

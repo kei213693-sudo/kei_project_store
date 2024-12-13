@@ -51,7 +51,7 @@ int32_t app_upgrade_init(void)
 	g_hUpgradeQueue = xQueueCreate(APP_UPGRADE_QUEUE_LEN,sizeof(APP_UPGRADE_QUEUE_REC_T));
     if(NULL == g_hUpgradeQueue)
     {
-        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"Create g_hUpgradeQueue fail.");
+        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_ERROR,"Create g_hUpgradeQueue fail.");
     }
     //创建定时器
     g_hUpgradeTimer = xTimerCreate("UpgradeTimer",pdMS_TO_TICKS(APP_UPGRADE_TIMEOUT)
@@ -60,13 +60,13 @@ int32_t app_upgrade_init(void)
                         ,app_upgrade_vTimerCallback);
     if(NULL == g_hUpgradeTimer)
     {
-        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"Create g_hUpgradeTimer fail.");
+        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_ERROR,"Create g_hUpgradeTimer fail.");
     }
     //申请内存
     g_pStBspUpgradeCtl = pvPortMalloc(sizeof(bsp_upgrade_ctl_t));
     if(NULL == g_pStBspUpgradeCtl)
     {
-        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"g_pStBspUpgradeCtl malloc fail!");
+        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_ERROR,"g_pStBspUpgradeCtl malloc fail!");
     }
     //创建任务
     i32ret = (int32_t)xTaskCreate(app_upgrade_task
@@ -77,7 +77,7 @@ int32_t app_upgrade_init(void)
                                 ,&g_UpgradeTaskHandle);
     if(pdPASS != i32ret)
     {
-        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"Create app_upgrade_task fail.");
+        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_ERROR,"Create app_upgrade_task fail.");
     }
 
     return i32ret;
@@ -116,21 +116,15 @@ int32_t app_upgrade_deinit(void)
 **************************************************************/
 static void app_upgrade_task(void* pvParameters)
 {
-    APP_UPGRADE_QUEUE_REC_T *pRec = NULL;
-
-    if(NULL == g_hUpgradeQueue)
-    {
-        // app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
-        APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
-        app_task_opt_put(APP_TASK_OPT_DELETE,&eModule,sizeof(eModule));
-    }
+    APP_UPGRADE_QUEUE_REC_T stRec;
 
     while(1)
     {
-        if((pdPASS == xQueueReceive(g_hUpgradeQueue,(void *)&pRec,portMAX_DELAY))//阻塞等待队列有信息
-            && (NULL != pRec))//获取的信息不为NULL
+        memset(&stRec,0,sizeof(APP_UPGRADE_QUEUE_REC_T));
+
+        if(pdPASS == xQueueReceive(g_hUpgradeQueue,(void *)&stRec,portMAX_DELAY))//阻塞等待队列有信息
         {
-            if(APP_UPGRADE_OPT_YMODEM == pRec->eOpt)
+            if(APP_UPGRADE_OPT_YMODEM == stRec.eOpt)
             {
                 g_pStBspYmodemCtl = pvPortMalloc(sizeof(bsp_ymodem_ctl_t));
                 if(NULL == g_pStBspYmodemCtl)
@@ -139,39 +133,38 @@ static void app_upgrade_task(void* pvParameters)
                 }
                 else
                 {
-                    bsp_ymodem_recv((uint8_t)*pRec->pData);
+                    bsp_ymodem_recv((uint8_t)*stRec.pData);
                 }
                 
                 // app_task_delete(APP_TASK_MODULE_UPGRADE);//删掉
                 APP_TASK_MODULE_E eModule = APP_TASK_MODULE_UPGRADE;
                 app_task_opt_put(APP_TASK_OPT_DELETE,&eModule,sizeof(eModule));
             }
-            else if(APP_UPGRADE_OPT_START == pRec->eOpt)
+            else if(APP_UPGRADE_OPT_START == stRec.eOpt)
             {
-                app_upgrade_start(pRec->pData,pRec->u32Len);
+                app_upgrade_start(stRec.pData,stRec.u32Len);
                 app_upgrade_timeout_set(1);
             }
-            else if(APP_UPGRADE_OPT_DATA == pRec->eOpt)
+            else if(APP_UPGRADE_OPT_DATA == stRec.eOpt)
             {
-                app_upgrade_data(pRec->pData,pRec->u32Len);
+                app_upgrade_data(stRec.pData,stRec.u32Len);
                 app_upgrade_timeout_set(1);
             }
-            else if(APP_UPGRADE_OPT_STOP == pRec->eOpt)
+            else if(APP_UPGRADE_OPT_STOP == stRec.eOpt)
             {
-                app_upgrade_stop(pRec->pData,pRec->u32Len);
+                app_upgrade_stop(stRec.pData,stRec.u32Len);
                 app_upgrade_timeout_set(0);//一般也不会运行到这，直接就重启了
             }
             else
             {
-                bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"eOpt is err:%d",pRec->eOpt);
+                bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"eOpt is err:%d",stRec.eOpt);
             }
             
             //处理完成，释放信息节点
-            if(NULL != pRec->pData)
+            if(NULL != stRec.pData)
             {
-                vPortFree(pRec->pData);
+                vPortFree(stRec.pData);
             }
-            vPortFree(pRec);
         }
     }
 }
@@ -187,38 +180,34 @@ static void app_upgrade_task(void* pvParameters)
 int32_t app_upgrade_opt_put(APP_UPGRADE_OPT_E eOpt,uint8_t *pData,uint32_t u32Len)
 {
     int32_t i32ret = pdFAIL;
-    APP_UPGRADE_QUEUE_REC_T *pRec = NULL;
+    APP_UPGRADE_QUEUE_REC_T stRec;
+    memset(&stRec,0,sizeof(APP_UPGRADE_QUEUE_REC_T));
 
     if((eOpt < APP_UPGRADE_OPT_END) && (NULL != g_hUpgradeQueue))
     {
-        pRec = pvPortMalloc(sizeof(APP_UPGRADE_QUEUE_REC_T));//失败就在本函数释放，成功就在task中释放
-        if(NULL != pRec)
+        stRec.eOpt = eOpt;
+        if((NULL != pData) && (0 != u32Len))
         {
-            pRec->eOpt = eOpt;
-            if((NULL != pData) && (0 != u32Len))
+            stRec.u32Len = u32Len;
+            stRec.pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
+            if(NULL != stRec.pData)
             {
-                pRec->u32Len = u32Len;
-                pRec->pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
-                if(NULL != pRec->pData)
-                {
-                    memcpy(pRec->pData,pData,u32Len);
-                }
-                else
-                {
-                    vPortFree(pRec);
-                    return i32ret;
-                }
+                memcpy(stRec.pData,pData,u32Len);
             }
             else
             {
-                pRec->u32Len = 0;
-                pRec->pData = NULL;
+                return i32ret;
             }
-
-            //数据组包完成，放入队列，放满了就阻塞在这里
-            (int32_t)xQueueSend(g_hUpgradeQueue,(void *)&pRec,portMAX_DELAY);
-            i32ret = pdPASS;
         }
+        else
+        {
+            stRec.u32Len = 0;
+            stRec.pData = NULL;
+        }
+
+        //数据组包完成，放入队列，放满了就阻塞在这里
+        (int32_t)xQueueSend(g_hUpgradeQueue,(void *)&stRec,portMAX_DELAY);
+        i32ret = pdPASS;
     }
     
     return i32ret;

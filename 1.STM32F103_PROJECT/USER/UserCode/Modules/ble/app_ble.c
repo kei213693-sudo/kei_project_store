@@ -22,9 +22,9 @@
 
 /*******************************内部函数的声明*******************************/
 static void app_ble_task(void* pvParameters);
-static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T *pRec);
-static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T *pRec);
-static void app_ble_processRxRec(APP_BLE_QUEUE_REC_T *pRec);
+static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T stRec);
+static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T stRec);
+static void app_ble_processRxRec(APP_BLE_QUEUE_REC_T stRec);
 
 static void app_ble_cmdBleUpgradeStartReq(void *pData);
 static void app_ble_cmdBleUpgradeStartRsp(void *pData);
@@ -109,7 +109,7 @@ int32_t app_ble_init(void)
     g_hBleRxQueue = xQueueCreate(APP_BLE_QUEUE_LEN,sizeof(APP_BLE_QUEUE_REC_T));
     if((NULL == g_hBleQueue) | (NULL == g_hBleTxQueue) | (NULL == g_hBleRxQueue))
     {
-        bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_WARNING,"Create g_hBleQueue fail");
+        bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_ERROR,"Create g_hBleQueue fail");
     }
     
     //创建任务
@@ -121,7 +121,7 @@ int32_t app_ble_init(void)
                         ,&g_BleTaskHandle);
     if(i32ret != pdPASS)
     {
-        bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_WARNING,"Create app_ble_task fail");
+        bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_ERROR,"Create app_ble_task fail");
     }
 
     return i32ret;
@@ -155,10 +155,12 @@ int32_t app_ble_deinit(void)
 static void app_ble_task(void* pvParameters)
 {
     EventBits_t events = 0;
-    APP_BLE_QUEUE_REC_T *pRec = NULL;
+    APP_BLE_QUEUE_REC_T stRec;
 
     while(1)
     {
+        memset(&stRec,0,sizeof(APP_BLE_QUEUE_REC_T));
+
         events = bsp_task_events_wait(APP_BLE_ALL_EVENTS,portMAX_DELAY);//阻塞在这里
         if(events)
         {
@@ -167,10 +169,9 @@ static void app_ble_task(void* pvParameters)
 			{//一直读取队列数据，然后处理，直到队列为空
                 while(uxQueueMessagesWaiting(g_hBleQueue))//返回当前队列有效元素数目
                 {
-                    if((pdPASS == xQueueReceive(g_hBleQueue,(void *)&pRec,0))
-                        && (NULL != pRec))
+                    if(pdPASS == xQueueReceive(g_hBleQueue,(void *)&stRec,0))
                     {//不阻塞,接收数据成功后自动从队列中删除项目
-                        app_ble_processStackRec(pRec);
+                        app_ble_processStackRec(stRec);
                     }
                 }
             }
@@ -180,10 +181,9 @@ static void app_ble_task(void* pvParameters)
 			{//一直读取队列数据，然后处理，直到队列为空
                 while(uxQueueMessagesWaiting(g_hBleTxQueue))//返回当前队列有效元素数目
                 {
-                    if((pdPASS == xQueueReceive(g_hBleTxQueue,(void *)&pRec,0))
-                        && (NULL != pRec))
+                    if(pdPASS == xQueueReceive(g_hBleTxQueue,(void *)&stRec,0))
                     {//不阻塞,接收数据成功后自动从队列中删除项目
-                        app_ble_processTxRec(pRec);
+                        app_ble_processTxRec(stRec);
                     }
                 }
             }
@@ -193,22 +193,17 @@ static void app_ble_task(void* pvParameters)
 			{//一直读取队列数据，然后处理，直到队列为空
                 while(uxQueueMessagesWaiting(g_hBleRxQueue))//返回当前队列有效元素数目
                 {
-                    if((pdPASS == xQueueReceive(g_hBleRxQueue,(void *)&pRec,0))
-                        && (NULL != pRec))
+                    if(pdPASS == xQueueReceive(g_hBleRxQueue,(void *)&stRec,0))
                     {//不阻塞,接收数据成功后自动从队列中删除项目
-                        app_ble_processRxRec(pRec);
+                        app_ble_processRxRec(stRec);
                     }
                 }
             }
 
             //处理完成，释放信息节点
-            if(NULL != pRec)
+            if(NULL != stRec.pData)
             {
-                if(NULL != pRec->pData)
-                {
-                    vPortFree(pRec->pData);
-                }
-                vPortFree(pRec);
+                vPortFree(stRec.pData);
             }
         }
     }
@@ -225,53 +220,49 @@ static void app_ble_task(void* pvParameters)
 int32_t app_ble_opt_put(EventBits_t events,APP_BLE_OPT_E enOpt,uint8_t *pData,uint32_t u32Len)
 {
     int32_t i32ret = pdFAIL;
-    APP_BLE_QUEUE_REC_T *pRec = NULL;
+    APP_BLE_QUEUE_REC_T stRec;
+    memset(&stRec,0,sizeof(APP_BLE_QUEUE_REC_T));
 
     if((events & APP_BLE_ALL_EVENTS) && (enOpt < APP_BLE_OPT_END))
     {
-        pRec = pvPortMalloc(sizeof(APP_BLE_QUEUE_REC_T));//失败就在本函数释放，成功就在task中释放
-        if(NULL != pRec)
-        {
-            pRec->enOpt = enOpt;
-            if(NULL != pData)
-            {//有数据
-                pRec->u32Len = u32Len;
-                pRec->pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
-                if(NULL != pRec->pData)
-                {
-                    memcpy(pRec->pData,pData,u32Len);
-                }
-                else
-                {
-                    vPortFree(pRec);
-                    return i32ret;
-                }
+        stRec.enOpt = enOpt;
+        if(NULL != pData)
+        {//有数据
+            stRec.u32Len = u32Len;
+            stRec.pData = (uint8_t *)pvPortMalloc(u32Len);//失败就在本函数释放，成功就在task中释放
+            if(NULL != stRec.pData)
+            {
+                memcpy(stRec.pData,pData,u32Len);
             }
             else
-            {//没有数据
-                pRec->u32Len = 0;
-                pRec->pData = NULL;
-            }
-
-            //数据组包完成，放入队列，放满了就阻塞在这里
-            if((events & APP_BLE_STACK_EVENTS) && (NULL != g_hBleQueue))
             {
-                xQueueSend(g_hBleQueue,(void *)&pRec,portMAX_DELAY);
+                return i32ret;
             }
-            else if((events & APP_BLE_TX_EVENTS) && (NULL != g_hBleTxQueue))
-            {
-                xQueueSend(g_hBleTxQueue,(void *)&pRec,portMAX_DELAY);
-            }
-            else if((events & APP_BLE_RX_EVENTS) && (NULL != g_hBleRxQueue))
-            {
-                xQueueSend(g_hBleRxQueue,(void *)&pRec,portMAX_DELAY);
-            }
-            else
-            {}
-
-            bsp_task_events_set(events);//传递事件
-            i32ret = pdPASS;
         }
+        else
+        {//没有数据
+            stRec.u32Len = 0;
+            stRec.pData = NULL;
+        }
+
+        //数据组包完成，放入队列，放满了就阻塞在这里
+        if((events & APP_BLE_STACK_EVENTS) && (NULL != g_hBleQueue))
+        {
+            xQueueSend(g_hBleQueue,(void *)&stRec,portMAX_DELAY);
+        }
+        else if((events & APP_BLE_TX_EVENTS) && (NULL != g_hBleTxQueue))
+        {
+            xQueueSend(g_hBleTxQueue,(void *)&stRec,portMAX_DELAY);
+        }
+        else if((events & APP_BLE_RX_EVENTS) && (NULL != g_hBleRxQueue))
+        {
+            xQueueSend(g_hBleRxQueue,(void *)&stRec,portMAX_DELAY);
+        }
+        else
+        {}
+
+        bsp_task_events_set(events);//传递事件
+        i32ret = pdPASS;
     }
 
     return i32ret;
@@ -283,18 +274,18 @@ int32_t app_ble_opt_put(EventBits_t events,APP_BLE_OPT_E enOpt,uint8_t *pData,ui
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T *pRec)
+static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T stRec)
 {
     uint8_t u8Count = 0;
-    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble stack opt:%d",pRec->enOpt);
+    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble stack opt:%d",stRec.enOpt);
 
     for(u8Count = 0;u8Count < (sizeof(g_stBleStackFucTab)/sizeof(g_stBleStackFucTab[0]));u8Count++)
     {
-        if(pRec->enOpt == g_stBleStackFucTab[u8Count].enOpt)
+        if(stRec.enOpt == g_stBleStackFucTab[u8Count].enOpt)
         {//判断事件类型
             if(NULL != g_stBleStackFucTab[u8Count].appBleFuc)
             {
-                (*g_stBleStackFucTab[u8Count].appBleFuc)(pRec);//需要长度信息，所以传pRec，而不是pRec->pData
+                (*g_stBleStackFucTab[u8Count].appBleFuc)(&stRec);//需要长度信息，所以传pRec，而不是stRec.pData
             }
             break;
         }
@@ -307,18 +298,18 @@ static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T *pRec)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T *pRec)
+static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T stRec)
 {
     uint8_t u8Count = 0;
-    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble tx opt:%d",pRec->enOpt);
+    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble tx opt:%d",stRec.enOpt);
 
     for(u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
     {
-        if(pRec->enOpt == g_stBleCmdFucTab[u8Count].enOpt)
+        if(stRec.enOpt == g_stBleCmdFucTab[u8Count].enOpt)
         {//判断事件类型
             if(NULL != g_stBleCmdFucTab[u8Count].appBleFucTx)
             {
-                (*g_stBleCmdFucTab[u8Count].appBleFucTx)(pRec->pData);
+                (*g_stBleCmdFucTab[u8Count].appBleFucTx)(stRec.pData);
             }
             break;
         }
@@ -331,18 +322,18 @@ static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T *pRec)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_ble_processRxRec(APP_BLE_QUEUE_REC_T *pRec)
+static void app_ble_processRxRec(APP_BLE_QUEUE_REC_T stRec)
 {
     uint8_t u8Count = 0;
-    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble rx opt:%d",pRec->enOpt);
+    bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble rx opt:%d",stRec.enOpt);
 
     for(u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
     {
-        if(pRec->enOpt == g_stBleCmdFucTab[u8Count].enOpt)
+        if(stRec.enOpt == g_stBleCmdFucTab[u8Count].enOpt)
         {//判断事件类型
             if(NULL != g_stBleCmdFucTab[u8Count].appBleFucRx)
             {
-                (*g_stBleCmdFucTab[u8Count].appBleFucRx)(pRec->pData);
+                (*g_stBleCmdFucTab[u8Count].appBleFucRx)(stRec.pData);
             }
             break;
         }

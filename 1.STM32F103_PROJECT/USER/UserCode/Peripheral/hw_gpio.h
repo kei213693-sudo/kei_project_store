@@ -24,6 +24,11 @@
 #define HW_GPIO_TYPE_BUTTON_2         GPIOA//引脚组/类型
 #define HW_GPIO_LEVEL_BUTTON_2        HAL_GPIO_ReadPin(HW_GPIO_TYPE_BUTTON_2,HW_GPIO_INDEX_BUTTON_2)//WKUP按键PA0
 
+
+#define LED0 PAout(8)   	//LED0
+#define LED1 PDout(2)   	//LED1
+
+
 /*******************************结构体、枚举等******************************/
 
 
@@ -34,5 +39,6 @@
 extern void hw_gpio_button_init(void);
 extern void hw_gpio_button_deinit(void);
 
+void LED_Init(void);
 
 #endif /* APPLICATION_PERIPHERAL_GPIO_BSP_GPIO_H_ */

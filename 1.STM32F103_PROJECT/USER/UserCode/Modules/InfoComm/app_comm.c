@@ -33,8 +33,8 @@ const BSP_COMM_API_T *g_pBspCommApi = &g_BspCommApi;
 
 /*******************************内部函数的声明*******************************/
 static void app_comm_task(void* pvParameters);
-static void app_comm_processTxMsg(APP_COMM_QUEUE_REC_T *pRec);
-static void app_comm_processRxMsg(APP_COMM_QUEUE_REC_T *pRec);
+static void app_comm_processTxMsg(APP_COMM_QUEUE_REC_T stRec);
+static void app_comm_processRxMsg(APP_COMM_QUEUE_REC_T stRec);
 
 static void app_comm_cb(void *pData);
 static void app_comm_vTimerCallback(TimerHandle_t xTimer);
@@ -55,12 +55,22 @@ int32_t app_comm_init(void)
 {
     int32_t i32ret = pdPASS;
 
+    //初始化bsp层
+    g_pBspCommApi->bsp_comm_init(app_comm_cb,app_comm_tx_hw,app_comm_rx_app,app_comm_last_rsp);
+
+    //申请内存
+    g_pStBspCommCtl = pvPortMalloc(sizeof(bsp_comm_ctl_t));
+    if(NULL == g_pStBspCommCtl)
+    {
+        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_ERROR,"g_pStBspCommCtl malloc fail:%d bytes",sizeof(bsp_comm_ctl_t));
+    }
+
     //创建队列
     g_hCommTxQueue = xQueueCreate(APP_COMM_QUEUE_LEN,sizeof(APP_COMM_QUEUE_REC_T));
     g_hCommRxQueue = xQueueCreate(APP_COMM_QUEUE_LEN,sizeof(APP_COMM_QUEUE_REC_T));
     if((NULL == g_hCommTxQueue) || (NULL == g_hCommRxQueue))
     {
-        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_WARNING,"Create g_hCommQueue fail");
+        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_ERROR,"Create g_hCommQueue fail");
     }
 
     //创建定时器
@@ -69,7 +79,7 @@ int32_t app_comm_init(void)
         g_hCommTxWaitTimer[i] = xTimerCreate("CommTimer",pdMS_TO_TICKS(BSP_COMM_TIMEOUT_TIME),pdFALSE,(void *)i,app_comm_vTimerCallback);
         if(NULL == g_hCommTxWaitTimer[i])
         {
-            bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_WARNING,"Create g_hCommTxWaitTimer[%d] fail",i);
+            bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_ERROR,"Create g_hCommTxWaitTimer[%d] fail",i);
         }
     }
 
@@ -82,7 +92,7 @@ int32_t app_comm_init(void)
                                 ,&g_CommTaskHandle);
     if(i32ret != pdPASS)
     {
-        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_WARNING,"Create app_comm_task fail");
+        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_ERROR,"Create app_comm_task fail");
         i32ret = pdFAIL;
     }
 
@@ -119,17 +129,12 @@ int32_t app_comm_deinit(void)
 **************************************************************/
 static void app_comm_task(void* pvParameters)
 {
-    g_pStBspCommCtl = pvPortMalloc(sizeof(bsp_comm_ctl_t));
-    if(NULL == g_pStBspCommCtl)
-    {
-        bsp_log_print(BSP_LOG_MODULE_UPGRADE,BSP_LOG_TYPE_WARNING,"g_pStBspCommCtl malloc fail:%d bytes",sizeof(bsp_comm_ctl_t));
-    }
-    g_pBspCommApi->bsp_comm_init(app_comm_cb,app_comm_tx_hw,app_comm_rx_app,app_comm_last_rsp);
+    EventBits_t events = 0;
+    APP_COMM_QUEUE_REC_T stRec;
 
     while(1)
     {
-        EventBits_t events = 0;
-        APP_COMM_QUEUE_REC_T *pRec = NULL;
+        memset(&stRec,0,sizeof(APP_COMM_QUEUE_REC_T));
 
         events = bsp_task_events_wait(APP_COMM_ALL_EVENTS,portMAX_DELAY);//阻塞在这里
         if(events)
@@ -139,10 +144,9 @@ static void app_comm_task(void* pvParameters)
 			{//一直读取队列数据，然后处理，直到队列为空
                 while(uxQueueMessagesWaiting(g_hCommTxQueue))//返回当前队列有效元素数目
                 {
-                    if((pdPASS == xQueueReceive(g_hCommTxQueue,(void *)&pRec,0))
-                        && (NULL != pRec))
+                    if(pdPASS == xQueueReceive(g_hCommTxQueue,(void *)&stRec,0))
                     {//不阻塞,接收数据成功后自动从队列中删除项目
-                        app_comm_processTxMsg(pRec);
+                        app_comm_processTxMsg(stRec);
                     }
                 }
             }
@@ -152,10 +156,9 @@ static void app_comm_task(void* pvParameters)
 			{//一直读取队列数据，然后处理，直到队列为空
                 while(uxQueueMessagesWaiting(g_hCommRxQueue))//返回当前队列有效元素数目
                 {
-                    if((pdPASS == xQueueReceive(g_hCommRxQueue,(void *)&pRec,0))
-                        && (NULL != pRec))
+                    if(pdPASS == xQueueReceive(g_hCommRxQueue,(void *)&stRec,0))
                     {//不阻塞,接收数据成功后自动从队列中删除项目
-                        app_comm_processRxMsg(pRec);
+                        app_comm_processRxMsg(stRec);
                     }
                 }
             }
@@ -174,12 +177,6 @@ static void app_comm_task(void* pvParameters)
                     bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_ERROR,"atk_ble03 uart data get fail!");
                 }
             }
-
-            //处理完成，释放信息节点
-            if(NULL != pRec)
-            {
-                vPortFree(pRec);
-            }
         }
     }
 }
@@ -194,30 +191,27 @@ static void app_comm_task(void* pvParameters)
 int32_t app_comm_put(EventBits_t events,uint8_t queueIndex)
 {
     int32_t i32ret = pdFAIL;
-    APP_COMM_QUEUE_REC_T *pRec = NULL;
+    APP_COMM_QUEUE_REC_T stRec;
+    memset(&stRec,0,sizeof(APP_COMM_QUEUE_REC_T));
 
     if(events & APP_COMM_ALL_EVENTS)
     {
-        pRec = pvPortMalloc(sizeof(APP_COMM_QUEUE_REC_T));//失败就在本函数释放，成功就在task中释放
-        if(NULL != pRec)
+        stRec.queueIndex = queueIndex;
+
+        //数据组包完成，放入队列，放满了就阻塞在这里
+        if((events & APP_COMM_TX_EVENTS) && (NULL != g_hCommTxQueue))
         {
-            pRec->queueIndex = queueIndex;
-
-             //数据组包完成，放入队列，放满了就阻塞在这里
-            if((events & APP_COMM_TX_EVENTS) && (NULL != g_hCommTxQueue))
-            {
-                xQueueSend(g_hCommTxQueue,(void *)&pRec,portMAX_DELAY);//放入队列，中断服务中不能调用
-            }
-            else if((events & APP_COMM_RX_EVENTS) && (NULL != g_hCommRxQueue))
-            {
-                xQueueSend(g_hCommRxQueue,(void *)&pRec,portMAX_DELAY);//放入队列，中断服务中不能调用
-            }
-            else
-            {}
-
-            bsp_task_events_set(events);//传递事件
-            i32ret = pdPASS;
+            xQueueSend(g_hCommTxQueue,(void *)&stRec,portMAX_DELAY);//放入队列，中断服务中不能调用
         }
+        else if((events & APP_COMM_RX_EVENTS) && (NULL != g_hCommRxQueue))
+        {
+            xQueueSend(g_hCommRxQueue,(void *)&stRec,portMAX_DELAY);//放入队列，中断服务中不能调用
+        }
+        else
+        {}
+
+        bsp_task_events_set(events);//传递事件
+        i32ret = pdPASS;
     }
     
     return i32ret;
@@ -277,24 +271,24 @@ static void app_comm_vTimerCallback(TimerHandle_t xTimer)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_comm_processTxMsg(APP_COMM_QUEUE_REC_T *pRec)
+static void app_comm_processTxMsg(APP_COMM_QUEUE_REC_T stRec)
 {
     if(NULL == g_pStBspCommCtl)
     {
         return;
     }
 
-    bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"App comm tx index:%d,channel:%d",pRec->queueIndex,g_pStBspCommCtl->txQueue[pRec->queueIndex].channel);
+    bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"App comm tx index:%d,channel:%d",stRec.queueIndex,g_pStBspCommCtl->txQueue[stRec.queueIndex].channel);
 
-    if(0 != g_pStBspCommCtl->txQueue[pRec->queueIndex].len)
+    if(0 != g_pStBspCommCtl->txQueue[stRec.queueIndex].len)
     {
-        bsp_log_print_hex(BSP_LOG_MODULE_COMM,"comm tx data",g_pStBspCommCtl->txQueue[pRec->queueIndex].buf,g_pStBspCommCtl->txQueue[pRec->queueIndex].len);
-        g_pBspCommApi->bsp_comm_do_tx(pRec->queueIndex);
+        bsp_log_print_hex(BSP_LOG_MODULE_COMM,"comm tx data",g_pStBspCommCtl->txQueue[stRec.queueIndex].buf,g_pStBspCommCtl->txQueue[stRec.queueIndex].len);
+        g_pBspCommApi->bsp_comm_do_tx(stRec.queueIndex);
     }
     else
     {
-        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"tx cancel:%d",pRec->queueIndex);
-        xTimerStop(g_hCommTxWaitTimer[pRec->queueIndex],0);
+        bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"tx cancel:%d",stRec.queueIndex);
+        xTimerStop(g_hCommTxWaitTimer[stRec.queueIndex],0);
     }
 }
 
@@ -304,17 +298,17 @@ static void app_comm_processTxMsg(APP_COMM_QUEUE_REC_T *pRec)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_comm_processRxMsg(APP_COMM_QUEUE_REC_T *pRec)
+static void app_comm_processRxMsg(APP_COMM_QUEUE_REC_T stRec)
 {
     if(NULL == g_pStBspCommCtl)
     {
         return;
     }
 
-    bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"App comm rx index:%d,channel:%d",pRec->queueIndex,g_pStBspCommCtl->rxQueue[pRec->queueIndex].channel);
+    bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"App comm rx index:%d,channel:%d",stRec.queueIndex,g_pStBspCommCtl->rxQueue[stRec.queueIndex].channel);
 
-    bsp_log_print_hex(BSP_LOG_MODULE_COMM,"comm rx data",g_pStBspCommCtl->rxQueue[pRec->queueIndex].buf,g_pStBspCommCtl->rxQueue[pRec->queueIndex].len);
-    g_pBspCommApi->bsp_comm_do_rx(pRec->queueIndex);
+    bsp_log_print_hex(BSP_LOG_MODULE_COMM,"comm rx data",g_pStBspCommCtl->rxQueue[stRec.queueIndex].buf,g_pStBspCommCtl->rxQueue[stRec.queueIndex].len);
+    g_pBspCommApi->bsp_comm_do_rx(stRec.queueIndex);
 }
 
 /******************以下代码和rtos类型无关***************************************************************************/
