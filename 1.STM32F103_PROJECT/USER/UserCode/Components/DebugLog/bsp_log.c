@@ -27,6 +27,7 @@
 #include "bsp_md5.h"
 #include "atk_ble03.h"
 #include "app_ble.h"
+#include "app_led.h"
 
 /*******************************全局变量定义*******************************/
 const BSP_LOG_API_T g_BspLogApi = 
@@ -333,6 +334,11 @@ void bsp_log_cmd_handle(const uint8_t *pData,uint32_t u32len)
                 app_ble_opt_put(APP_BLE_TX_EVENTS,APP_BLE_OPT_UPGRADE_STOP,(uint8_t *)&u8Err,1);
             }
         }
+        // else if(0 == strncmp("ledtest",(const char *)pData,7))
+        // {//led模组测试
+        //     uint8_t u8Opt = pData[7] - 0x30;
+        //     app_led_opt_put((APP_LED_OPT_E)u8Opt);
+        // }
         // else if(0 == strncmp("Ymodem",(const char *)pData,6))
         // {//Ymodem测试
         //     int8_t name[] = "Tempproject_2241107.bin";

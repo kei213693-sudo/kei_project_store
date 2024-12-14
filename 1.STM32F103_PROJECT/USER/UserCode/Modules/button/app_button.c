@@ -12,9 +12,9 @@
 #include "app_button.h"
 #include "bsp_button.h"
 #include "bsp_log.h"
-#include "task.h"
 #include "queue.h"
 #include "timers.h"
+#include "app_led.h"
 
 /*******************************全局变量定义*******************************/
 TaskHandle_t g_ButtonTaskHandle = NULL;//任务句柄
@@ -35,8 +35,8 @@ static void app_button_processGet(void);
 static void app_button_processOptHandle(APP_BUTTON_OPT_E eOpt);
 static void app_button_vTimerCallback(TimerHandle_t xTimer);
 static void app_button_combination_vTimerCallback(TimerHandle_t xTimer);
-static void app_button_combination_updata(BSP_BUTTON_NAME_E enButtonName);
-static void app_button_combination_reset(BSP_BUTTON_NAME_E enButtonName);
+static void app_button_combination_updata(BSP_BUTTON_NAME_E eButtonName);
+static void app_button_combination_reset(BSP_BUTTON_NAME_E eButtonName);
 
 /*******************************实际函数的实现*******************************/
 /**************************************************************
@@ -106,7 +106,7 @@ int32_t app_button_deinit(void)
 *函数功能描述 ：button进程任务，处理button业务层逻辑
 *函数参数 ：
 *函数返回值 ：
-*备注：使用队列处理
+*备注：使用队列阻塞
 **************************************************************/
 static void app_button_task(void* pvParameters)
 {
@@ -141,11 +141,11 @@ static void app_button_task(void* pvParameters)
 int32_t app_button_opt_put(APP_BUTTON_OPT_E eOpt)
 {
     int32_t i32ret = pdFAIL;
-    APP_BUTTON_QUEUE_REC_T stRec;
-	memset(&stRec,0,sizeof(APP_BUTTON_QUEUE_REC_T));
 
     if((eOpt > APP_BUTTON_E_GET) && (eOpt < APP_BUTTON_E_END))
     {
+        APP_BUTTON_QUEUE_REC_T stRec;
+        memset(&stRec,0,sizeof(APP_BUTTON_QUEUE_REC_T));
         stRec.eOpt = eOpt;
         //数据组包完成，放入队列
         //供定时器调用，所以这里不能阻塞
@@ -181,47 +181,50 @@ static void app_button_processGet(void)
     BSP_BUTTON_INFO_T stBspButtonInfo;
 	memset(&stBspButtonInfo,0,sizeof(BSP_BUTTON_INFO_T));
     g_pButtonApi->bsp_button_info_get(&stBspButtonInfo);//获取按键信息
-    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"Button Upload Name:0x%x, Type:%d",stBspButtonInfo.enButtonName,stBspButtonInfo.enButtonType);
+    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"Button Upload Name:0x%x, Type:%d",stBspButtonInfo.eButtonName,stBspButtonInfo.eButtonType);
 
     if(1 == g_stAppButtonCtl.u8CombFlag)
     {//先判定是否是组合按键
         if(APP_BUTTON_E_COMBINATION_UPDATA == g_stAppButtonCtl.eButtonOpt)
         {
-            app_button_combination_updata(stBspButtonInfo.enButtonName);
+            app_button_combination_updata(stBspButtonInfo.eButtonName);
         }
         else if(APP_BUTTON_E_COMBINATION_RESET == g_stAppButtonCtl.eButtonOpt)
         {
-            app_button_combination_reset(stBspButtonInfo.enButtonName);
+            app_button_combination_reset(stBspButtonInfo.eButtonName);
         }
     }
     else
     {
-        if(BSP_BUTTON_TYPE_LONG == stBspButtonInfo.enButtonType)
+        if(BSP_BUTTON_TYPE_LONG == stBspButtonInfo.eButtonType)
         {//长按，直接上报事件给任务
-            if(BSP_BUTTON_NAME_0 == stBspButtonInfo.enButtonName)
+            app_led_opt_put(APP_LED_E_BATTERY_FULL);//led灯常亮
+            if(BSP_BUTTON_NAME_0 == stBspButtonInfo.eButtonName)
             {
                 g_stAppButtonCtl.eButtonOpt = APP_BUTTON_E_LONG_0;
             }
-            else if(BSP_BUTTON_NAME_1 == stBspButtonInfo.enButtonName)
+            else if(BSP_BUTTON_NAME_1 == stBspButtonInfo.eButtonName)
             {
                 g_stAppButtonCtl.eButtonOpt = APP_BUTTON_E_LONG_1;
             }
-            else if(BSP_BUTTON_NAME_2 == stBspButtonInfo.enButtonName)
+            else if(BSP_BUTTON_NAME_2 == stBspButtonInfo.eButtonName)
             {
                 g_stAppButtonCtl.eButtonOpt = APP_BUTTON_E_LONG_2;
             }
             app_button_opt_put(g_stAppButtonCtl.eButtonOpt);
         }
-        else if(BSP_BUTTON_TYPE_TIMEOUT == stBspButtonInfo.enButtonType)
+        else if(BSP_BUTTON_TYPE_TIMEOUT == stBspButtonInfo.eButtonType)
         {//长按超时
+            app_led_opt_put(APP_LED_E_BATTERY_FULL);//led灯熄灭
         }
-        else if(BSP_BUTTON_TYPE_SHORT == stBspButtonInfo.enButtonType)
+        else if(BSP_BUTTON_TYPE_SHORT == stBspButtonInfo.eButtonType)
         {//短按
+            app_led_opt_put(APP_LED_E_BUTTON);//led灯亮一次
             if(g_stAppButtonCtl.u8Count < APP_BUTTON_CONTINUOUS_NUM)
             {
-                g_stAppButtonCtl.u8ButtonNameTab[g_stAppButtonCtl.u8Count] = (uint8_t)stBspButtonInfo.enButtonName;
+                g_stAppButtonCtl.u8ButtonNameTab[g_stAppButtonCtl.u8Count] = (uint8_t)stBspButtonInfo.eButtonName;
                 g_stAppButtonCtl.u8Count++;
-                g_stAppButtonCtl.u32ButtonState |= stBspButtonInfo.enButtonName;
+                g_stAppButtonCtl.u32ButtonState |= stBspButtonInfo.eButtonName;
             }
             else
             {
@@ -291,6 +294,7 @@ static void app_button_vTimerCallback(TimerHandle_t xTimer)
             {//组合按键——复合
                 g_stAppButtonCtl.eButtonOpt = APP_BUTTON_E_COMBINATION_LEARN;
                 app_button_opt_put(g_stAppButtonCtl.eButtonOpt);
+                app_led_opt_put(APP_LED_E_CHARGE);//led灯快闪
             }
             else
             {//组合按键——顺序
@@ -361,11 +365,11 @@ static void app_button_combination_vTimerCallback(TimerHandle_t xTimer)
 
 /**************************************************************
 *函数功能描述 ：顺序按键——upgrade规律判定
-*函数参数 ：enButtonName，当前按键名称
+*函数参数 ：eButtonName，当前按键名称
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_button_combination_updata(BSP_BUTTON_NAME_E enButtonName)
+static void app_button_combination_updata(BSP_BUTTON_NAME_E eButtonName)
 {
     //升级事件判定，短按0和2启动顺序组合按键判定，黄灯闪烁后
     //，4s内依次按下0、1、2、0，就进入升级模式
@@ -377,10 +381,10 @@ static void app_button_combination_updata(BSP_BUTTON_NAME_E enButtonName)
         BSP_BUTTON_NAME_0
     };
 
-    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"upgrade check:%d",enButtonName);
-    if(enButtonName < BSP_BUTTON_NAME_END)
+    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"upgrade check:%d",eButtonName);
+    if(eButtonName < BSP_BUTTON_NAME_END)
     {
-        if(eButtonUpgradeName[g_stAppButtonCtl.u8Count] == enButtonName)
+        if(eButtonUpgradeName[g_stAppButtonCtl.u8Count] == eButtonName)
         {//按照顺序判断相等就继续判定
             g_stAppButtonCtl.u8Count++;
             if(APP_BUTTON_COMBINATION_UPDATA_COUNT == g_stAppButtonCtl.u8Count)
@@ -390,6 +394,7 @@ static void app_button_combination_updata(BSP_BUTTON_NAME_E enButtonName)
                 //执行相应操作
                 app_button_opt_put(g_stAppButtonCtl.eButtonOpt);
                 xTimerStop(g_hButtonCombTimer,0);
+                app_led_opt_put(APP_LED_E_CHARGE_ERR);//led灯亮起一定时间
             }
         }
         else
@@ -403,11 +408,11 @@ static void app_button_combination_updata(BSP_BUTTON_NAME_E enButtonName)
 
 /**************************************************************
 *函数功能描述 ：顺序按键——reset规律判定
-*函数参数 ：enButtonName，当前按键名称
+*函数参数 ：eButtonName，当前按键名称
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_button_combination_reset(BSP_BUTTON_NAME_E enButtonName)
+static void app_button_combination_reset(BSP_BUTTON_NAME_E eButtonName)
 {
     //初始化事件判定，短按0和2启动顺序组合按键判定，黄灯闪烁后
     //，4s内依次按下2、0、1，就初始化系统
@@ -418,10 +423,10 @@ static void app_button_combination_reset(BSP_BUTTON_NAME_E enButtonName)
         BSP_BUTTON_NAME_1
     };
 
-    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"reset check:%d",enButtonName);
-    if(enButtonName < BSP_BUTTON_NAME_END)
+    bsp_log_print(BSP_LOG_MODULE_BUTTON,BSP_LOG_TYPE_INFO,"reset check:%d",eButtonName);
+    if(eButtonName < BSP_BUTTON_NAME_END)
     {
-        if(g_eButtonResetName[g_stAppButtonCtl.u8Count] == enButtonName)
+        if(g_eButtonResetName[g_stAppButtonCtl.u8Count] == eButtonName)
         {//按照顺序判断相等就继续判定
             g_stAppButtonCtl.u8Count++;
             if(APP_BUTTON_COMBINATION_RESET_COUNT == g_stAppButtonCtl.u8Count)
@@ -431,6 +436,7 @@ static void app_button_combination_reset(BSP_BUTTON_NAME_E enButtonName)
                 //执行相应操作
                 app_button_opt_put(g_stAppButtonCtl.eButtonOpt);
                 xTimerStop(g_hButtonCombTimer,0);
+                app_led_opt_put(APP_LED_E_CHARGE_ERR);//led灯亮起一定时间
             }
         }
         else

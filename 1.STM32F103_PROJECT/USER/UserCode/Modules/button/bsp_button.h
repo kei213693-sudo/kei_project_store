@@ -44,13 +44,13 @@ typedef enum
 
 typedef struct
 {//当前按键信息，传递给app层的信息
-    BSP_BUTTON_NAME_E enButtonName;//4bytes
-    BSP_BUTTON_TYPE_E enButtonType;//区分长按还是短按
+    BSP_BUTTON_NAME_E eButtonName;//4bytes
+    BSP_BUTTON_TYPE_E eButtonType;//区分长按还是短按
 }BSP_BUTTON_INFO_T;
 
 typedef struct
 {//控制/列表结构体
-    BSP_BUTTON_NAME_E enButtonName;//按键名称
+    BSP_BUTTON_NAME_E eButtonName;//按键名称
     uint16_t u16PinIndex;//gpio索引
     uint8_t u8ActiveLevel;//有效电平，0或1，代表按下时的电平
     //以上三个参数需要初始化阶段配置好然后固定不变，下面两个参数会动态变化
@@ -60,8 +60,8 @@ typedef struct
 
 typedef struct
 {//提供给应用层的接口
-    int32_t (*bsp_button_init)(appButtonCB_t pCallback);
-    int32_t (*bsp_button_deinit)(void);
+    void (*bsp_button_init)(appButtonCB_t pCallback);
+    void (*bsp_button_deinit)(void);
     void (*bsp_button_info_get)(BSP_BUTTON_INFO_T *pStData);
 }BSP_BUTTON_API_T;
 
@@ -70,8 +70,8 @@ typedef struct
 extern const BSP_BUTTON_API_T g_BspButtonApi;
 
 /*******************************全局函数的声明*******************************/
-extern int32_t bsp_button_init(appButtonCB_t pCallback);
-extern int32_t bsp_button_deinit(void);
+extern void bsp_button_init(appButtonCB_t pCallback);
+extern void bsp_button_deinit(void);
 extern void bsp_button_info_get(BSP_BUTTON_INFO_T *pStData);
 
 extern void bsp_button_handle(uint16_t u16Pin);

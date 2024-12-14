@@ -22,6 +22,7 @@
 #include "app_ble.h"
 #include "app_comm.h"
 #include "app_button.h"
+#include "app_led.h"
 
 /*******************************全局变量定义*******************************/
 
@@ -38,7 +39,7 @@ static app_task_module_tab_t g_stTaskModuleManagerTab[] =
 {APP_TASK_MODULE_TASK,              NULL,                  app_task_deinit,     &g_TaskHandle},
 {APP_TASK_MODULE_LOG,               app_log_init,          app_log_deinit,      &g_LogTaskHandle},
 {APP_TASK_MODULE_BLE,               app_ble_init,          app_ble_deinit,      &g_BleTaskHandle},
-{APP_TASK_MODULE_LED,               NULL,          NULL,NULL},
+{APP_TASK_MODULE_LED,               app_led_init,          app_led_deinit,      &g_LedTaskHandle},
 {APP_TASK_MODULE_BUTTON,            app_button_init,       app_button_deinit,   &g_ButtonTaskHandle},
 {APP_TASK_MODULE_COMM,              app_comm_init,         app_comm_deinit,     &g_CommTaskHandle},
 {APP_TASK_MODULE_UPGRADE,           app_upgrade_init,      app_upgrade_deinit,  &g_UpgradeTaskHandle}

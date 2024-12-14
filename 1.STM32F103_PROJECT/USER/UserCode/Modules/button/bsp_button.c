@@ -22,7 +22,7 @@ const BSP_BUTTON_API_T g_BspButtonApi =
 /*******************************内部变量定义*******************************/
 static appButtonCB_t g_pButtonAppCB = NULL;// Pointer to application callback
 
-static BSP_BUTTON_TAB_T g_ButtonTab[] = 
+static BSP_BUTTON_TAB_T g_BspButtonTab[] = 
 {
 {BSP_BUTTON_NAME_0,          HW_GPIO_INDEX_BUTTON_0,       0,0,0},//PC5，0有效
 {BSP_BUTTON_NAME_1,          HW_GPIO_INDEX_BUTTON_1,       0,0,0},//PA15，0有效
@@ -34,20 +34,18 @@ static BSP_BUTTON_TAB_T g_ButtonTab[] =
 static BSP_BUTTON_INFO_T g_stBspButtonInfo = {BSP_BUTTON_NAME_END,BSP_BUTTON_TYPE_END};
 
 /*******************************内部函数的声明*******************************/
-static void bsp_button_upload(BSP_BUTTON_NAME_E enButtonName,BSP_BUTTON_TYPE_E enButtonType);
+static void bsp_button_upload(BSP_BUTTON_NAME_E eButtonName,BSP_BUTTON_TYPE_E eButtonType);
 static uint8_t bsp_button_level_get(uint16_t u16PinIndex);
 
 /*******************************实际函数的实现*******************************/
 /**************************************************************
 *函数功能描述 ：button初始化
 *函数参数 ：appButtonCB，应用层回调函数
-*函数返回值 ：pdPASS表示成功，pdFAIL表示失败
+*函数返回值 ：
 *备注：
 **************************************************************/
-int32_t bsp_button_init(appButtonCB_t pCallback)
+void bsp_button_init(appButtonCB_t pCallback)
 {
-    int32_t int32ret = pdPASS;
-
     hw_gpio_button_init();
 
     //这里"消抖、长按、短按"等时间判定，复用周期性1ms产生定时中断的TIM3
@@ -56,39 +54,33 @@ int32_t bsp_button_init(appButtonCB_t pCallback)
     {
         g_pButtonAppCB = pCallback;
     }
-
-    return int32ret;
 }
 
 /**************************************************************
 *函数功能描述 ：button去初始化
 *函数参数 ：
-*函数返回值 ：pdPASS表示成功，pdFAIL表示失败
+*函数返回值 ：
 *备注：
 **************************************************************/
-int32_t bsp_button_deinit(void)
+void bsp_button_deinit(void)
 {
-    int32_t int32ret = pdPASS;
-    
     hw_gpio_button_deinit();
     g_pButtonAppCB = NULL;
-
-    return int32ret;
 }
 
 /**************************************************************
 *函数功能描述 ：传递单个按键操作给app
-*函数参数 ：enButtonName，键值
-            enButtonType，按键类型
+*函数参数 ：eButtonName，键值
+            eButtonType，按键类型
 *函数返回值 ：
 *备注：本质还是调用app层提供给bsp的回调函数，让app的task来主动获取最新的单个按键操作
 **************************************************************/
-static void bsp_button_upload(BSP_BUTTON_NAME_E enButtonName,BSP_BUTTON_TYPE_E enButtonType)
+static void bsp_button_upload(BSP_BUTTON_NAME_E eButtonName,BSP_BUTTON_TYPE_E eButtonType)
 {
     if(NULL != g_pButtonAppCB)
     {
-        g_stBspButtonInfo.enButtonName = enButtonName;
-        g_stBspButtonInfo.enButtonType = enButtonType;
+        g_stBspButtonInfo.eButtonName = eButtonName;
+        g_stBspButtonInfo.eButtonType = eButtonType;
 
         (*g_pButtonAppCB)(NULL);// Notify the application
     }
@@ -145,69 +137,69 @@ static uint8_t bsp_button_level_get(uint16_t u16PinIndex)
 }
 
 /**************************************************************
-*函数功能描述 ：io中断回调处理，根据列表读取io电平，然后修改g_ButtonTab对应标志位
+*函数功能描述 ：io中断回调处理，根据列表读取io电平，然后修改g_BspButtonTab对应标志位
 *函数参数 ：u16PinIndex,io口索引
 *函数返回值 ：
 *备注：在IO中断服务函数中调用，上下双边沿中断触发，在这里兼容不同有效电平的gpio
 **************************************************************/
 void bsp_button_handle(uint16_t u16PinIndex)
 {
-    for(uint8_t i = 0;i < (sizeof(g_ButtonTab)/sizeof(g_ButtonTab[0]));i++)
+    for(uint8_t i = 0;i < (sizeof(g_BspButtonTab)/sizeof(g_BspButtonTab[0]));i++)
     {
-        if(u16PinIndex == g_ButtonTab[i].u16PinIndex)
+        if(u16PinIndex == g_BspButtonTab[i].u16PinIndex)
         {
-            if(bsp_button_level_get(u16PinIndex) == g_ButtonTab[i].u8ActiveLevel)
+            if(bsp_button_level_get(u16PinIndex) == g_BspButtonTab[i].u8ActiveLevel)
             {//按键按下
-                g_ButtonTab[i].u8Flag = 1;//记录该按键被按下了
-                g_ButtonTab[i].u32Count = 0;
+                g_BspButtonTab[i].u8Flag = 1;//记录该按键被按下了
+                g_BspButtonTab[i].u32Count = 0;
             }
             else
             {//按键松开
                 #if (1 == BSP_BUTTON_LONG_ENBLE)
-                if((g_ButtonTab[i].u32Count > BSP_BUTTON_ELIMINATE_COUNT)
-                    && (g_ButtonTab[i].u32Count <= BSP_BUTTON_LONG_COUNT_MIN))
+                if((g_BspButtonTab[i].u32Count > BSP_BUTTON_ELIMINATE_COUNT)
+                    && (g_BspButtonTab[i].u32Count <= BSP_BUTTON_LONG_COUNT_MIN))
                 {//传递短按事件
-                    bsp_button_upload(g_ButtonTab[i].enButtonName,BSP_BUTTON_TYPE_SHORT);
+                    bsp_button_upload(g_BspButtonTab[i].eButtonName,BSP_BUTTON_TYPE_SHORT);
                 }
                 #endif
 
-                g_ButtonTab[i].u8Flag = 0;
-                g_ButtonTab[i].u32Count = 0;
+                g_BspButtonTab[i].u8Flag = 0;
+                g_BspButtonTab[i].u32Count = 0;
             }
         }
     }
 }
 
 /**************************************************************
-*函数功能描述 ：定时器中断处理，结合g_ButtonTab实现“消抖、长按、超时”的时间处理
+*函数功能描述 ：定时器中断处理，结合g_BspButtonTab实现“消抖、长按、超时”的时间处理
 *函数参数 ：
 *函数返回值 ：
 *备注：定时器中断触发
 **************************************************************/
 void bsp_button_IrqCheck(void)
 {
-    for(uint8_t i = 0;i < (sizeof(g_ButtonTab)/sizeof(g_ButtonTab[0]));i++)
+    for(uint8_t i = 0;i < (sizeof(g_BspButtonTab)/sizeof(g_BspButtonTab[0]));i++)
     {
-        if(1 == g_ButtonTab[i].u8Flag)
+        if(1 == g_BspButtonTab[i].u8Flag)
         {
-            g_ButtonTab[i].u32Count++;
-            if(g_ButtonTab[i].u32Count > BSP_BUTTON_ELIMINATE_COUNT)
+            g_BspButtonTab[i].u32Count++;
+            if(g_BspButtonTab[i].u32Count > BSP_BUTTON_ELIMINATE_COUNT)
             {//消抖通过
                 #if (0 == BSP_BUTTON_LONG_ENBLE)
                 //不支持长按功能，传递短按事件到app层
-                g_ButtonTab[i].u8Flag = 0;
-                g_ButtonTab[i].u32Count = 0;
-                bsp_button_upload(g_ButtonTab[i].enButtonName,BSP_BUTTON_TYPE_SHORT);
+                g_BspButtonTab[i].u8Flag = 0;
+                g_BspButtonTab[i].u32Count = 0;
+                bsp_button_upload(g_BspButtonTab[i].eButtonName,BSP_BUTTON_TYPE_SHORT);
                 #else
-                if(g_ButtonTab[i].u32Count == BSP_BUTTON_LONG_COUNT_MIN)
+                if(g_BspButtonTab[i].u32Count == BSP_BUTTON_LONG_COUNT_MIN)
                 {//长按，传递长按事件到app层
-                    bsp_button_upload(g_ButtonTab[i].enButtonName,BSP_BUTTON_TYPE_LONG);
+                    bsp_button_upload(g_BspButtonTab[i].eButtonName,BSP_BUTTON_TYPE_LONG);
                 }
-                else if(g_ButtonTab[i].u32Count > BSP_BUTTON_LONG_COUNT_MAX)
+                else if(g_BspButtonTab[i].u32Count > BSP_BUTTON_LONG_COUNT_MAX)
                 {//长按超时
-                    g_ButtonTab[i].u8Flag = 0;
-                    g_ButtonTab[i].u32Count = 0;
-                    bsp_button_upload(g_ButtonTab[i].enButtonName,BSP_BUTTON_TYPE_TIMEOUT);
+                    g_BspButtonTab[i].u8Flag = 0;
+                    g_BspButtonTab[i].u32Count = 0;
+                    bsp_button_upload(g_BspButtonTab[i].eButtonName,BSP_BUTTON_TYPE_TIMEOUT);
                 }
                 #endif
             }

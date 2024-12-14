@@ -337,7 +337,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F103xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CORE;..\USER;..\OBJ;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;.\UserCode\Peripheral;.\UserCode\Modules\task;.\UserCode\Components\InfoTime;..\SystemView\Config;..\SystemView\SEGGER;..\SystemView\Sample\FreeRTOSV10.4;.\UserCode\Modules\upgrade;.\UserCode\Components\DataCheck;.\UserCode\Components\DataEncrypt;.\UserCode\Components\StoreManage;.\UserCode\Modules\ble;.\UserCode\Modules\ble\ATK_BLE03;.\UserCode\Components\InfoProtocol;.\UserCode\Modules\InfoComm;.\UserCode\Components\DebugLog;.\UserCode\Modules\button</IncludePath>
+              <IncludePath>..\CORE;..\USER;..\OBJ;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HALLIB\STM32F1xx_HAL_Driver\Inc;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM3;.\UserCode\Peripheral;.\UserCode\Modules\task;.\UserCode\Components\InfoTime;..\SystemView\Config;..\SystemView\SEGGER;..\SystemView\Sample\FreeRTOSV10.4;.\UserCode\Modules\upgrade;.\UserCode\Components\DataCheck;.\UserCode\Components\DataEncrypt;.\UserCode\Components\StoreManage;.\UserCode\Modules\ble;.\UserCode\Modules\ble\ATK_BLE03;.\UserCode\Components\InfoProtocol;.\UserCode\Modules\InfoComm;.\UserCode\Components\DebugLog;.\UserCode\Modules\button;.\UserCode\Modules\led</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -950,6 +950,21 @@
               <FileName>app_button.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\UserCode\Modules\button\app_button.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MODU/led</GroupName>
+          <Files>
+            <File>
+              <FileName>bsp_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Modules\led\bsp_led.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_led.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\UserCode\Modules\led\app_led.c</FilePath>
             </File>
           </Files>
         </Group>

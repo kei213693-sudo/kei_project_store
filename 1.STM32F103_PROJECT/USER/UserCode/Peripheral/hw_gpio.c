@@ -105,25 +105,66 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     }
 }
 
-
-//LED IO初始化
-void LED_Init(void)
+/**************************************************************
+*函数功能描述 ：led灯引脚初始化
+*函数参数 ：
+*函数返回值 ：
+*备注：红灯——PA8——LED0——TIM1_CH1配置为pwm模式
+绿灯——PD2——LED1无法映射到pwm的通道，配置为通用gpio输出模式
+这里要注意，atk_ble03模组串口通信用到了PD2做RX，所以使用ble模组的时候需要关闭该引脚的使用
+**************************************************************/
+void hw_gpio_led_init(void)
 {
     GPIO_InitTypeDef GPIO_Initure;
 
     __HAL_RCC_GPIOA_CLK_ENABLE();           	//开启GPIOA时钟
-	__HAL_RCC_GPIOD_CLK_ENABLE();           	//开启GPIOD时钟
 	
-    GPIO_Initure.Pin=GPIO_PIN_8; 				//PB8
-    GPIO_Initure.Mode=GPIO_MODE_OUTPUT_PP;  	//推挽输出
+    GPIO_Initure.Pin=HW_GPIO_INDEX_LED_0; 				//PA8
+    GPIO_Initure.Mode=GPIO_MODE_AF_PP;  		//复用推挽输出，这里映射到了TIM1的通道1，映射关系看原理图
     GPIO_Initure.Pull=GPIO_PULLUP;          	//上拉
     GPIO_Initure.Speed=GPIO_SPEED_FREQ_HIGH;    //高速
-    HAL_GPIO_Init(GPIOA,&GPIO_Initure);
+    HAL_GPIO_Init(HW_GPIO_TYPE_LED_0,&GPIO_Initure);
 
-	GPIO_Initure.Pin=GPIO_PIN_2; 				//PD2
-	HAL_GPIO_Init(GPIOD,&GPIO_Initure);
+    #if(1 == HW_GPIO_PD2_ENBLE)
+    __HAL_RCC_GPIOD_CLK_ENABLE();           	//开启GPIOD时钟
+
+	GPIO_Initure.Pin=HW_GPIO_INDEX_LED_1; 				//PD2
+	GPIO_Initure.Mode=GPIO_MODE_OUTPUT_PP;  	//推挽输出
+    GPIO_Initure.Pull=GPIO_PULLUP;          	//上拉
+    GPIO_Initure.Speed=GPIO_SPEED_FREQ_HIGH;    //高速
+	HAL_GPIO_Init(HW_GPIO_TYPE_LED_1,&GPIO_Initure);
 	
-    HAL_GPIO_WritePin(GPIOA,GPIO_PIN_8,GPIO_PIN_SET);	//PA8置1，默认初始化后灯灭
-    HAL_GPIO_WritePin(GPIOD,GPIO_PIN_2,GPIO_PIN_SET);	//PD2置1，默认初始化后灯灭
+    hw_gpio_led1_set();	//PD2置1，默认初始化后灯灭
+    #endif
 }
+
+/**************************************************************
+*函数功能描述 ：led灯引脚去初始化
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+void hw_gpio_led_deinit(void)
+{
+	HAL_GPIO_DeInit(HW_GPIO_TYPE_LED_0,HW_GPIO_INDEX_LED_0);
+    #if(1 == HW_GPIO_PD2_ENBLE)
+	HAL_GPIO_DeInit(HW_GPIO_TYPE_LED_1,HW_GPIO_INDEX_LED_1);
+    #endif
+}
+
+//0有效，亮灯
+void hw_gpio_led1_reset(void)
+{
+    #if(1 == HW_GPIO_PD2_ENBLE)
+    HAL_GPIO_WritePin(HW_GPIO_TYPE_LED_1,HW_GPIO_INDEX_LED_1,GPIO_PIN_RESET);
+    #endif
+}
+//灭灯
+void hw_gpio_led1_set(void)
+{
+    #if(1 == HW_GPIO_PD2_ENBLE)
+    HAL_GPIO_WritePin(HW_GPIO_TYPE_LED_1,HW_GPIO_INDEX_LED_1,GPIO_PIN_SET);
+    #endif
+}
+
 
