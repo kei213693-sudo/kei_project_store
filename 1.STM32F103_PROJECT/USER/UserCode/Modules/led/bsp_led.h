@@ -13,7 +13,7 @@
 
 /*******************************结构体、枚举等******************************/
 typedef enum
-{//输出通道选择
+{//输出通道枚举，决定到底要控制几个led灯
     BSP_LED_NAME_0 = 0,
     BSP_LED_NAME_1,
 
@@ -23,9 +23,9 @@ typedef enum
 typedef struct
 {//led灯列表参数
     BSP_LED_NAME_E eLedName;//led灯通道
-    void (*percent_set)(void *);//设置占空比
-    void (*light_on)(void);//点亮
-    void (*light_off)(void);//熄灭
+    void (*percent_set)(void *);//设置占空比，映射到hw层
+    void (*light_on)(void);//点亮，映射到hw层
+    void (*light_off)(void);//熄灭，映射到hw层
 }BSP_LED_TAB_T;
 
 typedef struct

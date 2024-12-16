@@ -2,7 +2,7 @@
  * app_led.c
  *
  *  Created on: 2023年7月4日
-*	  Abstract: led处理模块，实现单个led灯的“亮一次、快闪、亮起一定时间、常亮”功能，然后根据特定操作码扩展更复杂多样的led灯状态
+ *	  Abstract: led处理模块，实现单个led灯的“亮一次定时熄灭、固定时间快闪固定次数、常亮、常灭”功能，然后根据特定操作码扩展更复杂多样的led灯状态
  */
 /*******************************头文件*******************************/
 #include <stdint.h>
@@ -29,9 +29,8 @@ static const BSP_LED_API_T *g_pBspLedApi = &g_BspLedApi;
 static void app_led_task(void* pvParameters);
 static void app_led_vTimerCallback(TimerHandle_t xTimer);
 
-static void app_led_execute_once(BSP_LED_NAME_E eLedName);
-static void app_led_execute_flicker(BSP_LED_NAME_E eLedName,uint16_t u16FlickerCount);
-static void app_led_execute_constant(BSP_LED_NAME_E eLedName);
+static void app_led_execute_constant(BSP_LED_NAME_E eLedName,uint16_t u16ConstantTime);
+static void app_led_execute_flicker(BSP_LED_NAME_E eLedName,uint16_t u16FlickerNum);
 
 /*******************************实际函数的实现*******************************/
 /**************************************************************
@@ -57,7 +56,7 @@ int32_t app_led_init(void)
     //创建定时器
     for(uint8_t i = 0; i < (sizeof(g_hLedTimer)/sizeof(g_hLedTimer[0])); i++)
     {
-        g_hLedTimer[i] = xTimerCreate("LedTimer",pdMS_TO_TICKS(APP_LED_ONCE_TIME),pdFALSE,NULL,app_led_vTimerCallback);
+        g_hLedTimer[i] = xTimerCreate("LedTimer",pdMS_TO_TICKS(APP_LED_CONSTANT_SHORT_TIME),pdFALSE,NULL,app_led_vTimerCallback);
         if(NULL == g_hLedTimer[i])
         {
             bsp_log_print(BSP_LOG_MODULE_LED,BSP_LOG_TYPE_ERROR,"Create g_hLedTimer[%d] fail",i);
@@ -123,17 +122,17 @@ static void app_led_task(void* pvParameters)
             {
                 case APP_LED_E_BUTTON:
                 {//红灯亮一次
-                    app_led_execute_once(BSP_LED_NAME_0);
+                    app_led_execute_constant(BSP_LED_NAME_0,APP_LED_CONSTANT_SHORT_TIME);
                     break;
                 }
                 case APP_LED_E_CHARGE:
                 {//红灯持续闪烁
-                    app_led_execute_flicker(BSP_LED_NAME_0,20);//闪烁10次
+                    app_led_execute_flicker(BSP_LED_NAME_0,10);//闪烁10次
                     break;
                 }
                 case APP_LED_E_CHARGE_ERR:
                 {//红灯亮起一定时间
-                    app_led_execute_constant(BSP_LED_NAME_0);
+                    app_led_execute_constant(BSP_LED_NAME_0,APP_LED_CONSTANT_LONG_TIME);
                     break;
                 }
                 case APP_LED_E_BATTERY_FULL:
@@ -152,17 +151,17 @@ static void app_led_task(void* pvParameters)
 
                 case APP_LED_E_LEARN_MODE:
                 {//绿灯亮一次
-                    app_led_execute_once(BSP_LED_NAME_1);
+                    app_led_execute_constant(BSP_LED_NAME_1,APP_LED_CONSTANT_SHORT_TIME);
                     break;
                 }
                 case APP_LED_E_OTA_MODE:
                 {//绿灯持续闪烁
-                    app_led_execute_flicker(BSP_LED_NAME_1,(0xff + 1));//一直闪烁不停
+                    app_led_execute_flicker(BSP_LED_NAME_1,0xff);//一直闪烁不停
                     break;
                 }
                 case APP_LED_E_RESET_MODE:
                 {//绿灯亮起一定时间
-                    app_led_execute_constant(BSP_LED_NAME_1);
+                    app_led_execute_constant(BSP_LED_NAME_1,APP_LED_CONSTANT_LONG_TIME);
                     break;
                 }
                 case APP_LED_E_SYS_MODE:
@@ -239,9 +238,9 @@ static void app_led_vTimerCallback(TimerHandle_t xTimer)
                 bsp_log_print(BSP_LOG_MODULE_COMM,BSP_LOG_TYPE_INFO,"g_hLedTimer[%d] running",i);
 
                 if(APP_LED_STATE_FLICKER == g_stLedCtl[i].eLedState)
-                {
+                {//需要判定是开还是关
                     g_stLedCtl[i].u8Count++;
-                    if(g_stLedCtl[i].u8Count <= g_stLedCtl[i].u16FlickerCount)
+                    if(g_stLedCtl[i].u8Count <= g_stLedCtl[i].u16FlickerNum)
                     {
                         if(0 == (g_stLedCtl[i].u8Count % 2))
                         {//亮
@@ -261,7 +260,7 @@ static void app_led_vTimerCallback(TimerHandle_t xTimer)
                     }
                 }
                 else
-                {
+                {//直接关
                     g_pBspLedApi->bsp_led_light_off((BSP_LED_NAME_E)i);
                 }
             }
@@ -270,73 +269,13 @@ static void app_led_vTimerCallback(TimerHandle_t xTimer)
 }
 
 /**************************************************************
-*函数功能描述 ：led灯亮一次
+*函数功能描述 ：led执行亮起操作，时间可定
 *函数参数 ：eLedName，灯通道
-*函数返回值 ：
-*备注：不启动定时器，一直亮起
-**************************************************************/
-static void app_led_execute_once(BSP_LED_NAME_E eLedName)
-{
-    if(eLedName < BSP_LED_NAME_END)
-    {
-        //点亮led灯
-        g_pBspLedApi->bsp_led_percent_set(eLedName,APP_LED_PERCENT);
-        g_pBspLedApi->bsp_led_light_on(eLedName);
-
-        //配置控制结构体参数
-        g_stLedCtl[eLedName].eLedState = APP_LED_STATE_ONCE;
-
-        xTimerChangePeriod(g_hLedTimer[eLedName],pdMS_TO_TICKS(APP_LED_ONCE_TIME),0);
-        if(pdFALSE != xTimerIsTimerActive(g_hLedTimer[eLedName]))
-        {//已激活，重置计时
-            xTimerReset(g_hLedTimer[eLedName],0);
-        }
-        else
-        {//未激活，启动
-            xTimerStart(g_hLedTimer[eLedName],0);
-        }
-    }
-}
-
-/**************************************************************
-*函数功能描述 ：led灯执行闪烁
-*函数参数 ：
+            u16ConstantTime，要保持亮起的时间，ms
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_led_execute_flicker(BSP_LED_NAME_E eLedName,uint16_t u16FlickerCount)
-{
-    if(eLedName < BSP_LED_NAME_END)
-    {
-        //点亮led灯
-        g_pBspLedApi->bsp_led_percent_set(eLedName,APP_LED_PERCENT);
-        g_pBspLedApi->bsp_led_light_on(eLedName);
-
-        //配置控制结构体参数
-        g_stLedCtl[eLedName].eLedState = APP_LED_STATE_FLICKER;
-        g_stLedCtl[eLedName].u16FlickerCount = u16FlickerCount;
-        g_stLedCtl[eLedName].u8Count = 0;
-
-        //修改定时时间并启动定时
-        xTimerChangePeriod(g_hLedTimer[eLedName],pdMS_TO_TICKS(APP_LED_FLICKER_TIME),0);
-        if(pdFALSE != xTimerIsTimerActive(g_hLedTimer[eLedName]))
-        {//已激活，重置计时
-            xTimerReset(g_hLedTimer[eLedName],0);
-        }
-        else
-        {//未激活，启动
-            xTimerStart(g_hLedTimer[eLedName],0);
-        }
-    }
-}
-
-/**************************************************************
-*函数功能描述 ：led常量一段时间
-*函数参数 ：
-*函数返回值 ：
-*备注：
-**************************************************************/
-static void app_led_execute_constant(BSP_LED_NAME_E eLedName)
+static void app_led_execute_constant(BSP_LED_NAME_E eLedName,uint16_t u16ConstantTime)
 {
     if(eLedName < BSP_LED_NAME_END)
     {
@@ -348,7 +287,40 @@ static void app_led_execute_constant(BSP_LED_NAME_E eLedName)
         g_stLedCtl[eLedName].eLedState = APP_LED_STATE_CONSTANT;
 
         //修改定时时间并启动定时
-        xTimerChangePeriod(g_hLedTimer[eLedName],pdMS_TO_TICKS(APP_LED_CONSTANT_TIME),0);
+        xTimerChangePeriod(g_hLedTimer[eLedName],pdMS_TO_TICKS(u16ConstantTime),0);
+        if(pdFALSE != xTimerIsTimerActive(g_hLedTimer[eLedName]))
+        {//已激活，重置计时
+            xTimerReset(g_hLedTimer[eLedName],0);
+        }
+        else
+        {//未激活，启动
+            xTimerStart(g_hLedTimer[eLedName],0);
+        }
+    }
+}
+
+/**************************************************************
+*函数功能描述 ：led灯执行闪烁操作，次数可定，也可以一直闪烁
+*函数参数 ：eLedName，灯通道
+            u16FlickerNum，要闪烁的次数，次数限制为127次，超过就是一直闪烁不停止
+*函数返回值 ：
+*备注：
+**************************************************************/
+static void app_led_execute_flicker(BSP_LED_NAME_E eLedName,uint16_t u16FlickerNum)
+{
+    if(eLedName < BSP_LED_NAME_END)
+    {
+        //点亮led灯
+        g_pBspLedApi->bsp_led_percent_set(eLedName,APP_LED_PERCENT);
+        g_pBspLedApi->bsp_led_light_on(eLedName);
+
+        //配置控制结构体参数
+        g_stLedCtl[eLedName].eLedState = APP_LED_STATE_FLICKER;
+        g_stLedCtl[eLedName].u16FlickerNum = u16FlickerNum * 2;
+        g_stLedCtl[eLedName].u8Count = 0;
+
+        //修改定时时间并启动定时
+        xTimerChangePeriod(g_hLedTimer[eLedName],pdMS_TO_TICKS(APP_LED_FLICKER_TIME),0);
         if(pdFALSE != xTimerIsTimerActive(g_hLedTimer[eLedName]))
         {//已激活，重置计时
             xTimerReset(g_hLedTimer[eLedName],0);

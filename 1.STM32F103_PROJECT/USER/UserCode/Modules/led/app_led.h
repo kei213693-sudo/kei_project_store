@@ -2,7 +2,7 @@
  * app_led.h
  *
  *  Created on: 2023年7月4日
- *	  Abstract: led处理模块，实现单个led灯的“亮一次、快闪、亮起一定时间、常亮”功能，然后根据特定操作码扩展更复杂多样的led灯状态
+ *	  Abstract: led处理模块，实现单个led灯的“亮一次定时熄灭、固定时间快闪固定次数、常亮、常灭”功能，然后根据特定操作码扩展更复杂多样的led灯状态
  */
 
 #ifndef _APP_LED_H_
@@ -16,10 +16,12 @@
 #define APP_LED_PRIORITY                   (6)//数字越大，优先级越高
 #define APP_LED_QUEUE_LEN                  (4)//队列能够容纳的最大项目数
 
-#define APP_LED_ONCE_TIME                  (600)//闪烁一次时间，单位ms
-#define APP_LED_FLICKER_TIME               (300)//快闪间隔，单位ms
-#define APP_LED_CONSTANT_TIME              (3000)//常量持续间隔，单位ms
 #define APP_LED_PERCENT                    (50)//100//占空比
+
+#define APP_LED_CONSTANT_SHORT_TIME        (600)//短亮一次时间，单位ms
+#define APP_LED_CONSTANT_LONG_TIME         (3000)//长亮一次时间，单位ms
+
+#define APP_LED_FLICKER_TIME               (300)//快闪间隔，单位ms
 
 /*******************************结构体、枚举等******************************/
 typedef enum
@@ -46,10 +48,9 @@ typedef struct
 }APP_LED_QUEUE_REC_T;
 
 typedef enum
-{//单个led灯状态，可以组合为“闪烁一次、持续闪烁、常亮、常灭”
-    APP_LED_STATE_ONCE        = 0,//闪烁一次
+{//单个led灯状态
+    APP_LED_STATE_CONSTANT        = 0,//亮起一定时间
     APP_LED_STATE_FLICKER,       //闪烁，次数可选
-    APP_LED_STATE_CONSTANT,      //亮起一定时间
 
     APP_LED_STATE_END                  
 }APP_LED_STATE_E;
@@ -57,7 +58,7 @@ typedef enum
 typedef struct
 {//定时处理控制结构体
     APP_LED_STATE_E eLedState;
-    uint16_t u16FlickerCount;//快闪次数限制，超过0xff就是一直闪烁不停下,10就是闪烁5次
+    uint16_t u16FlickerNum;//快闪次数限制，超过127就是一直闪烁不停下
     uint8_t u8Count;//快闪计数
     uint8_t res;
 }app_led_ctl_t;
