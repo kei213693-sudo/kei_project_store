@@ -1,2 +1,0 @@
-需要先安装PIL
-python3 gif_pil.py dst_c_file_path src_gif_file_path
