@@ -1,0 +1,22 @@
+var searchData=
+[
+  ['dma_5faddr_5finc_5fmode_2824',['dma_addr_inc_mode',['../group__DMA.html#ga176258c46c458473dfaac4fa44d282a3',1,'dma.h']]],
+  ['dma_5fallocate_2825',['dma_allocate',['../group__DMA.html#ga20ed9e01b085dab77666bb57a729d6d8',1,'dma.h']]],
+  ['dma_5fconfig_2826',['dma_config',['../group__DMA.html#ga89a2207cf758231b97fd04223d71000e',1,'dma.h']]],
+  ['dma_5fdeclare_5fllip_2827',['DMA_DECLARE_LLIP',['../group__APP__EXAMPLES__RC__IR__DMA.html#ga87b2ed9eb5ccf6f2ad52f1c535b98ce5',1,'ir_dma.c']]],
+  ['dma_5ffifo_5fin_2828',['dma_fifo_in',['../group__DMA__FIFO.html#gae2076f4e848f52378d4ded11a4396186',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5finit_2829',['dma_fifo_init',['../group__DMA__FIFO.html#gaf544e95c10b2a5e62fb820fab01b78df',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5flen_2830',['dma_fifo_len',['../group__DMA__FIFO.html#ga9cca992c9c9f954a46452ba155823454',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5fout_2831',['dma_fifo_out',['../group__DMA__FIFO.html#ga55bffe4ec19e1dbecee3b323fca962ab',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5freset_2832',['dma_fifo_reset',['../group__DMA__FIFO.html#gadf22e530e69c061f460be04abcb441c0',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5fset_5fin_5fpointer_2833',['dma_fifo_set_in_pointer',['../group__DMA__FIFO.html#ga3aaf99135f8c9e0c4e17b7bb5d2d726d',1,'dma_fifo.h']]],
+  ['dma_5ffifo_5fset_5fout_5fpointer_2834',['dma_fifo_set_out_pointer',['../group__DMA__FIFO.html#ga445165b2fb49d66312c9e50ab19e7d61',1,'dma_fifo.h']]],
+  ['dma_5fget_5fdst_5faddr_2835',['dma_get_dst_addr',['../group__DMA.html#ga3ca1ca47cd73b47e2f37e6f6f0a4d9df',1,'dma.h']]],
+  ['dma_5fget_5fsrc_5faddr_2836',['dma_get_src_addr',['../group__DMA.html#ga0755c7151673004682ee0e142ca8c3e4',1,'dma.h']]],
+  ['dma_5finit_2837',['dma_init',['../group__DMA.html#ga1c9e133b825bded7bf8039c43b49d2c7',1,'dma.h']]],
+  ['dma_5frelease_2838',['dma_release',['../group__DMA.html#ga08dcefa546e7ac6d8728d0ed12fde995',1,'dma.h']]],
+  ['dma_5fstart_2839',['dma_start',['../group__DMA.html#ga3f72bf3854ee1092d3aee9215a8afa16',1,'dma.h']]],
+  ['dma_5fstart_5fwith_5flli_2840',['dma_start_with_lli',['../group__DMA.html#gad06e78995bfde605650d8b1ba9f44d02',1,'dma.h']]],
+  ['dma_5fstop_2841',['dma_stop',['../group__DMA.html#gaa8490f393aaa4bfb2d38d8f9774a9d1c',1,'dma.h']]],
+  ['dma_5fwait_5fstop_2842',['dma_wait_stop',['../group__DMA.html#ga1c98e4187bf8c496019a8882e10c16ae',1,'dma.h']]]
+];

@@ -1,0 +1,1 @@
+nrfutil pkg generate --key-file private-key.pem --hw-version 0 --softdevice .\keil\ble_app_watch.bin --sd-id 0 --sd-req 0 firmware.zip

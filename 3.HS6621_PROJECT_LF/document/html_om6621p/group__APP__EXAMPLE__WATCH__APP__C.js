@@ -1,0 +1,20 @@
+var group__APP__EXAMPLE__WATCH__APP__C =
+[
+    [ "APP_ADV_DIRECTED_TIMEOUT", "group__APP__EXAMPLE__WATCH__APP__C.html#ga1b87db9c5c4981f5d9c91107f40756ea", null ],
+    [ "APP_ADV_FAST_INTERVAL", "group__APP__EXAMPLE__WATCH__APP__C.html#ga644cdcbf3fbb9ff9ba142e187ec744b7", null ],
+    [ "APP_ADV_FAST_TIMEOUT", "group__APP__EXAMPLE__WATCH__APP__C.html#ga361fa0a8a6c0d6a3688da023a0fce212", null ],
+    [ "APP_ADV_SLOW_INTERVAL", "group__APP__EXAMPLE__WATCH__APP__C.html#ga0f18d37bb3407280cf06e7508ab85ad3", null ],
+    [ "APP_ADV_SLOW_TIMEOUT", "group__APP__EXAMPLE__WATCH__APP__C.html#ga92b8666162c3945b61fdedb444f7940a", null ],
+    [ "appm_add_svc_func_t", "group__APP__EXAMPLE__WATCH__APP__C.html#gad4f474eddd8e6351d814527df3f70eb5", null ],
+    [ "appm_svc_list", "group__APP__EXAMPLE__WATCH__APP__C.html#ga5b547f7a88b86b7e293fd5b89efcc32e", null ],
+    [ "appm_add_svc", "group__APP__EXAMPLE__WATCH__APP__C.html#gaadcc896e1e7dc3e0eaf10aef91d4d612", null ],
+    [ "appm_disconnect", "group__APP__EXAMPLE__WATCH__APP__C.html#ga7f7a7d5472c987886b234244a8efaf4a", null ],
+    [ "appm_get_dev_name", "group__APP__EXAMPLE__WATCH__APP__C.html#ga2b4902e68a7c14abeeb6435b3336affd", null ],
+    [ "appm_init", "group__APP__EXAMPLE__WATCH__APP__C.html#ga1095ab62a78f2ba3aead10b00b466c13", null ],
+    [ "appm_recv_data", "group__APP__EXAMPLE__WATCH__APP__C.html#ga257c59be3791fdb8f9f0cc4615d46f66", null ],
+    [ "appm_reg_svc_itf", "group__APP__EXAMPLE__WATCH__APP__C.html#ga22980a4826d5e4f696ffd09c230d4e8b", null ],
+    [ "appm_update_param", "group__APP__EXAMPLE__WATCH__APP__C.html#ga7e0de75d0ce265f70d502e65f41c4e8a", null ],
+    [ "tspp_server_prf_itf_get", "group__APP__EXAMPLE__WATCH__APP__C.html#ga983f7aafc6650961114933413ba30d35", null ],
+    [ "app_env", "group__APP__EXAMPLE__WATCH__APP__C.html#ga970c5c25ebc34a427c98d7e61b3c74fd", null ],
+    [ "TASK_DESC_APP", "group__APP__EXAMPLE__WATCH__APP__C.html#ga4b4da276068fd4322d261f12e3834c3a", null ]
+];

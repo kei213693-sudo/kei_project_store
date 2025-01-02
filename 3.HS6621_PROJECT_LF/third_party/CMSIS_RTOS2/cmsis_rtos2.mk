@@ -1,0 +1,11 @@
+
+CMSIS_RTOS2_BASE_DIR = $(THIRD_PARTY_DIR)/CMSIS_RTOS2
+
+CMSIS_RTOS2_SOURCES = \
+    $(CMSIS_RTOS2_BASE_DIR)/FreeRTOS/Source/cmsis_os2.c \
+	$(CMSIS_RTOS2_BASE_DIR)/FreeRTOS/Source/freertos_evr.c \
+
+CMSIS_RTOS2_INCLUDES = \
+    $(CMSIS_RTOS2_BASE_DIR)/Include/ \
+    $(CMSIS_RTOS2_BASE_DIR)/FreeRTOS/Include/ \
+

@@ -1,0 +1,43 @@
+烧录出错时可以看log输出，无log可以参考下面的方法排除问题
+
+0x02(DFU_OPCODE_NOT_SUPPORT)
+	设备收到未知指令，一般不会出错，可能是升级应用的问题
+
+< 烧录数据之前出错 >
+	0x00(DFU_INVALID_CODE)
+		升级包中的配置文件头识别出错，检查是否用错了升级包
+	0x02(DFU_OPCODE_NOT_SUPPORT)
+		DFU功能被软件关闭或设备发出了DFU不支持的指令
+	0x03(DFU_INVALID_PARAMETER)
+		设备支持数字签名而升级包中无签名信息，检查是否用错了升级包
+		接收的配置信息格式正确但长度不够，一般不会出错，可能是打包应用的问题
+		DFU_CTRL_CREATE指令中数据类型出错，一般不会出错，可能是升级应用的问题
+	0x04(DFU_INSUFFICIENT_RESOURCES)
+		烧录的image中有一个或多个超出定义限制，检查打包时所有bin文件是否符合烧录配置（@ref onmicro_dfu_config.h）中对应的的大小限制
+		配置信息长度超过最大能接收的长度，可能是打包的bin数量太多，增大DFU_COMMAND_OBJ_MAX_SIZE可以解决该问题
+		缓存malloc失败，目前已经去掉了malloc改用全局变量，不可能出现该问题
+	0x05(DFU_INVALID_OBJECT)
+		配置信息记录的所有bin文件的长度之和与实际bin文件大小不同，一般不会出错
+	0x07(DFU_UNSUPPORTED_TYPE)
+		升级包的image中bin的类型在烧录配置（@ref onmicro_dfu_config.h）中无定义，检查打升级包命令的参数是否有问题
+	0x08(DFU_OPERATION_NOT_PERMITTED)
+		升级包的数字签名出错，检查打包数据用的私钥与该设备中使用的公钥是否对应
+	0x0A(DFU_OPERATION_FAILED)
+		通讯指令与协议不符，一般不会出错，可能是升级应用的问题
+	0x41(DFU_VERSION_NOT_MATCH)
+		当前升级文件版本不匹配
+		
+< 烧录过程中出错 >
+	0x03(DFU_INVALID_PARAMETER)
+		配置信息为空，一般不会出错，可能是升级应用的问题或DFU程序的BUG
+
+
+< 烧录完成时出错 >
+	0x04(DFU_INSUFFICIENT_RESOURCES)
+		CRC校验出错，可能是读写接口或响应读写设备问题导致写入的数据和读出的不同，多个bin时地址重叠也会导致CRC出错
+		升级APP、config、patch后写入MBR出错，一般不会出现这个问题
+	0x05(DFU_INVALID_OBJECT)
+		烧录设备认为烧录已经完成，而DFU这端接收到的数据长度小于配置信息当中的长度，一般不会出错
+		DFU_CTRL_SELECT指令中数据类型出错，一般不会出错，可能是升级应用的问题
+	0x08(DFU_OPERATION_NOT_PERMITTED)
+		由接收到的升级数据计算出的hash值与配置信息中给出的hash值不同，一般不会出错，否则升级数据包可能已损坏或被篡改

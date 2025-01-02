@@ -1,0 +1,149 @@
+@startuml inline_umlgraph_1.png
+repeat :Start
+partition Event Scheduler {
+    :Event scheduler: call rwip_schedule();
+}
+partition Power Manager {
+    :Enter critical ke_event_set;
+    if (Is there any event of ke_event_set here ?) then (No)
+        if (Is RF of BLE running ?) then (No)
+            :Check user power status;
+            note
+            Default callback is
+            pmu_power_status(),
+            Register a new through
+            co_power_register_user_status()
+            end note
+        else (Yes)
+        endif
+        partition Sleep Flow {
+            if (Is POWER_IDLE ?) then (Yes)
+                :Call __WFI();
+            else (No)
+                :Notify user: enter sleep;
+                note
+                Register callback through
+                co_power_register_sleep_event()
+
+                POWER_SLEEP_ENTRY
+                end note
+                :Lock the output state of all IO;
+                :Sleep;
+                :Notify user: leave sleep (top half);
+                note: POWER_SLEEP_LEAVE_TOP_HALF
+                :Unlock the output state of all IO;
+                :Notify user: leave sleep (bottom half);
+                note: POWER_SLEEP_LEAVE_BOTTOM_HALF
+            endif
+        }
+    else (Yes)
+    endif
+    :Leave critical section;
+}
+repeat while
+@enduml
+@startuml inline_umlgraph_2.png
+TASK_APP -> TASK_GAPM: GAPM_RESET_CMD
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_SET_DEV_CONFIG_CMD
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+@enduml
+@startuml inline_umlgraph_3.png
+hnote over TASK_APP, TASK_GAPM: RESET
+TASK_APP -> TASK_GAPM: GAPM_PROFILE_TASK_ADD_CMD
+TASK_GAPM -> TASK_APP: GAPM_PROFILE_ADDED_IND
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+@enduml
+@startuml inline_umlgraph_4.png
+hnote over TASK_APP, TASK_GAPM: RESET
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_CREATE_CMD, operation = GAPM_CREATE_ADV_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_CREATED_IND
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_SET_ADV_DATA_CMD, operation = GAPM_SET_ADV_DATA
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_SET_ADV_DATA_CMD, operation = GAPM_SET_SCAN_RSP_DATA
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_START_CMD, operation = GAPM_START_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+@enduml
+@startuml inline_umlgraph_5.png
+hnote over TASK_APP, TASK_GAPM: Start Advertising
+TASK_APP <- TASK_GAPC: GAPC_CONNECTION_REQ_IND
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_STOPPED_IND, actv_type = GAPM_ACTV_TYPE_ADV
+TASK_APP -> TASK_GAPC: GAPC_CONNECTION_CFM
+TASK_GAPC --> TASK_APP: GAPC_LE_PHY_IND
+TASK_GAPC --> TASK_APP: GAPC_LE_PKT_SIZE_IND
+TASK_GATTC --> TASK_APP: GATTC_MTU_CHANGED_IND
+TASK_GATTC --> TASK_APP: GATTC_SVC_CHANGED_CFG_IND
+@enduml
+@startuml inline_umlgraph_6.png
+hnote over TASK_APP, TASK_GAPM: Start Advertising
+hnote over TASK_APP, TASK_GAPM: Connected
+...
+TASK_APP <- TASK_GAPC: GAPC_DISCONNECT_IND
+@enduml
+@startuml inline_umlgraph_7.png
+hnote over TASK_APP, TASK_GAPM: RESET
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_CREATE_CMD, operation = GAPM_CREATE_SCAN_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_CREATED_IND
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_START_CMD, operation = GAPM_START_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_GAPM --> TASK_APP: GAPM_EXT_ADV_REPORT_IND
+TASK_GAPM --> TASK_APP: GAPM_EXT_ADV_REPORT_IND
+... Scan for a while ...
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_STOP_CMD, operation = GAPM_STOP_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_STOPPED_IND
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_DELETE_CMD, operation = GAPM_DELETE_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+@enduml
+@startuml inline_umlgraph_8.png
+hnote over TASK_APP, TASK_GAPM: START SCAN
+TASK_APP <-- TASK_GAPM: GAPM_EXT_ADV_REPORT_IND
+hnote over TASK_APP, TASK_GAPM: STOP SCAN
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_CREATE_CMD, operation = GAPM_CREATE_INIT_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_CREATED_IND
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_START_CMD, operation = GAPM_START_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+TASK_GAPC -> TASK_APP: GAPC_CONNECTION_REQ_IND
+TASK_APP -> TASK_GAPC: GAPC_CONNECTION_CFM
+TASK_GAPM -> TASK_APP: GAPM_ACTIVITY_STOPPED_IND, actv_type=GAPM_ACTV_TYPE_INIT
+TASK_APP -> TASK_GAPM: GAPM_ACTIVITY_DELETE_CMD, operation = GAPM_DELETE_ACTIVITY
+TASK_GAPM -> TASK_APP: GAPM_CMP_EVT
+@enduml
+@startuml inline_umlgraph_9.png
+hnote over TASK_APP, TASK_GAPM: Connected
+...
+TASK_APP -> TASK_GAPC: GAPC_DISCONNECT_CMD 
+TASK_APP <- TASK_GAPC: GAPC_DISCONNECT_IND
+@enduml
+@startuml inline_umlgraph_10.png
+ hnote over TASK_APP, TASK_ANCS: must be connected
+ hnote over TASK_APP, TASK_ANCS: 1.get the source of notification
+ TASK_ANCS -> TASK_APP: ANCSC_NOTIFICATION_IND
+ hnote over TASK_APP, TASK_ANCS: 2.get the information
+ TASK_APP->TASK_ANCS: ANCSC_GET_NTF_ATTR_CMD
+ TASK_ANCS->TASK_APP: ANCSC_NTF_ATTR_IND
+@enduml
+@startuml inline_umlgraph_11.png
+ hnote over TASK_APP, TASK_GATTC: BLE Connected
+ hnote over TASK_APP, TASK_GATTC: first MTU exchange
+ TASK_APP -> TASK_GATTC: GATTC_EXC_MTU_CMD
+ TASK_GATTC -> TASK_APP: GATTC_MTU_CHANGED_IND
+ hnote over TASK_APP, TASK_GATTC: second discover services
+ hnote over TASK_APP, TASK_GATTC: prf_disc_svc_all_send
+ TASK_GATTC->TASK_APP: GATTC_SDP_SVC_IND
+ TASK_GATTC->TASK_APP: GATTC_SDP_DISC_SVC_ALL
+@enduml
+@startuml inline_umlgraph_12.png
+ hnote over TASK_APP, TASK_GATTC: Get All Services.
+ hnote over TASK_APP, TASK_GATTC: Enable notify
+ hnote over TASK_APP, TASK_GATTC: prf_gatt_write_ntf_ind
+ TASK_GATTC->TASK_APP: GATTC_WRITE
+ hnote over TASK_APP, TASK_GATTC: Send data to device
+ hnote over TASK_APP, TASK_GATTC: prf_gatt_write_ntf_ind
+ TASK_GATTC->TASK_APP: GATTC_WRITE
+ hnote over TASK_APP, TASK_GATTC: Recv data from deta, handle GATTC_EVENT_IND
+@enduml

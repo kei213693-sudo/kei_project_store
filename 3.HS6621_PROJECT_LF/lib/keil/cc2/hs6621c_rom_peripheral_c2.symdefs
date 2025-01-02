@@ -1,0 +1,304 @@
+#<SYMDEFS># ARM Linker, 5060422: Last Updated: Thu Mar 17 04:14:59 PM CST 2022
+
+# hardware/peripheral/adc.c
+
+# hardware/peripheral/audio.c
+
+# hardware/peripheral/calib.c
+0x2000fdf0 D calib_env
+0x00103a81 T calib_patch
+0x00103b95 T calib_rc32k
+0x00103ea5 T calib_rf_restore_old
+0x00103cf5 T calib_sys_rc
+0x00103ca9 T calib_sys_rc32m
+0x0010402d T calib_sys_restore
+
+# hardware/peripheral/calib_repair.c
+0x2000f5b0 D calib_repair_env
+0x00104119 T calib_repair_rc32k_temperature_check
+0x00104085 T calib_repair_rc_rf_temperature_check
+0x00104155 T calib_repair_value_select
+
+# hardware/peripheral/cap.c
+
+# hardware/peripheral/codec_wm8753.c
+
+# hardware/peripheral/cpm.c
+0x00107b51 T cpm_get_clock
+0x00107b4d T cpm_init
+0x00107ddd T cpm_restore
+0x00107c1d T cpm_set_clock
+0x00107d39 T cpm_set_clock_div
+0x00107dc5 T cpm_store
+
+# hardware/peripheral/dma.c
+
+# hardware/peripheral/dma_nds.c
+
+# hardware/peripheral/encoder.c
+0x2000f48c D encoder_env
+0x00105589 T encoder_pin_mask
+0x00105595 T encoder_restore
+
+# hardware/peripheral/encoder_sim.c
+
+# hardware/peripheral/gpio.c
+0x0010a1c1 T GPIO0_IRQHandler
+0x0010a391 T gpio_clear_interrupt_pending
+0x0010a1f9 T gpio_open
+0x0010a241 T gpio_open_clock
+0x0010a325 T gpio_read
+0x0010a331 T gpio_read_output_status
+0x0010a3f5 T gpio_restore
+0x0010a315 T gpio_set_direction
+0x0010a265 T gpio_set_interrupt
+0x0010a309 T gpio_set_interrupt_callback
+0x0010a39d T gpio_store
+0x0010a381 T gpio_toggle
+0x0010a33d T gpio_write
+
+# hardware/peripheral/hib.c
+0x0010a64d T hib_is_pin_wakeup
+0x0010a6b5 T hib_is_timer_wakeup
+0x0010a55d T hib_register_spi_read
+0x0010a471 T hib_register_spi_read_raw
+0x0010a515 T hib_register_spi_write
+0x0010a531 T hib_register_spi_write0
+0x0010a547 T hib_register_spi_write1
+0x0010a4c5 T hib_register_spi_write_raw
+0x0010a60b T hib_timer_start
+0x0010a625 T hib_timer_stop
+0x0010a5fd T hib_wakeup_pin_get
+0x0010a56d T hib_wakeup_pin_set
+
+# hardware/peripheral/i2c.c
+
+# hardware/peripheral/i2c_sim.c
+
+# hardware/peripheral/i2s.c
+
+# hardware/peripheral/kpp.c
+
+# hardware/peripheral/kpp_sim.c
+
+# hardware/peripheral/lcd_serial.c
+
+# hardware/peripheral/lcd_serial_new.c
+
+# hardware/peripheral/mouse_sensor_sim.c
+
+# hardware/peripheral/peripheral.c
+0x00107a81 T peripheral_lowpower_enter
+0x00107b05 T peripheral_lowpower_leave
+0x00107b33 T peripheral_lowpower_leave_with_bb_sleep_flow_attach_to_system
+
+# hardware/peripheral/pic_dec.c
+
+# hardware/peripheral/pinmux.c
+0x00107e05 T pinmux_config
+0x00107e81 T pinmux_restore
+0x00107e51 T pinmux_search
+
+# hardware/peripheral/pmu.c
+0x0010542d T PIN_WAKEUP_IRQHandler
+0x00105471 T PMU_TIMER_IRQHandler
+0x001041f9 T pmu_32k_switch_to_rc
+0x00104709 T pmu_ana_enable
+0x001046f9 T pmu_ana_is_enabled
+0x00104559 T pmu_clock_lowpower_enter
+0x001053e1 T pmu_dcdc_enable
+0x00104549 T pmu_dcdc_is_enabled
+0x00104501 T pmu_dcdc_lowpower_enter
+0x00104165 T pmu_detect_lowpower_time_pin_toggle
+0x2000f498 D pmu_env
+0x0010512d T pmu_force_into_reboot_sleep_mode
+0x001041ad T pmu_gpio_lowpower_is_ready
+0x00104935 T pmu_init
+0x00104d3d T pmu_lowpower_allow
+0x00104e09 T pmu_lowpower_enter
+0x00104ee1 T pmu_lowpower_leave
+0x00104d21 T pmu_lowpower_prevent
+0x00104d5d T pmu_lowpower_prevent_status
+0x00104185 T pmu_nvic_restore
+0x00105029 T pmu_pin_driven_current_set
+0x001041cd T pmu_pin_input_enable
+0x001048c1 T pmu_pin_input_state_lowpower_enter
+0x00104fd5 T pmu_pin_mode_set
+0x00104fa9 T pmu_pin_state_restore
+0x00104f6d T pmu_pin_state_store
+0x0010521d T pmu_pin_wakeup_out_of_date
+0x00104d69 T pmu_power_status
+0x00104bc9 T pmu_ram_power_on_all
+0x00105351 T pmu_random_seed_fetch
+0x001048e9 T pmu_random_seed_is_valid
+0x001042f9 T pmu_reboot_prepare
+0x0010509d T pmu_reset_to_ram
+0x00105055 T pmu_reset_to_rom
+0x001050e5 T pmu_reset_to_sflash
+0x00104bf9 T pmu_reversion_check
+0x0010532d T pmu_rtos_timer_register
+0x001052e5 T pmu_rtos_timer_start
+0x00105309 T pmu_rtos_timer_stop
+0x00104c61 T pmu_select_32k
+0x00104d09 T pmu_select_32k_get
+0x001041d9 T pmu_select_32k_get_reg
+0x00104295 T pmu_timer_arbitrate
+0x00104251 T pmu_timer_enable
+0x0010522d T pmu_timer_init
+0x00104dc9 T pmu_timer_left_time
+0x001052c1 T pmu_timer_register
+0x00105279 T pmu_timer_start
+0x0010529d T pmu_timer_stop
+0x00104285 T pmu_timer_time
+0x001043e1 T pmu_topclk_rc32m_power_enable
+0x00104401 T pmu_topclk_rc32m_power_is_enabled
+0x00104b41 T pmu_topclk_recalib
+0x00104365 T pmu_topclk_switch_to_rc32m
+0x00104381 T pmu_topclk_switch_to_xtal32m
+0x001043ad T pmu_topclk_switch_to_xtal32m_x2
+0x00104319 T pmu_topclk_x2_enable
+0x00104479 T pmu_topclk_xtal32m_is_enabled
+0x00104415 T pmu_topclk_xtal32m_power_enable
+0x00104339 T pmu_topclk_xtal32m_wait_ready
+0x0010448d T pmu_topclk_xtal32m_x2_is_enabled
+0x00105209 T pmu_wait_system_ready
+0x00104d15 T pmu_wakeup_pin_get
+0x001042e1 T pmu_wakeup_pin_wait_idle
+0x00104669 T pmu_xtal32m_fast_startup
+0x00104bbd T pmu_xtal32m_fast_startup_parallel_register_callback
+0x001044c9 T pmu_xtal32m_fast_startup_param_setup
+0x001049f5 T pmu_xtal32m_startup
+0x0010449d T pmu_xtal32m_startup_param_setup
+0x00104ad5 T pmu_xtal32m_x2_close
+0x00104a69 T pmu_xtal32m_x2_startup
+
+# hardware/peripheral/psram_serial.c
+
+# hardware/peripheral/radio.c
+0x001055dd T rf_set_cte
+
+# hardware/peripheral/radio_gaussian.c
+
+# hardware/peripheral/retarget.c
+
+# hardware/peripheral/rtc.c
+0x00105515 T rtc_restore
+0x00105579 T rtc_second_irq_is_enabled
+0x00105511 T rtc_store
+
+# hardware/peripheral/sf.c
+0x00109345 T sf_capacity
+0x001090bd T sf_config
+0x001085b9 T sf_deep_power_down_enter
+0x00108649 T sf_deep_power_down_leave
+0x00109269 T sf_detect
+0x00109221 T sf_disable
+0x00109111 T sf_enable
+0x001089a1 T sf_erase
+0x001088db T sf_erase_block
+0x0010881d T sf_erase_chip
+0x0010893d T sf_erase_sec
+0x00108879 T sf_erase_sector
+0x0010937d T sf_id
+0x0010924d T sf_iflash_auto_close
+0x0010925d T sf_iflash_extra_open_delay_set
+0x00108565 T sf_otp_get
+0x001084fd T sf_otp_set
+0x001084d5 T sf_quad_enable
+0x00108fb9 T sf_read
+0x00108e31 T sf_read_fast_dma
+0x00108e9d T sf_read_fast_dual_dma
+0x00108d7d T sf_read_fast_nodma
+0x00108f75 T sf_read_fast_quad_dma
+0x00108f09 T sf_read_fast_quad_naked_dma
+0x00108759 T sf_read_id
+0x00108dc5 T sf_read_normal_dma
+0x00108da1 T sf_read_normal_nodma
+0x00108f95 T sf_read_sec
+0x001082ed T sf_read_sr
+0x0010831b T sf_read_sr2
+0x00108355 T sf_read_sr_16bits
+0x001087b1 T sf_read_uid
+0x00108791 T sf_read_uid_ex
+0x00109315 T sf_status
+0x001086e9 T sf_unlock_all
+0x0010836f T sf_wait_sr_no_busy
+0x00108c75 T sf_write
+0x0010838d T sf_write_enable
+0x00108ba5 T sf_write_page
+0x00108ae5 T sf_write_page_dma
+0x00108a45 T sf_write_page_nodma
+0x00108c09 T sf_write_sec
+0x001083b1 T sf_write_sr
+0x00108417 T sf_write_sr_16bits
+0x0010847d T sf_write_sr_mask
+0x001084a9 T sf_write_sr_mask_16bits
+0x001084e5 T sf_xip_quad_enable
+
+# hardware/peripheral/sf_base.c
+0x00109ec9 T SF1_IRQHandler
+0x00109ed1 T SF2_IRQHandler
+0x00109e89 T SF_IRQHandler
+0x00109bb5 T sfb_close
+0x00109c89 T sfb_config
+0x00109e45 T sfb_critical_object_get
+0x00109e39 T sfb_critical_object_set
+0x00109c69 T sfb_dma_done_event_get
+0x00109bf9 T sfb_dma_done_event_register
+0x00109e51 T sfb_enable
+0x00109d51 T sfb_lcd2lane_enable
+0x00109b71 T sfb_open
+0x001093c5 T sfb_read_dma
+0x0010955d T sfb_read_dma_ex
+0x00109809 T sfb_read_nodma
+0x00109e05 T sfb_regs_get
+0x00109e0d T sfb_regs_set
+0x00109d75 T sfb_restore
+0x0010962d T sfb_write_dma
+0x00109709 T sfb_write_dma_ex
+0x00109a7d T sfb_write_nodma
+
+# hardware/peripheral/sf_ex.c
+
+# hardware/peripheral/sf_nand.c
+
+# hardware/peripheral/sf_sys.c
+0x0010a0f1 T sfs_auto_disen_set
+0x0010a115 T sfs_cache_enable
+0x0010a13d T sfs_cache_invalidate_all
+0x00109f25 T sfs_config
+0x2000f584 D sfs_env
+0x0010a0e5 T sfs_is_auto_disen
+0x0010a0fd T sfs_is_xip
+0x0010a0d9 T sfs_located
+0x0010a149 T sfs_lowpower_enter
+0x0010a185 T sfs_lowpower_leave
+0x00109f81 T sfs_probe
+0x00109ed9 T sfs_raw_op
+0x0010ac5c D sfs_regobj_tbl
+0x0010a0b1 T sfs_select
+0x0010a109 T sfs_xip_set
+
+# hardware/peripheral/spi.c
+
+# hardware/peripheral/timer.c
+
+# hardware/peripheral/uart.c
+0x001081fd T UART0_IRQHandler
+0x001082d9 T UART1_IRQHandler
+0x00108015 T uart_close
+0x00108189 T uart_empty_fifo
+0x001081c9 T uart_is_empty
+0x00107ead T uart_open
+0x001081d3 T uart_pio_rx
+0x00108169 T uart_send_block
+0x00108059 T uart_send_noblock
+0x001080e9 T uart_send_noblock_fifo
+0x001080a9 T uart_send_noblock_fifo_open
+0x00108161 T uart_wait_send_finish
+
+# hardware/peripheral/wdt.c
+0x0010a6e1 T wdt_enable
+0x0010a6d1 T wdt_keepalive
+0x0010a731 T wdt_reactivate
+

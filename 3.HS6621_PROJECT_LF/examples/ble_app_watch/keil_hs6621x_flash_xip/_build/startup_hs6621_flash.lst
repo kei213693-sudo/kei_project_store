@@ -1,0 +1,1458 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;*******************************************************
+                       ***********************
+    2 00000000         ;
+    3 00000000         ;  Copyright (C), 2016, HunterSun Co., Ltd.
+    4 00000000         ;
+    5 00000000         ;*******************************************************
+                       ***********************
+    6 00000000         ; * @file     startup_HS6620.s
+    7 00000000         ; * @brief    CMSIS Cortex-M3 Core Device Startup File f
+                       or
+    8 00000000         ; *           Device HS6620
+    9 00000000         ; * @version  V1.00
+   10 00000000         ; * @date     27. May 2016
+   11 00000000         ; *
+   12 00000000         ; * @note
+   13 00000000         ; * Copyright (C) 2016 ARM Limited. All rights reserved.
+                       
+   14 00000000         ; *
+   15 00000000         ; * @par
+   16 00000000         ; * ARM Limited (ARM) is supplying this software for use
+                        with Cortex-M
+   17 00000000         ; * processor based microcontrollers.  This file can be 
+                       freely distributed
+   18 00000000         ; * within development tools that are supporting such AR
+                       M based processors.
+   19 00000000         ; *
+   20 00000000         ; * @par
+   21 00000000         ; * THIS SOFTWARE IS PROVIDED "AS IS".  NO WARRANTIES, W
+                       HETHER EXPRESS, IMPLIED
+   22 00000000         ; * OR STATUTORY, INCLUDING, BUT NOT LIMITED TO, IMPLIED
+                        WARRANTIES OF
+   23 00000000         ; * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+                        APPLY TO THIS SOFTWARE.
+   24 00000000         ; * ARM SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR S
+                       PECIAL, INCIDENTAL, OR
+   25 00000000         ; * CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
+   26 00000000         ; *
+   27 00000000         ; ******************************************************
+                       ************************/
+   28 00000000         
+   29 00000000 6621CC20 
+                       ROM_ID  EQU              0x6621CC20
+   30 00000000 46533252 
+                       RUN2SF_FLAG
+                               EQU              0x46533252
+   31 00000000         
+   32 00000000         ;/*
+   33 00000000         ;//-------- <<< Use Configuration Wizard in Context Menu
+                        >>> ------------------
+   34 00000000         ;*/
+   35 00000000         
+   36 00000000         ; <h> Stack Configuration
+   37 00000000         ;   <o> Stack Size (in Bytes) <0x0-0xFFFFFFFF:8>
+   38 00000000         ; </h>
+   39 00000000         
+   40 00000000 00001000 
+                       Stack_Size
+                               EQU              0x00001000
+   41 00000000         
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   42 00000000                 AREA             STACK, NOINIT, READWRITE, ALIGN
+=3
+   43 00000000         Stack_Mem
+                               SPACE            Stack_Size
+   44 00001000         __initial_sp
+   45 00001000         
+   46 00001000         
+   47 00001000         ; <h> Heap Configuration
+   48 00001000         ;   <o>  Heap Size (in Bytes) <0x0-0xFFFFFFFF:8>
+   49 00001000         ; </h>
+   50 00001000         
+   51 00001000 00000000 
+                       Heap_Size
+                               EQU              0x00000000
+   52 00001000         
+   53 00001000                 AREA             HEAP, NOINIT, READWRITE, ALIGN=
+3
+   54 00000000         __heap_base
+   55 00000000         Heap_Mem
+                               SPACE            Heap_Size
+   56 00000000         __heap_limit
+   57 00000000         
+   58 00000000         
+   59 00000000                 PRESERVE8
+   60 00000000                 THUMB
+   61 00000000         
+   62 00000000         
+   63 00000000         ; Flash Vector Table Mapped to Address 0 at Reset (Only 
+                       work for power on)
+   64 00000000         
+   65 00000000                 AREA             RESET_FLASH, DATA, READONLY
+   66 00000000         
+   67 00000000 00000000 
+                       __VectorsFLASH
+                               DCD              __initial_sp ; Top of Stack
+   68 00000004 00000000        DCD              Reset_Handler ; Reset Handler
+   69 00000008 FFFFFFFF        DCD              0xFFFFFFFF  ; NMI Handler
+   70 0000000C 00000000        DCD              HardFault_Handler ; Hard Fault 
+                                                            Handler
+   71 00000010 FFFFFFFF        DCD              0xFFFFFFFF  ; MPU Fault Handler
+                                                            
+   72 00000014 FFFFFFFF        DCD              0xFFFFFFFF  ; Bus Fault Handler
+                                                            
+   73 00000018 FFFFFFFF        DCD              0xFFFFFFFF  ; Usage Fault Handl
+                                                            er
+   74 0000001C 00000000        DCD              SoftFault_Handler 
+                                                            ; Huntersun assign
+   75 00000020 FFFFFFFF        DCD              0xFFFFFFFF  ; Reserved
+   76 00000024 00000000        DCD              __VectorsFLASH ; Base address i
+                                                            n flash
+   77 00000028 46533252        DCD              RUN2SF_FLAG ; Run to flash flag
+                                                            
+   78 0000002C FFFFFFFF        DCD              0xFFFFFFFF  ; SVCall Handler
+   79 00000030 FFFFFFFF        DCD              0xFFFFFFFF  ; Debug Monitor Han
+                                                            dler
+   80 00000034 6621CC20        DCD              ROM_ID      ; @0x34 HS6620's ro
+                                                            m_id
+   81 00000038 FFFFFFFF        DCD              0xFFFFFFFF  ; PendSV Handler
+   82 0000003C FFFFFFFF        DCD              0xFFFFFFFF  ; SysTick Handler
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   83 00000040         
+   84 00000040         
+   85 00000040         ; RAM Vector Table Mapped to Address 0 at Reset (Real IR
+                       Q Vector Table)
+   86 00000040         
+   87 00000040                 AREA             RESET_RAM, DATA, READONLY
+   88 00000000                 IMPORT           co_ram_reset_handler
+   89 00000000                 EXPORT           __Vectors
+   90 00000000                 EXPORT           __Vectors_End
+   91 00000000                 EXPORT           __Vectors_Size
+   92 00000000         
+   93 00000000 00000000 
+                       __Vectors
+                               DCD              __initial_sp ; Top of Stack
+   94 00000004 00000000        DCD              co_ram_reset_handler 
+                                                            ; Reset Handler
+   95 00000008 00000000        DCD              NMI_Handler ; NMI Handler
+   96 0000000C 00000000        DCD              HardFault_Handler ; Hard Fault 
+                                                            Handler
+   97 00000010 00000000        DCD              MemManage_Handler 
+                                                            ; MPU Fault Handler
+                                                            
+   98 00000014 00000000        DCD              BusFault_Handler 
+                                                            ; Bus Fault Handler
+                                                            
+   99 00000018 00000000        DCD              UsageFault_Handler ; Usage Faul
+                                                            t Handler
+  100 0000001C 00000000        DCD              SoftFault_Handler 
+                                                            ; Huntersun assign
+  101 00000020 FFFFFFFF        DCD              0xFFFFFFFF  ; Reserved
+  102 00000024 FFFFFFFF        DCD              0xFFFFFFFF  ; Reserved
+  103 00000028 FFFFFFFF        DCD              0xFFFFFFFF  ; Reserved
+  104 0000002C 00000000        DCD              SVC_Handler ; SVCall Handler
+  105 00000030 00000000        DCD              DebugMon_Handler ; Debug Monito
+                                                            r Handler
+  106 00000034 6621CC20        DCD              ROM_ID      ; @0x34 HS6620's ro
+                                                            m_id
+  107 00000038 00000000        DCD              PendSV_Handler ; PendSV Handler
+                                                            
+  108 0000003C 00000000        DCD              SysTick_Handler 
+                                                            ; SysTick Handler
+  109 00000040         
+  110 00000040         ; External Interrupts
+  111 00000040 00000000        DCD              BT_IRQHandler ; 0
+  112 00000044 00000000        DCD              BT_OSCEN_IRQHandler ; 1
+  113 00000048 00000000        DCD              DMA_IRQHandler ; 2
+  114 0000004C 00000000        DCD              GPIO_IRQHandler ; 3
+  115 00000050 00000000        DCD              TIM_IRQHandler ; 4
+  116 00000054 00000000        DCD              KPP_DEPRESS_IRQHandler ; 5
+  117 00000058 00000000        DCD              KPP_RELEASE_IRQHandler ; 6
+  118 0000005C 00000000        DCD              PMU_TIMER_IRQHandler ; 7
+  119 00000060 00000000        DCD              UART0_IRQHandler ; 8
+  120 00000064 00000000        DCD              UART1_IRQHandler ; 9
+  121 00000068 00000000        DCD              I2C_IRQHandler ; 10
+  122 0000006C 00000000        DCD              PIN_WAKEUP_IRQHandler ; 11
+  123 00000070 00000000        DCD              ADC_IRQHandler ; 12
+  124 00000074 00000000        DCD              SPI0_IRQHandler ; 13
+  125 00000078 00000000        DCD              SPI1_IRQHandler ; 14
+  126 0000007C 00000000        DCD              GP_COMP_IRQHandler ; 15
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+  127 00000080 00000000        DCD              DMA0_IRQHandler ; 16
+  128 00000084 00000000        DCD              DMA1_IRQHandler ; 17
+  129 00000088 00000000        DCD              DMA2_IRQHandler ; 18
+  130 0000008C 00000000        DCD              PIC_DEC_IRQHandler ; 19
+  131 00000090 00000000        DCD              RTC_AF_IRQHandler ; 20
+  132 00000094 00000000        DCD              RTC_1HZ_IRQHandler ; 21
+  133 00000098 00000000        DCD              RTC_BLE_IRQHandler ; 22
+  134 0000009C 00000000        DCD              VTRACK_IRQHandler ; 23
+  135 000000A0 00000000        DCD              CRY32M_DIG_IRQHandler ; 24
+  136 000000A4 00000000        DCD              CRY32M_PLL_IRQHandler ; 25
+  137 000000A8 00000000        DCD              GPIO0_IRQHandler ; 26
+  138 000000AC 00000000        DCD              SF1_IRQHandler ; 27
+  139 000000B0 00000000        DCD              TIM0_IRQHandler ; 28
+  140 000000B4 00000000        DCD              TIM1_IRQHandler ; 29
+  141 000000B8 00000000        DCD              TIM2_IRQHandler ; 30
+  142 000000BC 00000000        DCD              CPM_IRQHandler ; 31
+  143 000000C0 00000000        DCD              CRY32K_IRQHandler ; 32
+  144 000000C4 00000000        DCD              SF_IRQHandler ; 33
+  145 000000C8 00000000        DCD              QDEC_IRQHandler ; 34
+  146 000000CC 00000000        DCD              POWER_DOWN_IRQHandler ; 35
+  147 000000D0 00000000        DCD              I2S_TX_IRQHandler ; 36
+  148 000000D4 00000000        DCD              I2S_RX_IRQHandler ; 37
+  149 000000D8 00000000        DCD              MAC6200_RF_IRQHandler ; 38
+  150 000000DC 00000000        DCD              MAC6200_SPI_IRQHandler ; 39
+  151 000000E0 00000000        DCD              SOFT0_IRQHandler ; 40
+  152 000000E4 00000000        DCD              SOFT1_IRQHandler ; 41
+  153 000000E8 00000000        DCD              SOFT2_IRQHandler ; 42
+  154 000000EC 00000000        DCD              SOFT3_IRQHandler ; 43
+  155 000000F0 00000000        DCD              SOFT4_IRQHandler ; 44
+  156 000000F4 00000000        DCD              SOFT5_IRQHandler ; 45
+  157 000000F8 00000000        DCD              SOFT6_IRQHandler ; 46
+  158 000000FC 00000000        DCD              SOFT7_IRQHandler ; 47
+  159 00000100 00000000        DCD              AUDIO_IRQHandler ; 48
+  160 00000104 00000000        DCD              I2C1_IRQHandler ; 49
+  161 00000108 00000000        DCD              I2C2_IRQHandler ; 50
+  162 0000010C 00000000        DCD              SF2_IRQHandler ; 51
+  163 00000110 00000000        DCD              0           ; 52
+  164 00000114 00000000        DCD              0           ; 53
+  165 00000118 00000000        DCD              0           ; 54
+  166 0000011C 00000000        DCD              0           ; 55
+  167 00000120 00000000        DCD              0           ; 56
+  168 00000124 00000000        DCD              0           ; 57
+  169 00000128 00000000        DCD              0           ; 58
+  170 0000012C 00000000        DCD              0           ; 59
+  171 00000130 00000000        DCD              0           ; 60
+  172 00000134 00000000        DCD              0           ; 61
+  173 00000138 00000000        DCD              0           ; 62
+  174 0000013C 00000000        DCD              0           ; 63
+  175 00000140         
+  176 00000140         __Vectors_End
+  177 00000140         
+  178 00000140 00000140 
+                       __Vectors_Size
+                               EQU              __Vectors_End - __Vectors
+  179 00000140         
+  180 00000140         
+  181 00000140         ; Reset_Handler must be place at 1st RAM block
+  182 00000140                 AREA             |.text|, CODE, READONLY
+  183 00000000         
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+  184 00000000         
+  185 00000000         ; Reset Handler
+  186 00000000         Reset_Handler
+                               PROC
+  187 00000000                 EXPORT           Reset_Handler             [WEAK
+]
+  188 00000000                 IMPORT           system_init
+  189 00000000                 IMPORT           __main
+  190 00000000 4809            LDR              R0, =system_init
+  191 00000002 4780            BLX              R0
+  192 00000004 4809            LDR              R0, =__main
+  193 00000006 4700            BX               R0
+  194 00000008                 ENDP
+  195 00000008         
+  196 00000008         ; Sub main (from __main)
+  197 00000008         |$Sub$$main|
+                               PROC
+  198 00000008                 EXPORT           |$Sub$$main|
+  199 00000008                 IMPORT           system_init_run2sf
+  200 00000008                 IMPORT           |$Super$$main|
+  201 00000008         ; Do system init
+  202 00000008 4809            LDR              R0, =system_init_run2sf
+  203 0000000A 4780            BLX              R0
+  204 0000000C         ; Call main
+  205 0000000C 4809            LDR              R0, =|$Super$$main|
+  206 0000000E 4700            BX               R0
+  207 00000010                 ENDP
+  208 00000010         
+  209 00000010         
+  210 00000010         ; Dummy Exception Handlers (infinite loops which can be 
+                       modified)
+  211 00000010         
+  212 00000010         NMI_Handler
+                               PROC
+  213 00000010                 EXPORT           NMI_Handler               [WEAK
+]
+  214 00000010 E7FE            B                .
+  215 00000012                 ENDP
+  217 00000012         HardFault_Handler
+                               PROC
+  218 00000012                 EXPORT           HardFault_Handler         [WEAK
+]
+  219 00000012 E7FE            B                .
+  220 00000014                 ENDP
+  222 00000014         MemManage_Handler
+                               PROC
+  223 00000014                 EXPORT           MemManage_Handler         [WEAK
+]
+  224 00000014 E7FE            B                .
+  225 00000016                 ENDP
+  227 00000016         BusFault_Handler
+                               PROC
+  228 00000016                 EXPORT           BusFault_Handler          [WEAK
+]
+  229 00000016 E7FE            B                .
+  230 00000018                 ENDP
+  232 00000018         UsageFault_Handler
+                               PROC
+  233 00000018                 EXPORT           UsageFault_Handler        [WEAK
+
+
+
+ARM Macro Assembler    Page 6 
+
+
+]
+  234 00000018 E7FE            B                .
+  235 0000001A                 ENDP
+  237 0000001A         SoftFault_Handler
+                               PROC
+  238 0000001A                 EXPORT           SoftFault_Handler         [WEAK
+]
+  239 0000001A E7FE            B                .
+  240 0000001C                 ENDP
+  241 0000001C         SVC_Handler
+                               PROC
+  242 0000001C                 EXPORT           SVC_Handler               [WEAK
+]
+  243 0000001C E7FE            B                .
+  244 0000001E                 ENDP
+  246 0000001E         DebugMon_Handler
+                               PROC
+  247 0000001E                 EXPORT           DebugMon_Handler          [WEAK
+]
+  248 0000001E E7FE            B                .
+  249 00000020                 ENDP
+  251 00000020         PendSV_Handler
+                               PROC
+  252 00000020                 EXPORT           PendSV_Handler            [WEAK
+]
+  253 00000020 E7FE            B                .
+  254 00000022                 ENDP
+  256 00000022         SysTick_Handler
+                               PROC
+  257 00000022                 EXPORT           SysTick_Handler           [WEAK
+]
+  258 00000022 E7FE            B                .
+  259 00000024                 ENDP
+  260 00000024         
+  261 00000024         Default_Handler
+                               PROC
+  262 00000024                 EXPORT           BT_IRQHandler             [WEAK
+]
+  263 00000024                 EXPORT           BT_OSCEN_IRQHandler       [WEAK
+]
+  264 00000024                 EXPORT           DMA_IRQHandler            [WEAK
+]
+  265 00000024                 EXPORT           GPIO_IRQHandler           [WEAK
+]
+  266 00000024                 EXPORT           TIM_IRQHandler            [WEAK
+]
+  267 00000024                 EXPORT           KPP_DEPRESS_IRQHandler    [WEAK
+]
+  268 00000024                 EXPORT           KPP_RELEASE_IRQHandler    [WEAK
+]
+  269 00000024                 EXPORT           PMU_TIMER_IRQHandler      [WEAK
+]
+  270 00000024                 EXPORT           UART0_IRQHandler          [WEAK
+]
+  271 00000024                 EXPORT           UART1_IRQHandler          [WEAK
+]
+  272 00000024                 EXPORT           I2C_IRQHandler            [WEAK
+]
+  273 00000024                 EXPORT           PIN_WAKEUP_IRQHandler     [WEAK
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+]
+  274 00000024                 EXPORT           ADC_IRQHandler            [WEAK
+]
+  275 00000024                 EXPORT           SPI0_IRQHandler           [WEAK
+]
+  276 00000024                 EXPORT           SPI1_IRQHandler           [WEAK
+]
+  277 00000024                 EXPORT           GP_COMP_IRQHandler        [WEAK
+]
+  278 00000024                 EXPORT           DMA0_IRQHandler           [WEAK
+]
+  279 00000024                 EXPORT           DMA1_IRQHandler           [WEAK
+]
+  280 00000024                 EXPORT           DMA2_IRQHandler           [WEAK
+]
+  281 00000024                 EXPORT           PIC_DEC_IRQHandler        [WEAK
+]
+  282 00000024                 EXPORT           RTC_AF_IRQHandler         [WEAK
+]
+  283 00000024                 EXPORT           RTC_1HZ_IRQHandler        [WEAK
+]
+  284 00000024                 EXPORT           RTC_BLE_IRQHandler        [WEAK
+]
+  285 00000024                 EXPORT           VTRACK_IRQHandler         [WEAK
+]
+  286 00000024                 EXPORT           CRY32M_DIG_IRQHandler     [WEAK
+]
+  287 00000024                 EXPORT           CRY32M_PLL_IRQHandler     [WEAK
+]
+  288 00000024                 EXPORT           GPIO0_IRQHandler          [WEAK
+]
+  289 00000024                 EXPORT           SF1_IRQHandler            [WEAK
+]
+  290 00000024                 EXPORT           TIM0_IRQHandler           [WEAK
+]
+  291 00000024                 EXPORT           TIM1_IRQHandler           [WEAK
+]
+  292 00000024                 EXPORT           TIM2_IRQHandler           [WEAK
+]
+  293 00000024                 EXPORT           CPM_IRQHandler            [WEAK
+]
+  294 00000024                 EXPORT           CRY32K_IRQHandler         [WEAK
+]
+  295 00000024                 EXPORT           SF_IRQHandler             [WEAK
+]
+  296 00000024                 EXPORT           QDEC_IRQHandler           [WEAK
+]
+  297 00000024                 EXPORT           POWER_DOWN_IRQHandler     [WEAK
+]
+  298 00000024                 EXPORT           I2S_TX_IRQHandler         [WEAK
+]
+  299 00000024                 EXPORT           I2S_RX_IRQHandler         [WEAK
+]
+  300 00000024                 EXPORT           MAC6200_RF_IRQHandler     [WEAK
+]
+  301 00000024                 EXPORT           MAC6200_SPI_IRQHandler    [WEAK
+]
+  302 00000024                 EXPORT           SOFT0_IRQHandler          [WEAK
+]
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+  303 00000024                 EXPORT           SOFT1_IRQHandler          [WEAK
+]
+  304 00000024                 EXPORT           SOFT2_IRQHandler          [WEAK
+]
+  305 00000024                 EXPORT           SOFT3_IRQHandler          [WEAK
+]
+  306 00000024                 EXPORT           SOFT4_IRQHandler          [WEAK
+]
+  307 00000024                 EXPORT           SOFT5_IRQHandler          [WEAK
+]
+  308 00000024                 EXPORT           SOFT6_IRQHandler          [WEAK
+]
+  309 00000024                 EXPORT           SOFT7_IRQHandler          [WEAK
+]
+  310 00000024                 EXPORT           AUDIO_IRQHandler          [WEAK
+]
+  311 00000024                 EXPORT           I2C1_IRQHandler           [WEAK
+]
+  312 00000024                 EXPORT           I2C2_IRQHandler           [WEAK
+]
+  313 00000024                 EXPORT           SF2_IRQHandler            [WEAK
+]
+  314 00000024         
+  315 00000024         BT_IRQHandler
+  316 00000024         BT_OSCEN_IRQHandler
+  317 00000024         DMA_IRQHandler
+  318 00000024         GPIO_IRQHandler
+  319 00000024         TIM_IRQHandler
+  320 00000024         KPP_DEPRESS_IRQHandler
+  321 00000024         KPP_RELEASE_IRQHandler
+  322 00000024         PMU_TIMER_IRQHandler
+  323 00000024         UART0_IRQHandler
+  324 00000024         UART1_IRQHandler
+  325 00000024         I2C_IRQHandler
+  326 00000024         PIN_WAKEUP_IRQHandler
+  327 00000024         ADC_IRQHandler
+  328 00000024         SPI0_IRQHandler
+  329 00000024         SPI1_IRQHandler
+  330 00000024         GP_COMP_IRQHandler
+  331 00000024         DMA0_IRQHandler
+  332 00000024         DMA1_IRQHandler
+  333 00000024         DMA2_IRQHandler
+  334 00000024         PIC_DEC_IRQHandler
+  335 00000024         RTC_AF_IRQHandler
+  336 00000024         RTC_1HZ_IRQHandler
+  337 00000024         RTC_BLE_IRQHandler
+  338 00000024         VTRACK_IRQHandler
+  339 00000024         CRY32M_DIG_IRQHandler
+  340 00000024         CRY32M_PLL_IRQHandler
+  341 00000024         GPIO0_IRQHandler
+  342 00000024         SF1_IRQHandler
+  343 00000024         TIM0_IRQHandler
+  344 00000024         TIM1_IRQHandler
+  345 00000024         TIM2_IRQHandler
+  346 00000024         CPM_IRQHandler
+  347 00000024         CRY32K_IRQHandler
+  348 00000024         SF_IRQHandler
+  349 00000024         QDEC_IRQHandler
+  350 00000024         POWER_DOWN_IRQHandler
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+  351 00000024         I2S_TX_IRQHandler
+  352 00000024         I2S_RX_IRQHandler
+  353 00000024         MAC6200_RF_IRQHandler
+  354 00000024         MAC6200_SPI_IRQHandler
+  355 00000024         SOFT0_IRQHandler
+  356 00000024         SOFT1_IRQHandler
+  357 00000024         SOFT2_IRQHandler
+  358 00000024         SOFT3_IRQHandler
+  359 00000024         SOFT4_IRQHandler
+  360 00000024         SOFT5_IRQHandler
+  361 00000024         SOFT6_IRQHandler
+  362 00000024         SOFT7_IRQHandler
+  363 00000024         AUDIO_IRQHandler
+  364 00000024         I2C1_IRQHandler
+  365 00000024         I2C2_IRQHandler
+  366 00000024         SF2_IRQHandler
+  367 00000024 E7FE            B                .
+  368 00000026                 ENDP
+  369 00000026         
+  370 00000026         
+  371 00000026 00 00           ALIGN
+  372 00000028         
+  373 00000028         
+  374 00000028         ; User Initial Stack & Heap
+  375 00000028         
+  376 00000028                 IF               :DEF:__MICROLIB
+  377 00000028         
+  378 00000028                 EXPORT           Stack_Mem
+  379 00000028                 EXPORT           __initial_sp
+  380 00000028                 EXPORT           __heap_base
+  381 00000028                 EXPORT           __heap_limit
+  382 00000028         
+  383 00000028                 ELSE
+  398                          ENDIF
+  399 00000028         
+  400 00000028         
+  401 00000028                 END
+              00000000 
+              00000000 
+              00000000 
+              00000000 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4 --apcs=interw
+ork --depend=.\_build\startup_hs6621_flash.d -o.\_build\startup_hs6621_flash.o 
+-ID:\LenovoSoftstore\Install\Keil_v5\ARM\RV31\INC -ID:\LenovoSoftstore\Install\
+Keil_v5\ARM\CMSIS\Include -ID:\LenovoSoftstore\Install\Keil_v5\ARM\INC\Huntersu
+n\HS6600 --predefine="__MICROLIB SETA 1" --predefine="__UVISION_VERSION SETA 52
+5" --list=.\_build\startup_hs6621_flash.lst ..\..\..\lib\keil\startup_hs6621_fl
+ash.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+STACK 00000000
+
+Symbol: STACK
+   Definitions
+      At line 42 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: STACK unused
+Stack_Mem 00000000
+
+Symbol: Stack_Mem
+   Definitions
+      At line 43 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 378 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: Stack_Mem used once
+__initial_sp 00001000
+
+Symbol: __initial_sp
+   Definitions
+      At line 44 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 67 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 93 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 379 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+3 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+HEAP 00000000
+
+Symbol: HEAP
+   Definitions
+      At line 53 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: HEAP unused
+Heap_Mem 00000000
+
+Symbol: Heap_Mem
+   Definitions
+      At line 55 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: Heap_Mem unused
+__heap_base 00000000
+
+Symbol: __heap_base
+   Definitions
+      At line 54 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 380 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: __heap_base used once
+__heap_limit 00000000
+
+Symbol: __heap_limit
+   Definitions
+      At line 56 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 381 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: __heap_limit used once
+4 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+RESET_FLASH 00000000
+
+Symbol: RESET_FLASH
+   Definitions
+      At line 65 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: RESET_FLASH unused
+__VectorsFLASH 00000000
+
+Symbol: __VectorsFLASH
+   Definitions
+      At line 67 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 76 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: __VectorsFLASH used once
+2 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+RESET_RAM 00000000
+
+Symbol: RESET_RAM
+   Definitions
+      At line 87 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: RESET_RAM unused
+__Vectors 00000000
+
+Symbol: __Vectors
+   Definitions
+      At line 93 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 89 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 178 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+__Vectors_End 00000140
+
+Symbol: __Vectors_End
+   Definitions
+      At line 176 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 90 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 178 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+3 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+$Sub$$main 00000008
+
+Symbol: $Sub$$main
+   Definitions
+      At line 197 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 198 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: $Sub$$main used once
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 182 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: .text unused
+ADC_IRQHandler 00000024
+
+Symbol: ADC_IRQHandler
+   Definitions
+      At line 327 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 123 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 274 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+AUDIO_IRQHandler 00000024
+
+Symbol: AUDIO_IRQHandler
+   Definitions
+      At line 363 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 159 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 310 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+BT_IRQHandler 00000024
+
+Symbol: BT_IRQHandler
+   Definitions
+      At line 315 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 111 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 262 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+BT_OSCEN_IRQHandler 00000024
+
+Symbol: BT_OSCEN_IRQHandler
+   Definitions
+      At line 316 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 112 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 263 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+BusFault_Handler 00000016
+
+Symbol: BusFault_Handler
+   Definitions
+      At line 227 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 98 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 228 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+CPM_IRQHandler 00000024
+
+Symbol: CPM_IRQHandler
+   Definitions
+      At line 346 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 142 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 293 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+CRY32K_IRQHandler 00000024
+
+Symbol: CRY32K_IRQHandler
+   Definitions
+      At line 347 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 143 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 294 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+CRY32M_DIG_IRQHandler 00000024
+
+Symbol: CRY32M_DIG_IRQHandler
+   Definitions
+      At line 339 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 135 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 286 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+CRY32M_PLL_IRQHandler 00000024
+
+Symbol: CRY32M_PLL_IRQHandler
+   Definitions
+      At line 340 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 136 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 287 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+DMA0_IRQHandler 00000024
+
+Symbol: DMA0_IRQHandler
+   Definitions
+      At line 331 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 127 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 278 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+DMA1_IRQHandler 00000024
+
+Symbol: DMA1_IRQHandler
+   Definitions
+      At line 332 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 128 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 279 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+DMA2_IRQHandler 00000024
+
+Symbol: DMA2_IRQHandler
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 333 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 129 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 280 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+DMA_IRQHandler 00000024
+
+Symbol: DMA_IRQHandler
+   Definitions
+      At line 317 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 113 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 264 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+DebugMon_Handler 0000001E
+
+Symbol: DebugMon_Handler
+   Definitions
+      At line 246 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 105 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 247 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+Default_Handler 00000024
+
+Symbol: Default_Handler
+   Definitions
+      At line 261 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      None
+Comment: Default_Handler unused
+GPIO0_IRQHandler 00000024
+
+Symbol: GPIO0_IRQHandler
+   Definitions
+      At line 341 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 137 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 288 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+GPIO_IRQHandler 00000024
+
+Symbol: GPIO_IRQHandler
+   Definitions
+      At line 318 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 114 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 265 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+GP_COMP_IRQHandler 00000024
+
+Symbol: GP_COMP_IRQHandler
+   Definitions
+      At line 330 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 126 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 277 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+
+
+
+ARM Macro Assembler    Page 4 Alphabetic symbol ordering
+Relocatable symbols
+
+HardFault_Handler 00000012
+
+Symbol: HardFault_Handler
+   Definitions
+      At line 217 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 70 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 96 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 218 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+I2C1_IRQHandler 00000024
+
+Symbol: I2C1_IRQHandler
+   Definitions
+      At line 364 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 160 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 311 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+I2C2_IRQHandler 00000024
+
+Symbol: I2C2_IRQHandler
+   Definitions
+      At line 365 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 161 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 312 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+I2C_IRQHandler 00000024
+
+Symbol: I2C_IRQHandler
+   Definitions
+      At line 325 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 121 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 272 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+I2S_RX_IRQHandler 00000024
+
+Symbol: I2S_RX_IRQHandler
+   Definitions
+      At line 352 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 148 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 299 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+I2S_TX_IRQHandler 00000024
+
+Symbol: I2S_TX_IRQHandler
+   Definitions
+      At line 351 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 147 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 298 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+KPP_DEPRESS_IRQHandler 00000024
+
+Symbol: KPP_DEPRESS_IRQHandler
+   Definitions
+
+
+
+ARM Macro Assembler    Page 5 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 320 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 116 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 267 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+KPP_RELEASE_IRQHandler 00000024
+
+Symbol: KPP_RELEASE_IRQHandler
+   Definitions
+      At line 321 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 117 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 268 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+MAC6200_RF_IRQHandler 00000024
+
+Symbol: MAC6200_RF_IRQHandler
+   Definitions
+      At line 353 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 149 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 300 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+MAC6200_SPI_IRQHandler 00000024
+
+Symbol: MAC6200_SPI_IRQHandler
+   Definitions
+      At line 354 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 150 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 301 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+MemManage_Handler 00000014
+
+Symbol: MemManage_Handler
+   Definitions
+      At line 222 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 97 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 223 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+NMI_Handler 00000010
+
+Symbol: NMI_Handler
+   Definitions
+      At line 212 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 95 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 213 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+PIC_DEC_IRQHandler 00000024
+
+Symbol: PIC_DEC_IRQHandler
+   Definitions
+      At line 334 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 130 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 281 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+
+
+
+ARM Macro Assembler    Page 6 Alphabetic symbol ordering
+Relocatable symbols
+
+PIN_WAKEUP_IRQHandler 00000024
+
+Symbol: PIN_WAKEUP_IRQHandler
+   Definitions
+      At line 326 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 122 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 273 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+PMU_TIMER_IRQHandler 00000024
+
+Symbol: PMU_TIMER_IRQHandler
+   Definitions
+      At line 322 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 118 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 269 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+POWER_DOWN_IRQHandler 00000024
+
+Symbol: POWER_DOWN_IRQHandler
+   Definitions
+      At line 350 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 146 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 297 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+PendSV_Handler 00000020
+
+Symbol: PendSV_Handler
+   Definitions
+      At line 251 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 107 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 252 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+QDEC_IRQHandler 00000024
+
+Symbol: QDEC_IRQHandler
+   Definitions
+      At line 349 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 145 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 296 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+RTC_1HZ_IRQHandler 00000024
+
+Symbol: RTC_1HZ_IRQHandler
+   Definitions
+      At line 336 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 132 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 283 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+RTC_AF_IRQHandler 00000024
+
+Symbol: RTC_AF_IRQHandler
+   Definitions
+      At line 335 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+
+
+ARM Macro Assembler    Page 7 Alphabetic symbol ordering
+Relocatable symbols
+
+   Uses
+      At line 131 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 282 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+RTC_BLE_IRQHandler 00000024
+
+Symbol: RTC_BLE_IRQHandler
+   Definitions
+      At line 337 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 133 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 284 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+Reset_Handler 00000000
+
+Symbol: Reset_Handler
+   Definitions
+      At line 186 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 68 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 187 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SF1_IRQHandler 00000024
+
+Symbol: SF1_IRQHandler
+   Definitions
+      At line 342 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 138 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 289 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SF2_IRQHandler 00000024
+
+Symbol: SF2_IRQHandler
+   Definitions
+      At line 366 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 162 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 313 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SF_IRQHandler 00000024
+
+Symbol: SF_IRQHandler
+   Definitions
+      At line 348 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 144 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 295 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT0_IRQHandler 00000024
+
+Symbol: SOFT0_IRQHandler
+   Definitions
+      At line 355 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 151 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 302 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT1_IRQHandler 00000024
+
+
+
+ARM Macro Assembler    Page 8 Alphabetic symbol ordering
+Relocatable symbols
+
+
+Symbol: SOFT1_IRQHandler
+   Definitions
+      At line 356 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 152 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 303 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT2_IRQHandler 00000024
+
+Symbol: SOFT2_IRQHandler
+   Definitions
+      At line 357 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 153 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 304 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT3_IRQHandler 00000024
+
+Symbol: SOFT3_IRQHandler
+   Definitions
+      At line 358 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 154 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 305 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT4_IRQHandler 00000024
+
+Symbol: SOFT4_IRQHandler
+   Definitions
+      At line 359 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 155 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 306 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT5_IRQHandler 00000024
+
+Symbol: SOFT5_IRQHandler
+   Definitions
+      At line 360 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 156 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 307 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT6_IRQHandler 00000024
+
+Symbol: SOFT6_IRQHandler
+   Definitions
+      At line 361 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 157 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 308 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SOFT7_IRQHandler 00000024
+
+Symbol: SOFT7_IRQHandler
+   Definitions
+      At line 362 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 9 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 158 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 309 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SPI0_IRQHandler 00000024
+
+Symbol: SPI0_IRQHandler
+   Definitions
+      At line 328 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 124 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 275 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SPI1_IRQHandler 00000024
+
+Symbol: SPI1_IRQHandler
+   Definitions
+      At line 329 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 125 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 276 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SVC_Handler 0000001C
+
+Symbol: SVC_Handler
+   Definitions
+      At line 241 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 104 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 242 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SoftFault_Handler 0000001A
+
+Symbol: SoftFault_Handler
+   Definitions
+      At line 237 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 74 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 100 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 238 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+SysTick_Handler 00000022
+
+Symbol: SysTick_Handler
+   Definitions
+      At line 256 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 108 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 257 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+TIM0_IRQHandler 00000024
+
+Symbol: TIM0_IRQHandler
+   Definitions
+      At line 343 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 139 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 290 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+TIM1_IRQHandler 00000024
+
+
+
+ARM Macro Assembler    Page 10 Alphabetic symbol ordering
+Relocatable symbols
+
+
+Symbol: TIM1_IRQHandler
+   Definitions
+      At line 344 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 140 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 291 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+TIM2_IRQHandler 00000024
+
+Symbol: TIM2_IRQHandler
+   Definitions
+      At line 345 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 141 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 292 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+TIM_IRQHandler 00000024
+
+Symbol: TIM_IRQHandler
+   Definitions
+      At line 319 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 115 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 266 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+UART0_IRQHandler 00000024
+
+Symbol: UART0_IRQHandler
+   Definitions
+      At line 323 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 119 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 270 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+UART1_IRQHandler 00000024
+
+Symbol: UART1_IRQHandler
+   Definitions
+      At line 324 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 120 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 271 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+UsageFault_Handler 00000018
+
+Symbol: UsageFault_Handler
+   Definitions
+      At line 232 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 99 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 233 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+VTRACK_IRQHandler 00000024
+
+Symbol: VTRACK_IRQHandler
+   Definitions
+      At line 338 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 11 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 134 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 285 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+66 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+Heap_Size 00000000
+
+Symbol: Heap_Size
+   Definitions
+      At line 51 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 55 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: Heap_Size used once
+ROM_ID 6621CC20
+
+Symbol: ROM_ID
+   Definitions
+      At line 29 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 80 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+      At line 106 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+
+RUN2SF_FLAG 46533252
+
+Symbol: RUN2SF_FLAG
+   Definitions
+      At line 30 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 77 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: RUN2SF_FLAG used once
+Stack_Size 00001000
+
+Symbol: Stack_Size
+   Definitions
+      At line 40 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 43 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: Stack_Size used once
+__Vectors_Size 00000140
+
+Symbol: __Vectors_Size
+   Definitions
+      At line 178 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 91 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: __Vectors_Size used once
+5 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+$Super$$main 00000000
+
+Symbol: $Super$$main
+   Definitions
+      At line 200 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 205 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: $Super$$main used once
+__main 00000000
+
+Symbol: __main
+   Definitions
+      At line 189 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 192 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: __main used once
+co_ram_reset_handler 00000000
+
+Symbol: co_ram_reset_handler
+   Definitions
+      At line 88 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 94 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: co_ram_reset_handler used once
+system_init 00000000
+
+Symbol: system_init
+   Definitions
+      At line 188 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 190 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: system_init used once
+system_init_run2sf 00000000
+
+Symbol: system_init_run2sf
+   Definitions
+      At line 199 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+   Uses
+      At line 202 in file ..\..\..\lib\keil\startup_hs6621_flash.s
+Comment: system_init_run2sf used once
+5 symbols
+422 symbols in table

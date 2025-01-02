@@ -1,0 +1,14 @@
+######################################################################
+#
+# via file for armcc
+#
+#####################################################################
+
+# A1, A2, A3
+-DCONFIG_HS6621CC1_RELEASE
+-DCONFIG_USER_APP
+-DCONFIG_BLE_ALLROLES
+
+# Additional include pach (Don't care this)
+#-I..\..\..\..\..\..\..\hardware\cfg
+

@@ -1,0 +1,4 @@
+在6621x系列使用gazell工程需要将third_party文件夹放到与SDK并列的目录。
+1、不带ACK收发通信：ble_app_24g_gazell_device 和 ble_app_24g_gazell_host
+2、带ACK收发通信:   ble_app_24g_gazell_device_ack 和 ble_app_24g_gazell_host_ack
+3、配对通信：       ble_app_24g_gazell_device_pairing 和 ble_app_24g_gazell_host_pairing

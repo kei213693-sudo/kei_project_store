@@ -1,0 +1,16 @@
+######################################################################
+#
+# via file for armlink
+#
+#####################################################################
+
+# Peripheral ROM extend patchs
+..\..\..\lib\keil\a2\hs6621_rom_peripheral_ext_a2.lib
+
+# Peripheral ROM symbol (User can edit this file to remove some ROM symbol)
+..\..\..\lib\keil\a2\hs6621_rom_peripheral_a2.symdefs
+
+# BLE Stack ROM library
+..\..\..\lib\keil\a2\hs6621_rom_a2.lib
+..\..\..\lib\keil\a2\hs6621_lib_a2.lib
+

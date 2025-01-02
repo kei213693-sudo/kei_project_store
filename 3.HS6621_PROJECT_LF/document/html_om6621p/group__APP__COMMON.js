@@ -1,0 +1,25 @@
+var group__APP__COMMON =
+[
+    [ "app_adv.c", "group__APP__COMMON__ADV__C.html", "group__APP__COMMON__ADV__C" ],
+    [ "app_adv.h", "group__APP__COMMON__ADV.html", "group__APP__COMMON__ADV" ],
+    [ "app_ancsc.c", "group__APP__COMMON__ANCSC__C.html", null ],
+    [ "app_ancsc.h", "group__APP__COMMON__ANCS__H.html", "group__APP__COMMON__ANCS__H" ],
+    [ "app_atvv.c", "group__APP__COMM__ATVV__C.html", null ],
+    [ "app_atvv.h", "group__APP__COMMON__ATVV__H.html", null ],
+    [ "app_batt.c", "group__APP__COMM__BATT__C.html", null ],
+    [ "app_batt.h", "group__APP__COMM__BATT__H.html", null ],
+    [ "app_dis.c", "group__APP__COMM__DIS__C.html", null ],
+    [ "app_dis.h", "group__APP__COMM__DIS__H.html", null ],
+    [ "app_hid.c", "group__APP__COMM__HID__C.html", null ],
+    [ "app_hid.h", "group__APP__COMM__HID__H.html", null ],
+    [ "app_privacy.c", "group__APP__COMMON__PRIVACY__C.html", "group__APP__COMMON__PRIVACY__C" ],
+    [ "app_privacy.h", "group__APP__COMMON__PRIVACY.html", "group__APP__COMMON__PRIVACY" ],
+    [ "app_sec.c", "group__APP__COMMON__SEC__C.html", "group__APP__COMMON__SEC__C" ],
+    [ "app_sec.h", "group__APP__COMMON__SEC.html", "group__APP__COMMON__SEC" ],
+    [ "app_tspp_server.c", "group__APP__COMM__TSPP__C.html", null ],
+    [ "app_tspp_server.h", "group__APP__COMM__TSPP__H.html", "group__APP__COMM__TSPP__H" ],
+    [ "app_wechat.c", "group__APP__COMM__WECHAT__C.html", "group__APP__COMM__WECHAT__C" ],
+    [ "app_wechat.h", "group__APP__COMM__WECHAT__H.html", "group__APP__COMM__WECHAT__H" ],
+    [ "app_whl.c", "group__APP__COMMON__WHL__C.html", "group__APP__COMMON__WHL__C" ],
+    [ "app_whl.h", "group__APP__COMMON__WHL.html", "group__APP__COMMON__WHL" ]
+];

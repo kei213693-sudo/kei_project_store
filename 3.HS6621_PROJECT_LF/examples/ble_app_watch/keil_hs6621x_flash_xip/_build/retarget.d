@@ -1,0 +1,17 @@
+.\_build\retarget.o: ..\..\..\hardware\peripheral\retarget.c
+.\_build\retarget.o: D:\LenovoSoftstore\Install\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\_build\retarget.o: ..\..\..\include\features.h
+.\_build\retarget.o: ..\..\..\include\autoconf_release_hs6621c_c2.h
+.\_build\retarget.o: D:\LenovoSoftstore\Install\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\_build\retarget.o: D:\LenovoSoftstore\Install\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
+.\_build\retarget.o: D:\LenovoSoftstore\Install\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
+.\_build\retarget.o: D:\LenovoSoftstore\Install\Keil_v5\ARM\ARMCC\Bin\..\include\stdlib.h
+.\_build\retarget.o: ..\..\..\hardware\sys\hs66xx.h
+.\_build\retarget.o: ..\..\..\hardware\sys\hs6621c.h
+.\_build\retarget.o: ..\..\..\hardware\cmsis\core_cm4.h
+.\_build\retarget.o: ..\..\..\hardware\cmsis\cmsis_version.h
+.\_build\retarget.o: ..\..\..\hardware\cmsis\cmsis_compiler.h
+.\_build\retarget.o: ..\..\..\hardware\cmsis\cmsis_armcc.h
+.\_build\retarget.o: ..\..\..\hardware\cmsis\mpu_armv7.h
+.\_build\retarget.o: ..\..\..\hardware\sys\hs662x_driver.h
+.\_build\retarget.o: ..\..\..\hardware\peripheral\uart.h

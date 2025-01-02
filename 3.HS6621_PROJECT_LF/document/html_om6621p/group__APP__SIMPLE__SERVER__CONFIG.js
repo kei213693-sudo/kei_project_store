@@ -1,0 +1,7 @@
+var group__APP__SIMPLE__SERVER__CONFIG =
+[
+    [ "BLE_APP_PRIVACY", "group__APP__SIMPLE__SERVER__CONFIG.html#ga698b1981da1e0bc44e06579195bc86c6", null ],
+    [ "BLE_APP_SEC", "group__APP__SIMPLE__SERVER__CONFIG.html#gaa81e72218090f9a4e50b3671e2859fcd", null ],
+    [ "BLE_APP_SIMPLE_SERVER", "group__APP__SIMPLE__SERVER__CONFIG.html#ga8d30cebcba8479ffa22909c56d4035a5", null ],
+    [ "BLE_APP_WHITE_LIST", "group__APP__SIMPLE__SERVER__CONFIG.html#ga509db6b4a81472d2637c100d631b4701", null ]
+];

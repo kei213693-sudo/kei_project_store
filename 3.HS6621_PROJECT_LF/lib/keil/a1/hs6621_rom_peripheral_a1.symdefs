@@ -1,0 +1,266 @@
+#<SYMDEFS># ARM Linker, 5060422: Last Updated: Wed Jun 28 11:49:12 2017
+
+# ADC
+
+# DMA
+0x08003a61 T dma_init
+0x08003acb T dma_allocate
+0x08003afd T dma_release
+0x08003b17 T dma_config_old
+0x08003c15 T dma_start
+0x08003c4f T dma_start_with_lli
+0x08003c73 T dma_stop
+0x08003ca7 T DMA_IRQHandler
+0x08000df5 T DMA0_IRQHandler
+0x08000df5 T DMA1_IRQHandler
+0x08000df5 T DMA2_IRQHandler
+0x08000df5 T DMA3_IRQHandler
+
+# GPIO
+0x2003e9ec D gpio_env
+0x08004141 T gpio_open
+0x0800417b T gpio_set_interrupt
+0x08004217 T gpio_set_interrupt_ex
+0x080042b3 T gpio_set_interrupt_callback
+0x080042b9 T gpio_set_interrupt_callback_ex
+0x080042bf T gpio_set_direction
+0x080042cb T gpio_set_direction_ex
+0x080042d7 T gpio_read
+0x080042df T gpio_read_ex
+0x080042e7 T gpio_read_output_status
+0x080042ef T gpio_read_output_status_ex
+0x080042f7 T gpio_write
+0x0800432f T gpio_write_ex
+0x0800433f T gpio_toggle
+0x0800437f T gpio_toggle_ex
+0x08004397 T gpio_clear_interrupt_pending
+0x0800439d T gpio_clear_interrupt_pending_ex
+0x080043a3 T gpio_store
+#0x08004417 T gpio_restore
+0x080040d5 T GPIO0_IRQHandler
+0x0800410b T GPIO1_IRQHandler
+0x08000df5 T GPIO_IRQHandler
+
+# KPP
+0x08004f57 T kpp_sim_gpio_handler
+0x08004f8d T kpp_sim_config
+
+# PINMUX
+#0x08005365 T pinmux_config
+#0x080053c1 T pinmux_restore
+
+# PMU
+#0x2003eac8 D pmu_env
+#0x080054d9 T pmu_init
+#0x08005571 T pmu_env_init
+#0x08005579 T pmu_xtal32m_startup
+#0x080055e5 T pmu_xtal32m_fast_startup
+#0x0800560d T pmu_xtal32m_switch_to_rc
+#0x0800563d T pmu_random_seed_fetch
+#0x08005709 T pmu_ram_power_on
+#0x08005765 T pmu_ram_power_on_all
+#0x080057a1 T pmu_reversion_check
+#0x08005823 T pmu_32k_switch_to_rc
+#0x08005871 T pmu_select_32k
+#0x0800590f T pmu_select_32k_get
+#0x08005915 T pmu_32k_enable_in_deep_sleep
+#0x0800591b T pmu_xtal32k_change_param
+#0x08005949 T pmu_xtal32m_change_param
+#0x08005963 T pmu_dcdc_enable
+#0x0800597f T pmu_external_dcdc_enable
+#0x08005981 T pmu_wakeup_pin_set
+#0x08005a19 T pmu_wakeup_pin_set_ex
+#0x08005ab1 T pmu_wakeup_pin_get
+#0x08005abb T pmu_wakeup_pin_get_ex
+#0x08005ac7 T pmu_wakeup_pin_register_callback
+#0x08005acf T pmu_wakeup_pin_register_callback_ex
+#0x08005ad7 T pmu_lowpower_prevent
+#0x08005aef T pmu_lowpower_allow
+#0x08005b07 T pmu_lowpower_prevent_status
+#0x08005b0d T pmu_power_status
+#0x08005b57 T pmu_lowpower_enter
+#0x08005c43 T pmu_lowpower_leave
+#0x08005cb5 T pmu_pin_state_store
+#0x08005cc3 T pmu_pin_state_restore
+#0x08005cd1 T pmu_pin_mode_set
+#0x08005d31 T pmu_pin_mode_set_ex
+#0x08005da5 T pmu_pin_driven_current_set
+#0x08005dcb T pmu_pin_driven_current_set_ex
+#0x08005df1 T pmu_shutdown_pin_enable
+#0x08005e51 T pmu_ana_enable
+#0x08005f55 T pmu_ana_is_enabled
+#0x08005f65 T pmu_reset_to_rom
+#0x08005f9f T pmu_reset_to_ram
+#0x08005fd9 T pmu_reset_to_sflash
+#0x08006035 T pmu_force_reboot
+#0x08006051 T pmu_force_into_ota_isp_mode
+#0x0800606d T pmu_wait_system_ready
+#0x08006079 T pmu_force_into_reboot_sleep_mode
+#0x080060e1 T pmu_configuration_validate
+#0x0800612b T pmu_pin_wakeup_out_of_date
+#0x08006135 T pmu_charge_status
+#0x08006155 T pmu_reboot_reason
+#0x0800618b T pmu_retention_reg_get
+#0x08006195 T pmu_retention_reg_set
+#0x080061a5 T pmu_startup_hook_set
+#0x080061c1 T pmu_startup_hook_check
+#0x080061d3 T pmu_timer_init
+#0x0800620b T pmu_timer_time
+#0x08006213 T pmu_timer_start
+#0x08006233 T pmu_timer_stop
+#0x0800624f T pmu_timer_register
+#0x0800626d T pmu_dump
+#0x08006373 T POWER_DOWN_IRQHandler
+#0x08006375 T PIN_WAKEUP_IRQHandler
+#0x080063d1 T PMU_TIMER_IRQHandler
+
+# CPM
+#0x0800368b T cpm_init
+#0x0800368d T cpm_get_clock
+#0x08003771 T cpm_set_clock
+#0x080038e9 T cpm_store
+#0x080038f7 T cpm_restore
+
+# RTC
+0x080065dd T rtc_time_set
+0x0800666b T rtc_time_get
+0x08006687 T rtc_alarm_set
+0x08006703 T rtc_alarm_get
+0x0800671f T rtc_init
+0x080067c7 T rtc_store
+0x080067c9 T rtc_restore
+0x0800681b T rtc_start
+0x08006823 T rtc_stop
+0x0800685b T rtc_second_irq_is_enabled
+0x08006865 T rtc_calc_32k_ppm
+0x08006a33 T RTC_AF_IRQHandler
+0x08006a69 T RTC_1HZ_IRQHandler
+
+# SF
+#0x08006b31 T sf_disable
+#0x08006b83 T sf_readStatus
+#0x08006d67 T sf_write_bytes
+#0x08006e25 T sf_writeStatus
+#0x08006f77 T sf_dma_read_sec
+#0x08006fb3 T sf_raw_erase_sector
+#0x08006ffb T sf_raw_write_page
+#0x08007019 T sf_erase_sector
+#0x08007095 T sf_erase_block
+#0x0800712d T sf_erase_chip
+#0x0800716b T sf_enter_dp
+#0x080071d5 T sf_exit_dp
+#0x0800723d T sf_raw_cmd8
+#0x0800726b T sf_raw_dma_op
+#0x080072c9 T sf_read_uid
+#0x0800732d T sf_boot
+#0x08007391 T sf_read
+#0x0800742d T sf_write
+#0x080074c5 T sf_erase
+#0x0800755d T sf_detect
+#0x0800760b T sf_set_info
+#0x0800763d T sf_boost_mode
+#0x08007727 T sf_normal_mode
+#0x08007771 T sf_init
+#0x08007845 T sf_enable
+#0x08007899 T sf_auto_disable
+#0x080078b5 T sf_cs_locate
+#0x080078c1 T sf_register_hook_callback
+#0x080078c7 T sf_cache_enable
+#0x08000df5 T SF_IRQHandler
+0x0800a86d T rw_flash_init
+0x0800a86f T rw_flash_identify
+0x0800a87d T rw_flash_erase
+0x0800a895 T rw_flash_write
+0x0800a8a9 T rw_flash_read
+
+# TIM
+0x08007d0d T tim_init
+0x08007d0f T tim_config
+0x08007d4f T tim_pwm_change_period_count
+0x08007d53 T tim_pwm_channel_change_pulse_count
+0x08007d5b T tim_pwm_channel_force_output
+0x08007da3 T tim_start
+0x08007db5 T tim_stop
+0x08007dc7 T TIM0_IRQHandler
+0x08007dcf T TIM1_IRQHandler
+0x08007dd5 T TIM2_IRQHandler
+0x08000df5 T TIM_IRQHandler
+
+# UART
+0x08007fb5 T uart_open
+0x080080a5 T uart_close
+0x080080d5 T uart_send_noblock
+0x08008115 T uart_wait_send_finish
+0x0800811d T uart_send_block
+0x0800813b T uart_empty_fifo
+0x0800816f T uart_is_empty
+0x0800817d T uart_pio_rx
+0x080081ad T UART0_IRQHandler
+0x080081b1 T UART1_IRQHandler
+0x080081b5 T iso7816_init
+0x08008245 T iso7816_send_block
+0x0800aa51 T rw_uart_read
+0x0800aa71 T rw_uart_write
+0x0800aa9b T rw_uart_flow_on
+0x0800aa9d T rw_uart_flow_off
+0x0800aaa1 T rw_uart_open
+
+# ENCODER
+0x08003d6d T QDEC_IRQHandler
+0x08003d83 T encoder_config
+0x08003ebd T encoder_start
+0x08003ee1 T encoder_stop
+0x08003f05 T encoder_pin_mask
+0x08003f0b T encoder_restore
+0x08003feb T encoder_sim_gpio_handler
+0x0800407b T encoder_sim_config
+
+# WDT
+0x080082fd T wdt_time_left
+0x08008327 T wdt_keepalive
+0x08008351 T wdt_enable
+
+# I2S
+
+# I2C
+0x0800453f T i2c_open
+0x0800459f T i2c_close
+0x080045b9 T i2c_master_transmit
+0x080045e9 T i2c_master_write
+0x0800460d T i2c_master_read
+0x0800462f T i2c_master_read_mem
+0x0800465b T i2c_master_write_mem
+0x08004a5b T i2c_sim_config
+0x08004a97 T i2c_sim_master_write_mem
+0x08004b1b T i2c_sim_master_read_mem
+0x08000df5 T I2C1_IRQHandler
+0x08000df5 T I2C2_IRQHandler
+0x08000df5 T I2C_IRQHandler
+
+# SPI
+0x08007b85 T spi_open
+0x08007c35 T spi_close
+0x08007c5b T spi_master_cs_low
+0x08007c65 T spi_master_cs_high
+0x08007c6f T spi_master_exchange
+0x08000df5 T SPI0_IRQHandler
+0x08000df5 T SPI1_IRQHandler
+
+# mouse sensor
+0x080050b5 T ms_sim_read
+0x080050c7 T ms_sim_read_delta_y
+0x080050d3 T ms_sim_read_delta_x
+0x080050df T ms_sim_read_status
+0x080050e3 T ms_sim_is_motion
+0x08005167 T ms_sim_gpio_handler
+0x080051a3 T ms_sim_config
+0x0800520f T ms_sim_write
+0x08005223 T ms_sim_read_id1
+0x08005227 T ms_sim_read_id2
+0x0800522b T ms_sim_read_config
+0x0800522f T ms_sim_is_present
+
+# peripheral
+#0x080052bd T peripheral_lowpower_store
+#0x08005347 T peripheral_lowpower_restore
+

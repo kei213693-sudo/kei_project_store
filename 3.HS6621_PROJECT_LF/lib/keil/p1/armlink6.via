@@ -1,0 +1,16 @@
+######################################################################
+#
+# via file for armlink
+#
+#####################################################################
+
+# Peripheral ROM extend patchs
+..\..\..\lib\keil\p1\hs6621p_rom_peripheral_ext_a1_armclang.lib(adc.o encoder*.o i2c.o i2c_sim.o kpp_sim.o spi.o timer.o audio.o i2s.o dma.o gpio*.o sf*.o pmu*.o lcd_serial_new*.o cpm*.o)
+
+# Peripheral ROM symbol (User can edit this file to remove some ROM symbol)
+..\..\..\lib\keil\p1\hs6621p_rom_peripheral_a1.symdefs
+
+# BLE Stack ROM library
+..\..\..\lib\keil\p1\hs6621p_rom_a1.lib
+..\..\..\lib\keil\p1\hs6621p_lib_a1_armclang.lib(*)
+

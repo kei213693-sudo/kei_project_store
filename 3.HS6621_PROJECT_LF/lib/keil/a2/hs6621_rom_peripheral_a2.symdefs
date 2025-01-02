@@ -1,0 +1,342 @@
+#<SYMDEFS># ARM Linker, 5060422: Last Updated: Tue, Jan 7, 2020 4:22:53 PM
+
+# hardware/peripheral/adc.c
+#0x08002d57 T ADC_IRQHandler
+#0x08002ab1 T adc_add_channel
+#0x08003099 T adc_battery_voltage_read
+#0x080031f1 T adc_battery_voltage_read_by_dif_pin
+#0x08003131 T adc_battery_voltage_read_by_single_pin
+#0x08002e71 T adc_calibrate
+#0x08002a11 T adc_channel_read_data
+#0x08002ca3 T adc_config
+#0x08002a73 T adc_del_channel
+#0x08002f15 T adc_dma_config
+#0x08002daf T adc_init
+#0x080032c5 T adc_set_calibarate_param
+#0x08002dd9 T adc_start
+#0x08002fcb T adc_start_convert
+#0x08002dbd T adc_stop
+#0x08002fe5 T adc_stop_convert
+#0x08002ffb T adc_temperature_read
+#0x080029e5 T expand_integer_16
+
+# hardware/peripheral/audio.c
+
+# hardware/peripheral/calib.c
+#0x0800415f T calib_rc32k
+#0x080040db T calib_rc32k_accuracy_check
+#0x08004507 T calib_rf
+#0x08004599 T calib_rf_restore
+#0x08004351 T calib_sys_rc
+#0x08004309 T calib_sys_rc32m
+#0x08004747 T calib_sys_restore
+
+# hardware/peripheral/calib_repair.c
+#0x2003e948 D calib_repair_env
+#0x080047cb T calib_repair_rc32k_temperature
+#0x08004811 T calib_repair_rc32k_temperature_delay_set
+#0x080047c9 T calib_repair_rf_init
+
+# hardware/peripheral/cap.c
+
+# hardware/peripheral/codec_wm8753.c
+0x08004859 T codec_wm8753_init
+
+# hardware/peripheral/cpm.c
+#0x08004a71 T cpm_get_clock
+#0x08004a6f T cpm_init
+#0x08004e3f T cpm_restore
+#0x08004b55 T cpm_set_clock
+#0x08004cfd T cpm_set_clock_div
+#0x08004e31 T cpm_store
+
+# hardware/peripheral/dma.c
+0x080051eb T DMA_IRQHandler
+0x08004fcf T dma_allocate
+0x0800501b T dma_config
+0x08004f65 T dma_init
+0x08005001 T dma_release
+0x0800512f T dma_start
+0x08005169 T dma_start_with_lli
+0x0800518d T dma_stop
+0x080051bf T dma_wait_stop
+
+# hardware/peripheral/encoder.c
+0x080052b9 T QDEC_IRQHandler
+0x080052cf T encoder_config
+0x08005457 T encoder_pin_mask
+0x0800545d T encoder_restore
+0x0800540f T encoder_start
+0x08005433 T encoder_stop
+
+# hardware/peripheral/encoder_sim.c
+0x080055d7 T encoder_sim_config
+0x08005547 T encoder_sim_gpio_handler
+0x2003e9f8 D es_env
+
+# hardware/peripheral/gpio.c
+0x08005631 T GPIO0_IRQHandler
+0x08005667 T GPIO1_IRQHandler
+0x08005923 T gpio_clear_interrupt_pending
+0x08005929 T gpio_clear_interrupt_pending_ex
+0x0800569d T gpio_open
+0x080056e3 T gpio_open_clock
+0x08005863 T gpio_read
+0x0800586b T gpio_read_ex
+0x08005873 T gpio_read_output_status
+0x0800587b T gpio_read_output_status_ex
+0x080059af T gpio_restore
+0x0800584b T gpio_set_direction
+0x08005857 T gpio_set_direction_ex
+0x08005707 T gpio_set_interrupt
+0x0800583f T gpio_set_interrupt_callback
+0x08005845 T gpio_set_interrupt_callback_ex
+0x080057a3 T gpio_set_interrupt_ex
+0x0800592f T gpio_store
+0x080058cb T gpio_toggle
+0x0800590b T gpio_toggle_ex
+0x08005883 T gpio_write
+0x080058bb T gpio_write_ex
+
+# hardware/peripheral/i2c.c
+0x08005b61 T i2c_close
+0x08005bd9 T i2c_master_read
+0x08005bfb T i2c_master_read_mem
+0x08005b85 T i2c_master_transmit
+0x08005bb5 T i2c_master_write
+0x08005c27 T i2c_master_write_mem
+0x08005af7 T i2c_open
+
+# hardware/peripheral/i2c_sim.c
+0x08006027 T i2c_sim_config
+0x080060e7 T i2c_sim_master_read_mem
+0x08006063 T i2c_sim_master_write_mem
+
+# hardware/peripheral/i2s.c
+
+# hardware/peripheral/kpp.c
+0x08000e01 T KPP_DEPRESS_IRQHandler
+0x08000e01 T KPP_RELEASE_IRQHandler
+
+# hardware/peripheral/kpp_sim.c
+0x08006559 T kpp_sim_config
+0x08006523 T kpp_sim_gpio_handler
+
+# hardware/peripheral/lcd_serial.c
+
+# hardware/peripheral/mouse_sensor_sim.c
+0x0800676f T ms_sim_config
+0x08006733 T ms_sim_gpio_handler
+0x080066af T ms_sim_is_motion
+0x080067fb T ms_sim_is_present
+0x08006681 T ms_sim_read
+0x080067f7 T ms_sim_read_config
+0x0800669f T ms_sim_read_delta_x
+0x08006693 T ms_sim_read_delta_y
+0x080067ef T ms_sim_read_id1
+0x080067f3 T ms_sim_read_id2
+0x080066ab T ms_sim_read_status
+0x080067db T ms_sim_write
+
+# hardware/peripheral/peripheral.c
+#0x0800691d T peripheral_lowpower_restore
+#0x08006889 T peripheral_lowpower_store
+
+# hardware/peripheral/pinmux.c
+0x0800693d T pinmux_config
+0x08006999 T pinmux_restore
+
+# hardware/peripheral/pmu.c
+#0x080074e5 T PIN_WAKEUP_IRQHandler
+#0x08007543 T PMU_TIMER_IRQHandler
+#0x08007de3 T POWER_DOWN_IRQHandler
+#0x080077bd T pmu_32k_enable_in_deep_sleep
+#0x080071bb T pmu_ana_enable
+#0x0800730f T pmu_ana_is_enabled
+#0x08007be3 T pmu_charge_status
+#0x08007b99 T pmu_configuration_validate
+#0x08007819 T pmu_dcdc_enable
+#0x08007c81 T pmu_dump
+#0x08007863 T pmu_external_dcdc_enable
+#0x08007b7d T pmu_force_into_ota_isp_mode
+0x080073d5 T pmu_force_into_reboot_sleep_mode
+#0x08007b61 T pmu_force_reboot
+#0x08006d5b T pmu_init
+#0x08006fb3 T pmu_lowpower_allow
+#0x08007065 T pmu_lowpower_enter
+#0x08007125 T pmu_lowpower_leave
+#0x08006f9b T pmu_lowpower_prevent
+#0x08006fcb T pmu_lowpower_prevent_status
+#0x08007ab7 T pmu_pin_driven_current_set
+#0x08007add T pmu_pin_driven_current_set_ex
+#0x080079a3 T pmu_pin_mode_set
+#0x08007a1f T pmu_pin_mode_set_ex
+#0x080071ad T pmu_pin_state_restore
+#0x0800719f T pmu_pin_state_store
+#0x0800743d T pmu_pin_wakeup_out_of_date
+#0x080075db T pmu_pll_startup
+#0x08006fd1 T pmu_power_status
+#0x08007757 T pmu_ram_power_on
+#0x08006e51 T pmu_ram_power_on_all
+#0x08007c03 T pmu_reboot_reason
+0x08007357 T pmu_reset_to_ram
+0x0800731f T pmu_reset_to_rom
+0x0800738f T pmu_reset_to_sflash
+#0x08007c39 T pmu_retention_reg_get
+#0x08007c43 T pmu_retention_reg_set
+#0x08006e7b T pmu_reversion_check
+#0x08006ed9 T pmu_select_32k
+#0x08006f7f T pmu_select_32k_get
+#0x08007b03 T pmu_shutdown_pin_enable
+#0x08007c6f T pmu_startup_hook_check
+#0x08007c53 T pmu_startup_hook_set
+#0x08007447 T pmu_timer_init
+#0x080074c7 T pmu_timer_register
+#0x08007489 T pmu_timer_start
+#0x080074ab T pmu_timer_stop
+#0x0800747f T pmu_timer_time
+#0x080073c7 T pmu_wait_system_ready
+#0x08006f85 T pmu_wakeup_pin_get
+#0x08006f8f T pmu_wakeup_pin_get_ex
+#0x08007993 T pmu_wakeup_pin_register_callback
+#0x0800799b T pmu_wakeup_pin_register_callback_ex
+#0x08007865 T pmu_wakeup_pin_set
+#0x080078fb T pmu_wakeup_pin_set_ex
+#0x080077c3 T pmu_xtal32k_change_param
+#0x080077f9 T pmu_xtal32m_change_param
+#0x08006c27 T pmu_xtal32m_fast_startup
+#0x0800755b T pmu_xtal32m_startup
+#0x08007675 T pmu_random_seed_fetch
+0x2003eadc D pmu_env
+
+# hardware/peripheral/radio.c
+
+# hardware/peripheral/retarget.c
+
+# hardware/peripheral/rtc.c
+0x080084c1 T RTC_1HZ_IRQHandler
+0x0800848b T RTC_AF_IRQHandler
+0x08008157 T rtc_alarm_get
+0x080080d1 T rtc_alarm_set
+0x080082cd T rtc_calc_32k_ppm
+0x08008173 T rtc_init
+0x08008227 T rtc_restore
+0x080082c3 T rtc_second_irq_is_enabled
+0x08008283 T rtc_start
+0x0800828b T rtc_stop
+0x08008225 T rtc_store
+0x080080b5 T rtc_time_get
+0x0800801d T rtc_time_set
+
+# hardware/peripheral/sf.c
+0x2003eb04 D sf_env
+#0x080092bd T sf_capacity
+#0x08009121 T sf_config
+#0x080091a7 T sf_detect
+#0x08008609 T sf_disable
+#0x0800916d T sf_enable
+#0x08008a69 T sf_erase
+#0x08008a01 T sf_erase_block
+#0x080089a3 T sf_erase_chip
+#0x08008a35 T sf_erase_sec
+#0x080089cd T sf_erase_sector
+#0x080092e5 T sf_id
+#0x0800919b T sf_iflash_auto_close
+#0x08008821 T sf_otp_get
+#0x080087c7 T sf_otp_set
+#0x080087b3 T sf_quad_enable
+#0x0800900f T sf_read
+#0x08008eab T sf_read_fast_dma
+#0x08008f0d T sf_read_fast_dual_dma
+#0x08008f6b T sf_read_fast_quad_dma
+#0x080088c9 T sf_read_id
+#0x08008e4d T sf_read_normal_dma
+#0x08008c85 T sf_read_normal_nodma
+#0x08008fdd T sf_read_sec
+#0x08008635 T sf_read_sr
+#0x08008663 T sf_read_sr2
+#0x0800869f T sf_read_sr_16bits
+#0x0800892f T sf_read_uid
+#0x08008905 T sf_read_uid_ex
+#0x08009229 T sf_status
+#0x08008863 T sf_unlock_all
+#0x080086b9 T sf_wait_sr_no_busy
+#0x08008cb7 T sf_write
+#0x080086d5 T sf_write_enable
+#0x08008bdf T sf_write_page
+#0x08008b5b T sf_write_page_dma
+#0x08008afd T sf_write_page_nodma
+#0x08008c47 T sf_write_sec
+#0x080086f7 T sf_write_sr
+#0x08008729 T sf_write_sr_16bits
+#0x08008759 T sf_write_sr_mask
+#0x08008787 T sf_write_sr_mask_16bits
+
+# hardware/peripheral/sf_base.c
+0x2003eb50 D sfb_env
+#0x08009e01 T SF_IRQHandler
+#0x08009aa5 T sfb_close
+#0x08009b15 T sfb_config
+#0x08009acf T sfb_dma_done_event_register
+#0x08009ddd T sfb_enable
+#0x08009c63 T sfb_lcd_config
+#0x08009a7b T sfb_open
+#0x080095bb T sfb_read_dma
+#0x0800965b T sfb_read_dma_ex
+#0x0800996f T sfb_read_nodma
+#0x08009db3 T sfb_regs_get
+#0x08009dbb T sfb_regs_set
+#0x08009d45 T sfb_restore
+#0x0800970b T sfb_write_dma
+#0x08009887 T sfb_write_dma_ex
+#0x080099b3 T sfb_write_nodma
+
+# hardware/peripheral/sf_sys.c
+0x08009f6b T sfs_cache_enable
+0x08009e97 T sfs_config
+0x2003e988 D sfs_env
+0x08009ee7 T sfs_probe
+0x08009e59 T sfs_raw_op
+0x08037c88 D sfs_regobj_tbl
+0x08009f49 T sfs_select
+
+# hardware/peripheral/spi.c
+0x0800a0f3 T spi_close
+0x0800a123 T spi_dma_config
+0x0800a203 T spi_master_cs_high
+0x0800a1f9 T spi_master_cs_low
+0x0800a20d T spi_master_exchange
+0x0800a24f T spi_master_exchange_dma
+0x0800a00b T spi_open
+
+# hardware/peripheral/timer.c
+0x0800a415 T TIM0_IRQHandler
+0x0800a41d T TIM1_IRQHandler
+0x0800a423 T TIM2_IRQHandler
+0x0800a34b T tim_config
+0x0800a349 T tim_init
+0x0800a39d T tim_pwm_change_period_count
+0x0800a3a1 T tim_pwm_channel_change_pulse_count
+0x0800a3a9 T tim_pwm_channel_force_output
+0x0800a3f1 T tim_start
+0x0800a403 T tim_stop
+
+# hardware/peripheral/uart.c
+0x0800a82b T UART0_IRQHandler
+0x0800a82f T UART1_IRQHandler
+0x0800a833 T iso7816_init
+0x0800a8c3 T iso7816_send_block
+0x0800a719 T uart_close
+0x0800a7b9 T uart_empty_fifo
+0x0800a7ed T uart_is_empty
+0x0800a601 T uart_open
+0x0800a7fb T uart_pio_rx
+0x0800a79b T uart_send_block
+0x0800a753 T uart_send_noblock
+0x0800a793 T uart_wait_send_finish
+
+# hardware/peripheral/wdt.c
+0x0800a9ed T wdt_enable
+0x0800a9ad T wdt_keepalive
+0x0800a979 T wdt_time_left
+
