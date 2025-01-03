@@ -60,7 +60,7 @@ enum KE_TASK_STATUS
 
 /// Format of a task message handler function
 typedef int (*ke_msg_func_t)(ke_msg_id_t const msgid, void const *param,
-                             ke_task_id_t const dest_id, ke_task_id_t const src_id);
+                            ke_task_id_t const dest_id, ke_task_id_t const src_id);
 
 /// Macro for message handler function declaration or definition
 #define KE_MSG_HANDLER(msg_name, param_struct)   __STATIC int msg_name##_handler(ke_msg_id_t const msgid,     \
@@ -173,7 +173,7 @@ void ke_state_set(ke_task_id_t const id, ke_state_t const state_id);
  ****************************************************************************************
  */
 int ke_msg_discard(ke_msg_id_t const msgid, void const *param,
-                   ke_task_id_t const dest_id, ke_task_id_t const src_id);
+                ke_task_id_t const dest_id, ke_task_id_t const src_id);
 
 /**
  ****************************************************************************************

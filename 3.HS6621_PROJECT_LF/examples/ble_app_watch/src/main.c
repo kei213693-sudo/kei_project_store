@@ -32,7 +32,7 @@
 #include "hal_timer.h"
 #include "hal_flash.h"
 #include "hal_wdt.h"
-#include "bsp_protocol.h"
+#include "app_ble.h"
 
 
 /*********************************************************************
@@ -42,20 +42,11 @@
 #define APP_VERSION_DATE      (__DATE__)
 #define APP_VERSION_TIME      (__TIME__)
 
-// IO PIN {{{
 #ifdef CONFIG_ASIC
 #define PIN_WAKEUP_0                    2   // UART-RTS@EVB
 #define PIN_WAKEUP_1                    24  // KEY1@EVB
-#define PIN_LED_0                       8
-#define PIN_LED_1                       9
-#define PIN_LED_2                       10
-#define PIN_LED_3                       25
-#define PIN_LED_4                       13
-#define PIN_LED_5                       14
-#define PIN_LED_6                       14
-#define PIN_LED_7                       14
+
 #endif
-// }}}
 
 #define HCI_UART_BAUDRATE               115200
 #define DEBUG_UART_BAUDRATE             115200
@@ -208,57 +199,25 @@ static void ble_stack_config(void)
 int main(void)
 {
     ble_stack_config();
-
     hardware_init();
-
     rwip_init(RESET_NO_ERROR);
-
     co_power_register_user_status(power_sleep_status_handler);
     co_power_register_sleep_event(power_sleep_event_handler);
 
-    log_debug("reboot reason:0x%x\n", pmu_reboot_reason());
-
-#if defined(NORDIC_DFU_DEBUG)
-    uint32_t addr, size, res;
-    sfs_enable();
-    res = mbr_read_part(PART_TYPE_APP, &addr, &size, NULL);
-    if(!res){
-        dfu_debug("Running @ flash address: 0x%08x, size:0x%08x(%d)\n", addr, size, size);
-    }else{
-        dfu_debug("Read PART_TYPE_APP address failed: %d\n", res);
-    }
-    res = mbr_read_part(PART_TYPE_PATCH, &addr, &size, NULL);
-    if(!res){
-        dfu_debug("patch address: 0x%08x, size:0x%08x(%d)\n", addr, size, size);
-    }else{
-        dfu_debug("Read PART_TYPE_PATCH address failed: %d\n", res);
-    }
-    res = mbr_read_part(PART_TYPE_CFG, &addr, &size, NULL);
-    if(!res){
-        dfu_debug("config address: 0x%08x, size:0x%08x(%d)\n", addr, size, size);
-    }else{
-        dfu_debug("Read PART_TYPE_CFG address failed: %d\n", res);
-    }
-#endif
-
     appm_init();
-
-    co_timer_set(&simple_timer, 100, TIMER_REPEAT, simple_timer_handler, NULL);
+	app_ble_init();
+    co_timer_set(&simple_timer, 1000,TIMER_REPEAT, simple_timer_handler, NULL);
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);
-	//0掉电，1深度睡眠唤醒，2ota升级，3主动重启，4看门狗重启，5低电压重启
-    log_debug("reboot_reason:%d\n", pmu_reboot_reason());
+	//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
+    log_debug("reboot reason:%d\n", pmu_reboot_reason());
 	log_debug("APP start\n");//从上电到这里最少要花1000ms
 
     while(1)
     {
         rwip_schedule();
-
-        hal_uart_log_cmd_handle();
     }
 }
 
-/** @} */
 
-// vim: fdm=marker

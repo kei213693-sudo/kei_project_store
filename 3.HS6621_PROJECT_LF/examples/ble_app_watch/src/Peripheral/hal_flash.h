@@ -7,7 +7,7 @@
 #define  HAL_FLASH_CS 			        (0)//0是内部flash；1/2是外部flash，需要初始化对应io口
 
 //HS6621CG-C的内部flash大小为1024kb
-//用户自定数据区域设定为1000~1016kb
+//用户自定数据区域设定为1000~1016kb,需要保证为一个扇区大小的倍数，这里一个扇区大小是SF_SECTOR_SIZE = 4kb
 #define  HAL_FLASH_USER_DATA_START 		(1000*1024)
 #define  HAL_FLASH_USER_DATA_END 		(1017*1024)//1024kb flash，从1017kb开始就是系统信息
 

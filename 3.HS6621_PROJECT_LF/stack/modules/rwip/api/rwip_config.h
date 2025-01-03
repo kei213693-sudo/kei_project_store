@@ -782,7 +782,7 @@ enum KE_TASK_TYPE
 #endif // (DISPLAY_SUPPORT)
 
 #if (BLE_APP_PRESENT)
-    TASK_APP,
+    TASK_APP,//8
 #endif // (BLE_APP_PRESENT)
 
 #if (BLE_HOST_PRESENT)
@@ -805,7 +805,7 @@ enum KE_TASK_TYPE
 #endif // (AHI_TL_SUPPORT)
 
     /// Reserve for user
-    TASK_USR_FIRST,
+    TASK_USR_FIRST,//19
     TASK_USR_LAST = TASK_USR_FIRST + 10,
 
     /// Maximum number of tasks

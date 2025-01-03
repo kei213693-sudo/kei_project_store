@@ -471,11 +471,6 @@
               <FilePath>..\..\common\app_sec.c</FilePath>
             </File>
             <File>
-              <FileName>app_task.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\common\app_task.h</FilePath>
-            </File>
-            <File>
               <FileName>app_wechat.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\common\app_wechat.c</FilePath>
@@ -724,6 +719,21 @@
               <FileName>crc32.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\Components\InfoProtocol\crc32.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>MODU/ble</GroupName>
+          <Files>
+            <File>
+              <FileName>app_ble.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Modules\ble\app_ble.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_ble.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\Modules\ble\bsp_ble.c</FilePath>
             </File>
           </Files>
         </Group>

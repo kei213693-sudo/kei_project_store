@@ -1098,7 +1098,7 @@ KE_MSG_HANDLER_TAB(appm)
 };
 
 /**< Defines the place holder for the states of all the task instances. */
-ke_state_t appm_state[APP_IDX_MAX];
+ke_state_t appm_state[APP_IDX_MAX];//×´Ì¬ÁÐ±í
 
 /// Application task descriptor
 const struct ke_task_desc TASK_DESC_APP = {appm_msg_handler_tab, appm_state, APP_IDX_MAX, ARRAY_LEN(appm_msg_handler_tab)};

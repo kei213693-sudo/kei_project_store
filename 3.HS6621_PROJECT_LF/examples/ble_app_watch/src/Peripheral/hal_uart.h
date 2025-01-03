@@ -50,14 +50,15 @@ typedef struct
 void hal_uart_log_init(void);
 void hal_uart_log_RxIrqCheck(void);
 uint8_t *hal_uart_log_rx_buf_addr_get(void);
-uint8_t hal_uart_log_rx_buf_len_get(void);
-void hal_uart_log_cmd_handle(void);
+uint16_t hal_uart_log_rx_buf_len_get(void);
+void hal_uart_log_rx_buf_reset(void);
 
 
 void hal_uart_fm33lg_init(void);
 void hal_uart_fm33lg_RxIrqCheck(void);
 uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void);
 uint8_t hal_uart_fm33lg_rx_buf_len_get(void);
+void hal_uart_fm33lg_rx_buf_reset(void);
 void hal_uart_fm33lg_tx_buf_set(uint8_t *pData,uint8_t u8Len);
 
 #endif
