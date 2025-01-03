@@ -25,7 +25,7 @@
 
 #include "rwip_config.h"             // SW configuration
 
-#if (BLE_APP_PRESENT)
+//#if (BLE_APP_PRESENT)
 
 #include <string.h>
 
@@ -435,6 +435,6 @@ void appm_recv_data(uint8_t conidx, uint8_t *p_pdata, uint16_t len)
 }
 
 
-#endif //(BLE_APP_PRESENT)
+//#endif //(BLE_APP_PRESENT)
 
 /// @} APP

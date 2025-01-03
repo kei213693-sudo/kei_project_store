@@ -808,7 +808,8 @@ static int app_i2s_rx_data_handler(ke_msg_id_t const msgid,
                                      ke_task_id_t const dest_id,
                                      ke_task_id_t const src_id)
 {
-   APP_HANDLER(audio_rx_cmd, msgid, param, dest_id, src_id); // APP layer Callback
+	//告警app_audio_rx_cmd_handler函数隐式声明，实际上没有这个函数，所以屏蔽掉
+//   APP_HANDLER(audio_rx_cmd, msgid, param, dest_id, src_id); // APP layer Callback
 
    return (KE_MSG_CONSUMED);
 }

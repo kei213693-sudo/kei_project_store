@@ -115,3 +115,8 @@
 .\_build\main.o: ..\..\..\examples\common\app_ancsc.h
 .\_build\main.o: ..\..\..\stack\ip\ble\profiles\ancs\api\ancsc_task.h
 .\_build\main.o: ..\..\..\stack\ip\ble\profiles\ancs\src\ancs_common.h
+.\_build\main.o: ..\src\Peripheral\hal_uart.h
+.\_build\main.o: ..\src\Peripheral\hal_timer.h
+.\_build\main.o: ..\src\Peripheral\hal_flash.h
+.\_build\main.o: ..\src\Peripheral\hal_wdt.h
+.\_build\main.o: ..\src\Components\InfoProtocol\bsp_protocol.h

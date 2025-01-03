@@ -36,7 +36,7 @@ extern "C"
 #define DEBUG_ADDR "\xCC\xCC\xCC\xCC\xCC\xCC" // Address just for debug
 
 /// Default Device Name
-#define APP_DFLT_DEVICE_NAME            ("Onmicro-V1.0")
+#define APP_DFLT_DEVICE_NAME            ("LF_SN000007")
 /// Default Device Name Length
 #define APP_DFLT_DEVICE_NAME_LEN        (sizeof(APP_DFLT_DEVICE_NAME)-1)
 

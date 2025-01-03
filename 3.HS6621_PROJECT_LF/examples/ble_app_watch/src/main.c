@@ -28,9 +28,19 @@
 #include "sysdump.h"
 #include "app.h"
 
+#include "hal_uart.h"
+#include "hal_timer.h"
+#include "hal_flash.h"
+#include "hal_wdt.h"
+#include "bsp_protocol.h"
+
+
 /*********************************************************************
  * MACROS
  */
+
+#define APP_VERSION_DATE      (__DATE__)
+#define APP_VERSION_TIME      (__TIME__)
 
 // IO PIN {{{
 #ifdef CONFIG_ASIC
@@ -44,23 +54,6 @@
 #define PIN_LED_5                       14
 #define PIN_LED_6                       14
 #define PIN_LED_7                       14
-#define PIN_UART0_TX                    5
-#define PIN_UART1_TX                    13
-#define PIN_UART1_RX                    6
-#else
-#define PIN_WAKEUP_0                    3  // GPIO4@FPGA-PeripheralBoard
-#define PIN_WAKEUP_1                    4  // KEY4@FPGA-PeripheralBoard (KEY2:RESET)
-#define PIN_LED_0                       14
-#define PIN_LED_1                       15
-#define PIN_LED_2                       16
-#define PIN_LED_3                       17
-#define PIN_LED_4                       18
-#define PIN_LED_5                       19
-#define PIN_LED_6                       20
-#define PIN_LED_7                       21
-#define PIN_UART0_TX                    13
-#define PIN_UART1_TX                    5
-#define PIN_UART1_RX                    6
 #endif
 // }}}
 
@@ -82,10 +75,6 @@
  */
 
 static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_WAKEUP_0) | BIT_MASK(PIN_WAKEUP_1));
-static uint32_t pin_leds_mask   = (BIT_MASK(PIN_LED_0)|BIT_MASK(PIN_LED_1)|
-                                   BIT_MASK(PIN_LED_2)|BIT_MASK(PIN_LED_3)|
-                                   BIT_MASK(PIN_LED_4)|BIT_MASK(PIN_LED_5)|
-                                   BIT_MASK(PIN_LED_6)|BIT_MASK(PIN_LED_7));
 
 static co_timer_t simple_timer;
 
@@ -116,26 +105,6 @@ static void pinmux_init(void)
     pinmux_config(PIN_WAKEUP_0,  PINMUX_GPIO_MODE_CFG);
     pinmux_config(PIN_WAKEUP_1,  PINMUX_GPIO_MODE_CFG);
     pmu_pin_mode_set(pin_wakeup_mask, PMU_PIN_MODE_PU);
-
-    // UART0
-    pinmux_config(PIN_UART0_TX, PINMUX_UART0_SDA_O_CFG);
-    // UART1
-    pinmux_config(PIN_UART1_TX,  PINMUX_UART1_SDA_O_CFG);
-    pinmux_config(PIN_UART1_RX,  PINMUX_UART1_SDA_I_CFG);
-    pmu_pin_mode_set(BITMASK(PIN_UART1_TX), PMU_PIN_MODE_PP);
-    pmu_pin_mode_set(BITMASK(PIN_UART1_TX), PMU_PIN_MODE_PP);
-    pmu_pin_mode_set(BITMASK(PIN_UART1_RX), PMU_PIN_MODE_PU);
-
-    // LEDS
-    pinmux_config(PIN_LED_0, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_1, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_2, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_3, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_4, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_5, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_6, PINMUX_GPIO_MODE_CFG);
-    pinmux_config(PIN_LED_7, PINMUX_GPIO_MODE_CFG);
-    pmu_pin_mode_set(pin_leds_mask, PMU_PIN_MODE_PP);
 }
 
 static void peripheral_init(void)
@@ -148,26 +117,22 @@ static void peripheral_init(void)
     gpio_set_interrupt(pin_wakeup_mask, GPIO_BOTH_EDGE);
     gpio_set_interrupt_callback(gpio_handler);
 
-    // LEDS
-#ifdef CONFIG_ASIC
-    gpio_write(pin_leds_mask, GPIO_HIGH);
-#else
-    gpio_write(pin_leds_mask, GPIO_LOW);
-#endif
-    gpio_set_direction(pin_leds_mask, GPIO_OUTPUT);
-
     // wakeup
     pmu_wakeup_pin_set(pin_wakeup_mask, PMU_PIN_WAKEUP_LOW_LEVEL);
     pmu_wakeup_pin_register_callback(wakeup_gpio_handler, wakeup_gpio_handler);
 
-    // Init UART
-    uart_open(HS_UART0, DEBUG_UART_BAUDRATE, UART_FLOW_CTRL_DISABLED, NULL);
+    hal_uart_log_init();
+    hal_uart_fm33lg_init();
+	hal_timer_init();
+    hal_flash_init();
+	hal_wdt_init();
+    
 }
 
 static void peripheral_restore(void)
 {
     // Init UART
-    uart_open(HS_UART0, DEBUG_UART_BAUDRATE, UART_FLOW_CTRL_DISABLED, NULL);
+    hal_uart_log_init();
 }
 
 static void hardware_init(void)
@@ -176,10 +141,9 @@ static void hardware_init(void)
     #ifndef CONFIG_GPIO1_ABSENT
     pmu_pin_mode_set_ex(0xFF, PMU_PIN_MODE_PU);
     #endif
-
-    pinmux_init();
-
-    peripheral_init();
+	
+	pinmux_init();
+    peripheral_init();//外设
 }
 
 static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_power_status_t power_status)
@@ -217,9 +181,6 @@ static void simple_timer_handler(co_timer_t *timer, void *param)
 
 static void ble_stack_config(void)
 {
-    // Disable WDT
-    wdt_enable(0);
-
     pmu_dcdc_enable(true);
 
     // Power down xtal32k in deep sleep mode
@@ -255,7 +216,7 @@ int main(void)
     co_power_register_user_status(power_sleep_status_handler);
     co_power_register_sleep_event(power_sleep_event_handler);
 
-    log_debug("running %d\n", pmu_reboot_reason());
+    log_debug("reboot reason:0x%x\n", pmu_reboot_reason());
 
 #if defined(NORDIC_DFU_DEBUG)
     uint32_t addr, size, res;
@@ -283,23 +244,18 @@ int main(void)
     appm_init();
 
     co_timer_set(&simple_timer, 100, TIMER_REPEAT, simple_timer_handler, NULL);
-#if 0
-    pinmux_config(2,  PINMUX_ANALOG_CH2_PIN2_CFG);
-    adc_cal_table_t cal_table;
-    adc_calibrate(&cal_table);
-    adc_set_calibarate_param(&cal_table);
 
-    float vbat = adc_battery_voltage_read(NULL);
-    float vbat2 = adc_battery_voltage_read_by_single_pin(ADC_CHANNEL_EXTERN_CH2, ADC_PGA_GAIN_0P125, NULL, 10);
-#endif
+    log_debug("Version data:%s\n",APP_VERSION_DATE);
+	log_debug("Version time:%s\n",APP_VERSION_TIME);
+	//0掉电，1深度睡眠唤醒，2ota升级，3主动重启，4看门狗重启，5低电压重启
+    log_debug("reboot_reason:%d\n", pmu_reboot_reason());
+	log_debug("APP start\n");//从上电到这里最少要花1000ms
+
     while(1)
     {
         rwip_schedule();
-#if 0
-        vbat = adc_battery_voltage_read(NULL);
-        vbat2 = adc_battery_voltage_read_by_single_pin(ADC_CHANNEL_EXTERN_CH2, ADC_PGA_GAIN_0P125, NULL, 10);
-        log_debug("%f,%f\r\n", vbat, vbat2);
-#endif
+
+        hal_uart_log_cmd_handle();
     }
 }
 
