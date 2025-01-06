@@ -11,20 +11,8 @@
 #define  HAL_FLASH_USER_DATA_START 		(1000*1024)
 #define  HAL_FLASH_USER_DATA_END 		(1017*1024)//1024kb flash，从1017kb开始就是系统信息
 
-#define  HAL_FLASH_SN_LEN 				(6)//SN码长度，bytes
 
 /*******************************结构体、枚举等******************************/
-typedef struct
-{
-    uint8_t sn[HAL_FLASH_SN_LEN];//序列号
-    uint8_t pairNum;//已配对手机个数
-    uint8_t  res1[3];//预留
-    uint8_t administratorMAC[6];//管理员用户mac addr，用于权限认定
-    uint8_t  res2[2];//预留
-
-    uint16_t AdvInterval;//广播间隔
-    uint8_t  res3[2];//预留
-}hal_flash_sys_info_t;
 
 /*******************************全局变量的外部声明extern*******************************/
 /*******************************全局函数的声明*******************************/

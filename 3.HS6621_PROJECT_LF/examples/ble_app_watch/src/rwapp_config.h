@@ -32,11 +32,11 @@ extern "C"
 /*********************************************************************
  * MACROS
  */
- 
+
 #define DEBUG_ADDR "\xCC\xCC\xCC\xCC\xCC\xCC" // Address just for debug
 
 /// Default Device Name
-#define APP_DFLT_DEVICE_NAME            ("LF_SN000007")
+#define APP_DFLT_DEVICE_NAME            ("LF_")//广播名称前缀，后面还要加上sn码，例如“LF_000000007”
 /// Default Device Name Length
 #define APP_DFLT_DEVICE_NAME_LEN        (sizeof(APP_DFLT_DEVICE_NAME)-1)
 
@@ -58,7 +58,7 @@ extern "C"
 
 
 /// enable/disable security connect
-#define BLE_APP_SEC          1
+#define BLE_APP_SEC          1//使能配对
 
 /// WECHAT
 #define BLE_APP_WECHAT       1
@@ -84,9 +84,9 @@ extern "C"
 #define BLE_APP_ONMICRO_DFU   1
 
 /// enable/disable white list
-#define BLE_APP_WHITE_LIST   0
+#define BLE_APP_WHITE_LIST   0//失能白名单机制
 /// enable/disable privacy
-#define BLE_APP_PRIVACY      0
+#define BLE_APP_PRIVACY      0//失能随机地址
 
 #if BLE_APP_ONMICRO_DFU
 /// the dfu task id

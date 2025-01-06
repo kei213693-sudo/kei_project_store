@@ -39,9 +39,6 @@
  * MACROS
  */
 
-#define APP_VERSION_DATE      (__DATE__)
-#define APP_VERSION_TIME      (__TIME__)
-
 #ifdef CONFIG_ASIC
 #define PIN_WAKEUP_0                    2   // UART-RTS@EVB
 #define PIN_WAKEUP_1                    24  // KEY1@EVB
@@ -204,8 +201,8 @@ int main(void)
     co_power_register_user_status(power_sleep_status_handler);
     co_power_register_sleep_event(power_sleep_event_handler);
 
-    appm_init();
-	app_ble_init();
+	app_ble_init();//先初始化自定义任务
+    appm_init();//再初始化ble协议参数
     co_timer_set(&simple_timer, 1000,TIMER_REPEAT, simple_timer_handler, NULL);
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);

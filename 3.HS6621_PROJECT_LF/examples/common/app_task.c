@@ -265,8 +265,8 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 #endif //(BLE_APP_HID)
                 // Set Device configuration
                 struct gapm_set_dev_config_cmd* cmd = KE_MSG_ALLOC(GAPM_SET_DEV_CONFIG_CMD,
-                                                                   TASK_GAPM, TASK_APP,
-                                                                   gapm_set_dev_config_cmd);
+                                                                TASK_GAPM, TASK_APP,
+                                                                gapm_set_dev_config_cmd);
                 // Set the operation
                 cmd->operation = GAPM_SET_DEV_CONFIG;
                 // Set the device role - Peripheral
@@ -568,11 +568,11 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
 {
     app_env.conidx = KE_IDX_GET(src_id);
     #if(BLE_APP_SEC)
-    bool is_bond = app_sec_get_bond_status_by_addr(param->peer_addr);
+    bool is_bond = app_sec_get_bond_status_by_addr(param->peer_addr);//判断是否是已经绑定过的设备
     #endif
 
-	//log_debug("Device type(%d) conidx(%d) connected, ", param->peer_addr_type, app_env.conidx);
-	//log_debug_array_ex("ADDR", &param->peer_addr, 6);
+	log_debug("Device type(%d) conidx(%d) connected, ", param->peer_addr_type, app_env.conidx);
+	log_debug_array_ex("ADDR", &param->peer_addr, 6);
     // Check if the received Connection Handle was valid
     if (app_env.conidx != GAP_INVALID_CONIDX)
     {
@@ -641,6 +641,7 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
             //app_sec_send_security_req(app_env.conidx);
         }
         #endif // (BLE_APP_SEC)
+        //调用app_gap_connected_handler打印对端信息
         APP_HANDLER(gap_connected, msgid, param, dest_id, src_id); // APP layer Callback
     }
     else
@@ -749,28 +750,28 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
   * @return If the message was consumed or not.
   ****************************************************************************************
   */
- static int gapc_param_update_req_ind_handler(ke_msg_id_t const msgid,
-									   struct gapc_param_update_req_ind const *param,
-									   ke_task_id_t const dest_id,
-									   ke_task_id_t const src_id)
- {
+static int gapc_param_update_req_ind_handler(ke_msg_id_t const msgid,
+									    struct gapc_param_update_req_ind const *param,
+                                        ke_task_id_t const dest_id,
+                                        ke_task_id_t const src_id)
+{
 	 // Prepare the GAPC_PARAM_UPDATE_CMD message
 	 struct gapc_param_update_cfm *cfm = KE_MSG_ALLOC(GAPC_PARAM_UPDATE_CFM,
-													  KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
-													  gapc_param_update_cfm);
+                                                    KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
+                                                    gapc_param_update_cfm);
 
-	 /// True to accept slave connection parameters, False else.
-	 cfm->accept = true;
-	 /// Minimum Connection Event Duration
-	 cfm->ce_len_min = 0x0;
-	 /// Maximum Connection Event Duration
-	 cfm->ce_len_max = 0xFFFF;
+    /// True to accept slave connection parameters, False else.
+    cfm->accept = true;//不论什么参数都接受
+    /// Minimum Connection Event Duration
+    cfm->ce_len_min = 0x0;
+    /// Maximum Connection Event Duration
+    cfm->ce_len_max = 0xFFFF;
 
-	 // Send the message
-	 ke_msg_send(cfm);
-
-	 return (KE_MSG_CONSUMED);
- }
+    // Send the message
+    ke_msg_send(cfm);
+    
+    return (KE_MSG_CONSUMED);
+}
 
 /**
   * @brief Handles connect param update(>4.1) event from the GAP.
@@ -783,14 +784,14 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
   * @return If the message was consumed or not.
   ****************************************************************************************
   */
- static int gapc_param_update_ind_handler(ke_msg_id_t const msgid,
-									   struct gapc_param_updated_ind const *param,
-									   ke_task_id_t const dest_id,
-									   ke_task_id_t const src_id)
- {
+static int gapc_param_update_ind_handler(ke_msg_id_t const msgid,
+                                    struct gapc_param_updated_ind const *param,
+                                    ke_task_id_t const dest_id,
+                                    ke_task_id_t const src_id)
+{
     APP_HANDLER(gap_param_update_ind, msgid, param, dest_id, src_id);
     return (KE_MSG_CONSUMED);
- }
+}
 
  /**
   * @brief Handles i2s rx event from the APP.
@@ -1090,8 +1091,8 @@ KE_MSG_HANDLER_TAB(appm)
     {GAPC_CONNECTION_REQ_IND,   (ke_msg_func_t)gapc_connection_req_ind_handler},
     {GAPC_CMP_EVT,              (ke_msg_func_t)gapc_cmp_evt_handler},
     {GAPC_DISCONNECT_IND,       (ke_msg_func_t)gapc_disconnect_ind_handler},
-    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},
-    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},
+    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},//最终连接参数更新完成后进入
+    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},//slave收到主机发送“连接参数更新指令”回调函数
     {GAPC_LE_PKT_SIZE_IND,      (ke_msg_func_t)gapc_pkt_size_ind_handler},
     {GATTC_MTU_CHANGED_IND,     (ke_msg_func_t)gattc_mtu_changed_ind_handler},
     {APP_AUDIO_RX_CMD,          (ke_msg_func_t)app_i2s_rx_data_handler},

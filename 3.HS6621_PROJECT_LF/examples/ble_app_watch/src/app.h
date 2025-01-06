@@ -35,7 +35,7 @@
 #include "gapm_task.h"            // GAP Manager Task API
 #include "gattc_task.h"
 
-#if (BLE_APP_PRESENT)
+//#if (BLE_APP_PRESENT)
 
 #include <stdint.h>          // Standard Integer Definition
 #include <co_bt.h>           // Common BT Definitions
@@ -93,6 +93,21 @@ void app_ancs_recv_msg_handler(struct ancsc_ntf_attr_ind const *param);
 #define APP_CONN_LATENCY             (25)
 /// the conn timeout
 #define APP_CONN_TIME_OUT            (200)
+
+/**
+ * Advertising Parameters
+ */
+#define APP_ADV_FAST_INTERVAL     0x0050//0x0320//默认500ms 0x0028   /**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
+#define APP_ADV_SLOW_INTERVAL     0x0C80   /**< Slow advertising interval (in units of 0.625 ms. This value corrsponds to 2 seconds). */
+
+#define APP_ADV_FAST_TIMEOUT      0       /**< The duration of the fast advertising period (in seconds). max 655, or 0 is no timeout*/
+#define APP_ADV_SLOW_TIMEOUT      0       /**< The duration of the slow advertising period (in seconds). max 655. or 0 is no timeout*/
+
+#define APP_ADV_DIRECTED_TIMEOUT  0       /**< The duration of the fast advertising period (in seconds). mas 655. or 0 is high duty cycle*/
+
+
+#define APP_VERSION_DATE      (__DATE__)
+#define APP_VERSION_TIME      (__TIME__)
 
 /*
  * MACROS
@@ -231,7 +246,7 @@ void appm_disconnect(uint8_t conidx);
  */
 uint8_t appm_get_dev_name(uint8_t* name);
 
-#endif //(BLE_APP_PRESENT)
+//#endif //(BLE_APP_PRESENT)
 
 /// @} APP
 

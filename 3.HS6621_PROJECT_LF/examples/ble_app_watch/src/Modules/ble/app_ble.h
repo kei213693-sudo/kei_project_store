@@ -21,6 +21,9 @@
 #define APP_BLE_TASK_ID         TASK_USR_FIRST
 #define APP_BLE_IDX_MAX         (1)//这个值到底是什么含义？？？
 
+
+#define APP_BLE_SN_LEN 			(9)//SN码长度，bytes，小于等于16
+
 /*******************************结构体、枚举******************************/
 typedef enum
 {//app自定义操作
@@ -31,6 +34,7 @@ typedef enum
     APP_BLE_OPT_GAP_DISCON,                //断开ble连接
     APP_BLE_OPT_GAP_RSSI,                  //获取RSSI
     APP_BLE_OPT_SMP_DEL,                   //删除配对信息
+    APP_BLE_OPT_UPDATA_PARAM,                //更新连接参数
 
     //自定义操作
     APP_BLE_OPT_DEBUGLOG,                  //处理调试指令
@@ -39,7 +43,21 @@ typedef enum
     APP_BLE_OPT_END
 }APP_BLE_OPT_E;//在ke-rtos中用于APP_BLE_TASK_ID的MSG_ID
 
+typedef struct
+{//存储在内部flash的系统参数
+    uint8_t sn[APP_BLE_SN_LEN];//序列号
+    uint8_t res0[16 - APP_BLE_SN_LEN];//预留
+    uint8_t pairNum;//已配对手机个数
+    uint8_t res1[3];//预留
+    uint8_t administratorMAC[6];//管理员用户mac addr，用于权限认定
+    uint8_t res2[2];//预留
+
+    uint16_t AdvInterval;//广播间隔
+    uint8_t res3[2];//预留
+}app_ble_sys_info_t;
+
 /*******************************全局变量的外部声明*******************************/
+extern app_ble_sys_info_t g_stAppBleSysInfo;
 
 /*******************************全局函数的声明*******************************/
 extern int32_t app_ble_init(void);

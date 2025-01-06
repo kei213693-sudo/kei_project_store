@@ -63,22 +63,12 @@
 #include "app_onmicro_dfu.h"
 #endif //BLE_APP_ONMICRO_DFU
 
+#include "app_ble.h"
+
 /*
  * DEFINES
  ****************************************************************************************
  */
-
-
-/**
- * Advertising Parameters
- */
-#define APP_ADV_FAST_INTERVAL     0x0028   /**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
-#define APP_ADV_SLOW_INTERVAL     0x0C80   /**< Slow advertising interval (in units of 0.625 ms. This value corrsponds to 2 seconds). */
-
-#define APP_ADV_FAST_TIMEOUT      0       /**< The duration of the fast advertising period (in seconds). max 655, or 0 is no timeout*/
-#define APP_ADV_SLOW_TIMEOUT      0       /**< The duration of the slow advertising period (in seconds). max 655. or 0 is no timeout*/
-
-#define APP_ADV_DIRECTED_TIMEOUT  0       /**< The duration of the fast advertising period (in seconds). mas 655. or 0 is high duty cycle*/
 
 /*
  * TYPE DEFINITIONS
@@ -221,8 +211,8 @@ static void appm_advertising_init(void)
     adv_config.directed_enabled = false;
     adv_config.directed_timeout = APP_ADV_DIRECTED_TIMEOUT;
     adv_config.fast_enabled = true;
-    adv_config.fast_interval = APP_ADV_FAST_INTERVAL;
-    adv_config.fast_timeout = APP_ADV_FAST_TIMEOUT;
+    adv_config.fast_interval = (uint32_t)g_stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_INTERVAL;
+    adv_config.fast_timeout = (uint32_t)g_stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_TIMEOUT;
     adv_config.slow_enabled = false;
     adv_config.slow_interval = APP_ADV_SLOW_INTERVAL;
     adv_config.slow_timeout = APP_ADV_SLOW_TIMEOUT;
@@ -269,29 +259,25 @@ void appm_init(void)
 
     // Get the Device Name to add in the Advertising Data (Default one or NVDS one)
     #if (NVDS_SUPPORT)
-    app_env.dev_name_len = APP_DEVICE_NAME_MAX_LEN;
-    if (nvds_get(NVDS_TAG_DEVICE_NAME, &(app_env.dev_name_len), app_env.dev_name) != NVDS_OK)
+//    app_env.dev_name_len = APP_DEVICE_NAME_MAX_LEN;
+//    if (nvds_get(NVDS_TAG_DEVICE_NAME, &(app_env.dev_name_len), app_env.dev_name) != NVDS_OK)
     #endif //(NVDS_SUPPORT)
     {
         // Get default Device Name (No name if not enough space)
-        memcpy(app_env.dev_name, APP_DFLT_DEVICE_NAME, APP_DFLT_DEVICE_NAME_LEN);
-        app_env.dev_name_len = APP_DFLT_DEVICE_NAME_LEN;
-
-        // TODO update this value per profiles
+        memcpy(app_env.dev_name, APP_DFLT_DEVICE_NAME, APP_DFLT_DEVICE_NAME_LEN);//前缀
+        memcpy(&app_env.dev_name[APP_DFLT_DEVICE_NAME_LEN], g_stAppBleSysInfo.sn, APP_BLE_SN_LEN);//sn码
+        app_env.dev_name_len = APP_DFLT_DEVICE_NAME_LEN + APP_BLE_SN_LEN;
     }
 
     #if (NVDS_SUPPORT)
-    nvds_tag_len_t len=6;
-    if (nvds_get(NVDS_TAG_BD_ADDRESS, &len, &app_env.addr.addr[0]) == NVDS_OK)
-    {
-    }
-    else
+    // nvds_tag_len_t len=6;
+    // if (nvds_get(NVDS_TAG_BD_ADDRESS, &len, &app_env.addr.addr[0]) != NVDS_OK)
     #endif //(NVDS_SUPPORT)
     {
-        memcpy(&app_env.addr.addr[0], &co_default_bdaddr,sizeof(co_default_bdaddr));
+        memcpy(&app_env.addr.addr[0], &co_default_bdaddr,6);
     }
     #if defined(DEBUG_ADDR)
-        memcpy(&app_env.addr.addr[0], DEBUG_ADDR, 6); // !!  JUST FOR DEBUG  !!
+        //memcpy(&app_env.addr.addr[0], DEBUG_ADDR, 6); // !!  JUST FOR DEBUG  !!
     #endif
 
     /*------------------------------------------------------
@@ -324,12 +310,13 @@ void appm_init(void)
     // ANCS Module
     app_ancsc_init();
     #endif //(BLE_APP_ANCSC)
+
     #if (BLE_APP_HID)
     app_hid_init();
     #endif //(BLE_APP_HID)
+
     // Reset the stack
     appm_send_gapm_reset_cmd();
-
     // start adversting
     appm_advertising_init();
 }
@@ -389,8 +376,8 @@ bool appm_add_svc(void)
 void appm_disconnect(uint8_t conidx)
 {
     struct gapc_disconnect_cmd *cmd = KE_MSG_ALLOC(GAPC_DISCONNECT_CMD,
-                                                   KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
-                                                   gapc_disconnect_cmd);
+                                                KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
+                                                gapc_disconnect_cmd);
 
     cmd->operation = GAPC_DISCONNECT;
     cmd->reason    = CO_ERROR_REMOTE_USER_TERM_CON;
@@ -403,8 +390,8 @@ void appm_update_param(struct gapc_conn_param *conn_param)
 {
     // Prepare the GAPC_PARAM_UPDATE_CMD message
     struct gapc_param_update_cmd *cmd = KE_MSG_ALLOC(GAPC_PARAM_UPDATE_CMD,
-                                                     KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
-                                                     gapc_param_update_cmd);
+                                                    KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP,
+                                                    gapc_param_update_cmd);
 
     cmd->operation  = GAPC_UPDATE_PARAMS;
     cmd->intv_min   = conn_param->intv_min;
