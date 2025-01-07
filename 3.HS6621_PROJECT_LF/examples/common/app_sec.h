@@ -60,7 +60,7 @@ struct app_sec_conn_info_tag
 struct app_sec_env_tag
 {
     ///Bond status
-    bool bonded;
+    bool bonded;//绑定标志
 #if (BLE_APP_SEC_CON)
     ///Secure Connections on current link
     bool sec_con_enabled[BLE_CONNECTION_MAX];

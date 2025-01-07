@@ -40,17 +40,13 @@ void hal_uart_log_init(void)
 **************************************************************/
 static void hal_uart_log_rx_callback(uint8_t data)
 {
-	if(0 != g_stUartLogCtl.finsh)
-	{
-		log_debug("cmd is running!\n");
-	}
-	else
+	if(0 == g_stUartLogCtl.finsh)
 	{
 		g_stUartLogCtl.irqCount = 0;//每接收一次清空一次计数标志
 		
 		g_stUartLogCtl.rxBuf[g_stUartLogCtl.rxLen] = data;
 		g_stUartLogCtl.rxLen++;
-		if(g_stUartLogCtl.rxLen >= sizeof(g_stUartLogCtl.rxBuf))
+		if(g_stUartLogCtl.rxLen >= HAL_UART_LOG_LEN)
 		{//超过最大值，覆盖之前的数据
 			g_stUartLogCtl.rxLen = 0;
 		}
@@ -107,7 +103,7 @@ void hal_uart_log_rx_buf_reset(void)
 	g_stUartLogCtl.finsh = 0;
 	g_stUartLogCtl.rxLen = 0;
 	g_stUartLogCtl.irqCount = 0;
-	memset(g_stUartLogCtl.rxBuf,0,sizeof(g_stUartLogCtl.rxBuf));
+	memset(g_stUartLogCtl.rxBuf,0,HAL_UART_LOG_LEN);
 }
 
 /**************************************************************
@@ -134,18 +130,13 @@ void hal_uart_fm33lg_init(void)
 **************************************************************/
 static void hal_uart_fm33lg_rx_callback(uint8_t data)
 {
-	//log_debug("uart revice:0x%x\n",data);
-	if(0 != g_stUartFm33lgCtl.finsh)
-	{
-		log_debug("comm is running!\n");
-	}
-	else
+	if(0 == g_stUartFm33lgCtl.finsh)
 	{
 		g_stUartFm33lgCtl.irqCount = 0;
 
 		g_stUartFm33lgCtl.rxBuf[g_stUartFm33lgCtl.rxLen] = data;
 		g_stUartFm33lgCtl.rxLen++;
-		if(g_stUartFm33lgCtl.rxLen >= sizeof(g_stUartFm33lgCtl.rxBuf))
+		if(g_stUartFm33lgCtl.rxLen >= HAL_UART_FM33LG_LEN)
 		{//超过最大值，覆盖之前的数据
 			g_stUartFm33lgCtl.rxLen = 0;
 		}
@@ -202,7 +193,7 @@ void hal_uart_fm33lg_rx_buf_reset(void)
 	g_stUartFm33lgCtl.finsh = 0;
 	g_stUartFm33lgCtl.rxLen = 0;
 	g_stUartFm33lgCtl.irqCount = 0;
-	memset(g_stUartFm33lgCtl.rxBuf,0,sizeof(g_stUartFm33lgCtl.rxBuf));
+	memset(g_stUartFm33lgCtl.rxBuf,0,HAL_UART_FM33LG_LEN);
 }
 
 /**************************************************************

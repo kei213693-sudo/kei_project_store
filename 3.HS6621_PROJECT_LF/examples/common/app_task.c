@@ -251,7 +251,7 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                                 ke_task_id_t const src_id)
 {
     #if ((NVDS_SUPPORT) && (BLE_APP_SEC))
-    nvds_tag_len_t key_len = KEY_LEN;
+    nvds_tag_len_t key_len = KEY_LEN;//16
     #endif //(NVDS_SUPPORT)
     switch(param->operation)
     {
@@ -291,12 +291,12 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 #endif //(BLE_APP_HID)
 
                 // Host privacy disabled by default
-                cmd->privacy_cfg = GAPM_PRIV_CFG_PRIV_ADDR_BIT;
-                memcpy(cmd->addr.addr, &app_env.addr.addr[0], 6);
+                cmd->privacy_cfg = GAPM_PRIV_CFG_PRIV_ADDR_BIT;//地址类型
+                memcpy(cmd->addr.addr, &app_env.addr.addr[0], 6);//配置地址参数
                 
                 #if ((NVDS_SUPPORT) && (BLE_APP_SEC))
 
-                if ((app_sec_get_bond_status()==true) &&
+                if ((app_sec_get_bond_status()==true) &&//已经绑定过最少一个设备
                     (nvds_get(NVDS_TAG_LOC_IRK, &key_len, app_env.loc_irk) == NVDS_OK))
                 {
                     memcpy(cmd->irk.key, app_env.loc_irk, 16);
@@ -307,8 +307,8 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                     memset((void *)&cmd->irk.key[0], 0x00, KEY_LEN);
                 }
                 #if (BLE_APP_PRIVACY)
-                cmd->privacy_cfg |= GAPM_PRIV_CFG_PRIV_EN_BIT;
-                cmd->renew_dur = 0x0384;
+                cmd->privacy_cfg |= GAPM_PRIV_CFG_PRIV_EN_BIT;//配置为随机地址
+                cmd->renew_dur = 0x0384;//更改随机地址的时间
                 #endif
                 // Send message
                 ke_msg_send(cmd);
@@ -571,8 +571,8 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
     bool is_bond = app_sec_get_bond_status_by_addr(param->peer_addr);//判断是否是已经绑定过的设备
     #endif
 
-	log_debug("Device type(%d) conidx(%d) connected, ", param->peer_addr_type, app_env.conidx);
-	log_debug_array_ex("ADDR", &param->peer_addr, 6);
+	// log_debug("Device type(%d) conidx(%d) connected, ", param->peer_addr_type, app_env.conidx);
+	// log_debug_array_ex("ADDR", &param->peer_addr, 6);
     // Check if the received Connection Handle was valid
     if (app_env.conidx != GAP_INVALID_CONIDX)
     {
@@ -585,7 +585,9 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
                 gapc_connection_cfm);
 
         #if(BLE_APP_SEC)
+		//权限设定，防止MIMT攻击并失能绑定
         cfm->auth      = is_bond ? GAP_AUTH_REQ_MITM_BOND : GAP_AUTH_REQ_MITM_BOND; // TODO [FBE] restore valid data
+        //cfm->auth      = GAP_AUTH_REQ_SEC_CON_BOND;
         #else // !(BLE_APP_SEC)
         cfm->auth      = GAP_AUTH_REQ_NO_MITM_NO_BOND;
         #endif // (BLE_APP_SEC)
@@ -635,10 +637,15 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
 
 
         #if (BLE_APP_SEC)
-        if (is_bond)
+        if(is_bond)
         {
             // Ask for the peer device to either start encryption
             //app_sec_send_security_req(app_env.conidx);
+        }
+        else
+        {
+            // app_sec_send_security_req(app_env.conidx);//主动发送安全请求
+            // log_debug("send security req\n");
         }
         #endif // (BLE_APP_SEC)
         //调用app_gap_connected_handler打印对端信息
@@ -1063,6 +1070,13 @@ static int gapm_dev_bdaddr_ind_handler(ke_msg_id_t const msgid, struct gapm_dev_
     return KE_MSG_CONSUMED;
 }
 
+static int gapc_get_rssi_ind_handler(ke_msg_id_t const msgid,struct gapc_con_rssi_ind const *param,
+                                    ke_task_id_t const dest_id,ke_task_id_t const src_id)
+{
+    log_debug("gapc_get_rssi_ind_handler rssi:%d dB\n",param->rssi);//获取RSSI值
+    return (KE_MSG_CONSUMED);
+}
+
 
 /*
  * GLOBAL VARIABLES DEFINITION
@@ -1091,11 +1105,12 @@ KE_MSG_HANDLER_TAB(appm)
     {GAPC_CONNECTION_REQ_IND,   (ke_msg_func_t)gapc_connection_req_ind_handler},
     {GAPC_CMP_EVT,              (ke_msg_func_t)gapc_cmp_evt_handler},
     {GAPC_DISCONNECT_IND,       (ke_msg_func_t)gapc_disconnect_ind_handler},
-    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},//最终连接参数更新完成后进入
-    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},//slave收到主机发送“连接参数更新指令”回调函数
+    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},//slave收到主机发送“连接参数更新指令”回调函数，需要返回确定
+    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},//最终连接参数更新完成后进入
     {GAPC_LE_PKT_SIZE_IND,      (ke_msg_func_t)gapc_pkt_size_ind_handler},
     {GATTC_MTU_CHANGED_IND,     (ke_msg_func_t)gattc_mtu_changed_ind_handler},
     {APP_AUDIO_RX_CMD,          (ke_msg_func_t)app_i2s_rx_data_handler},
+    {GAPC_CON_RSSI_IND,         (ke_msg_func_t)gapc_get_rssi_ind_handler}//获取RSSI值回调
 };
 
 /**< Defines the place holder for the states of all the task instances. */

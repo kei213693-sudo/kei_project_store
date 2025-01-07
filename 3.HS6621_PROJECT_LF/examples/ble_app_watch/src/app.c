@@ -250,10 +250,8 @@ void appm_init(void)
 {
     // Reset the application manager environment
     memset(&app_env, 0, sizeof(app_env));
-
     // Create APP task
     ke_task_create(TASK_APP, &TASK_DESC_APP);
-
     // Initialize Task state
     ke_state_set(TASK_APP, APPM_INIT);
 
@@ -421,6 +419,18 @@ void appm_recv_data(uint8_t conidx, uint8_t *p_pdata, uint16_t len)
     // TOOD: Process received data
 }
 
+//建立连接后，主动调用获取对端设备当前最新的rssi值
+//获取成功后会进入gapc_get_rssi_ind_handler（）回调函数中显示
+void appm_get_rssi(void)
+{
+    // Prepare the GAPC_PARAM_UPDATE_CMD message
+    struct gapc_get_info_cmd *cmd = KE_MSG_ALLOC(GAPC_GET_INFO_CMD,
+                                                KE_BUILD_ID(TASK_GAPC, app_env.conidx), TASK_APP, 
+                                                gapc_get_info_cmd);
+    cmd->operation = GAPC_GET_CON_RSSI;
+    // Send the message
+    ke_msg_send(cmd);
+}
 
 //#endif //(BLE_APP_PRESENT)
 

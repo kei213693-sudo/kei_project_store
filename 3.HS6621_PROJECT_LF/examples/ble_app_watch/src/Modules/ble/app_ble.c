@@ -26,6 +26,7 @@
 #include "app_task.h"
 #include "app.h"
 #include "sf.h"
+#include "app_sec.h"
 
 
 /*******************************内部函数的声明*******************************/
@@ -176,7 +177,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 	if((NULL != pData) && (0 != u16Len))
 	{
 		log_debug("uart rx string:%s\n",pData);
-		log_debug_array_ex("uart rx hex:", pData, u16Len);
+		log_debug_array_ex("uart rx hex", pData, u16Len);
 		
 		if(0 == strncmp("LED",(const char*)pData,3))
 		{//
@@ -238,9 +239,9 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		}
 		else if(0 == strncmp("sysget",(const char*)pData,6))
 		{
-			log_debug_array_ex("SN:", g_stAppBleSysInfo.sn, APP_BLE_SN_LEN);
+			log_debug_array_ex("SN", g_stAppBleSysInfo.sn, APP_BLE_SN_LEN);
 			log_debug("Pair num:%d\n",g_stAppBleSysInfo.pairNum);
-			log_debug_array_ex("Admin Mac Addr:", g_stAppBleSysInfo.administratorMAC, 6);
+			log_debug_array_ex("Admin Mac Addr", g_stAppBleSysInfo.administratorMAC, 6);
 			log_debug("AdvInterval:%d\n",g_stAppBleSysInfo.AdvInterval);
 		}
 		else if(0 == strncmp("blesetmac",(const char*)pData,9))
@@ -257,6 +258,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		else if(0 == strncmp("bleinfoget",(const char*)pData,10))
 		{//获取ble控制信息
 			log_debug_array_ex("app_env", &app_env, sizeof(app_env));
+			log_debug_array_ex("app_sec_env", &app_sec_env, sizeof(app_sec_env));
 		}
 		else if(0 == strncmp("bledis",(const char*)pData,6))
 		{//断开连接
@@ -272,8 +274,38 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			appm_adv_stop(u8Opt);//0代表暂停此次广播，1代表删除此次广播
 		}
 		else if(0 == strncmp("advstate",(const char*)pData,8))
-		{//参考枚举app_adv_state
+		{//广播状态获取，参考枚举app_adv_state
 			log_debug("adv state:%d\n",appm_adv_get_state());
+		}
+		else if(0 == strncmp("DelBond",(const char*)pData,7))
+		{//删除绑定信息
+			uint8_t u8Opt = pData[7] - 0x30;
+			if(0 == u8Opt)
+			{//删除所有
+				app_sec_remove_bond();
+			}
+			else
+			{//删掉除管理员之外的全部
+
+			}
+		}
+		else if(0 == strncmp("rssi",(const char*)pData,4))
+		{//获取最新的rssi值
+			appm_get_rssi();
+		}
+		else if(0 == strncmp("SendSecReq",(const char*)pData,10))
+		{
+			uint8_t u8Opt = pData[10] - 0x30;
+			if(0 == u8Opt)
+			{
+				app_sec_send_security_req(0);//主动发送安全请求
+				log_debug("send security req\n");
+			}
+			else if(1 == u8Opt)
+			{
+				app_sec_bond_req(0);//主动发送安全请求
+				log_debug("send bond req\n");
+			}
 		}
 		else
 		{

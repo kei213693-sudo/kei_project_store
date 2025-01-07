@@ -246,6 +246,10 @@ void appm_disconnect(uint8_t conidx);
  */
 uint8_t appm_get_dev_name(uint8_t* name);
 
+
+void appm_get_rssi(void);
+
+
 //#endif //(BLE_APP_PRESENT)
 
 /// @} APP

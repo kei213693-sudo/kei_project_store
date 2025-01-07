@@ -11,7 +11,7 @@
 #define HAL_UART_LOG_RX_PIN             6
 #define HAL_UART_LOG_BAUDRATE           115200
 #define HAL_UART_LOG_LEN    	        (32)
-#define HAL_UART_LOG_RX_IRQ_TIMEOUT     ((1*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
+#define HAL_UART_LOG_RX_IRQ_TIMEOUT     ((3*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
 
 
 //MCU通信串口
@@ -20,7 +20,7 @@
 #define HAL_UART_FM33LG_RX_PIN          9
 #define HAL_UART_FM33LG_BAUDRATE        115200
 #define HAL_UART_FM33LG_LEN    	        (128)//tx+rx最大数据长度，确保 >= PROTOCOL_BUFF_SIZE
-#define HAL_UART_FM33LG_RX_IRQ_TIMEOUT  ((5*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
+#define HAL_UART_FM33LG_RX_IRQ_TIMEOUT  ((3*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
 #define HAL_UART_FM33LG_DMA             (0)//1启动DMA模式
 
 /*******************************结构体、枚举等******************************/

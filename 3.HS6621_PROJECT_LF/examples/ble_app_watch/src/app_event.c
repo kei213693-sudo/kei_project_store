@@ -72,8 +72,8 @@ void app_audio_rx_cmd_handler(struct app_audio_rx_cmd_t const *param)
  */
 void app_gap_connected_handler(struct gapc_connection_req_ind const *param)
 {
-    log_debug("----------%s@%d,conhdl:%d,Addr Type:%d\n", __func__, __LINE__,param->conhdl,param->peer_addr_type);
-    log_debug_array_ex("ADDR:", &param->peer_addr, 6);
+    log_debug("----------%s@%d,conhdl:%d,Addr Type:%d,", __func__, __LINE__,param->conhdl,param->peer_addr_type);
+    log_debug_array_ex("ADDR", &param->peer_addr, 6);
     if(1){ // is android devices
         //app_sec_send_security_req(app_env.conidx);//主动发送安全请求
     }

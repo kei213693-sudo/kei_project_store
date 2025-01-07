@@ -29,7 +29,7 @@
 #include "co_utils.h"
 #include "co_math.h"
 
-#if (BLE_APP_SEC)
+//#if (BLE_APP_SEC)
 #include "gapc_task.h"      // GAP Controller Task API Definition
 #include "gap.h"            // GAP Definition
 #include "gapc.h"           // GAPC Definition
@@ -69,7 +69,7 @@ struct app_sec_env_tag app_sec_env;
  ****************************************************************************************
  */
 
-void app_sec_init()
+void app_sec_init(void)
 {
     memset(&app_sec_env, 0, sizeof(app_sec_env));
     /*------------------------------------------------------
@@ -79,7 +79,7 @@ void app_sec_init()
     struct app_sec_conn_info_tag info;
     nvds_tag_len_t length = sizeof(struct app_sec_conn_info_tag);
     uint8_t index = 0;
-    uint8_t nvds_len = NVDS_TAG_BLE_LINK_KEY_LAST-NVDS_TAG_BLE_LINK_KEY_FIRST;
+    uint8_t nvds_len = NVDS_TAG_BLE_LINK_KEY_LAST-NVDS_TAG_BLE_LINK_KEY_FIRST;//绑定数量限制
 
     app_sec_env.bonded = false;
 
@@ -89,7 +89,7 @@ void app_sec_init()
         length = sizeof(struct app_sec_conn_info_tag);
         memset(&info, 0, length);
         if (nvds_get(NVDS_TAG_BLE_LINK_KEY_FIRST+index, &length, (uint8_t *)&info) == NVDS_OK)
-        {
+        {//遍历绑定列表，有一个存在有效信息app_sec_env.bonded就是true
             app_sec_env.bonded = true;
             break;
         }
@@ -150,7 +150,7 @@ void app_sec_remove_bond(void)
         uint8_t nvds_len = NVDS_TAG_BLE_LINK_KEY_LAST-NVDS_TAG_BLE_LINK_KEY_FIRST;
 
         for(index =0; index <= nvds_len; index++)
-        {
+        {//全部删掉
             nvds_del(NVDS_TAG_BLE_LINK_KEY_FIRST+index) ;
         }
 
@@ -173,11 +173,11 @@ void app_sec_send_security_req(uint8_t conidx)
 {
     // Send security request
     struct gapc_security_cmd *cmd = KE_MSG_ALLOC(GAPC_SECURITY_CMD,
-                                                 KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
-                                                 gapc_security_cmd);
+                                                KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
+                                                gapc_security_cmd);
 
     cmd->operation = GAPC_SECURITY_REQ;
-    cmd->auth      = GAP_AUTH_REQ_NO_MITM_BOND;
+    cmd->auth      = GAP_AUTH_REQ_SEC_CON_BOND;//GAP_AUTH_REQ_NO_MITM_BOND;
 
     // Send the message
     ke_msg_send(cmd);
@@ -187,8 +187,8 @@ void app_sec_send_security_req(uint8_t conidx)
 void app_sec_bond_req(uint8_t conidx)
 {
     struct gapc_bond_cmd *cmd = KE_MSG_ALLOC(GAPC_BOND_CMD,
-                                                 KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
-                                                 gapc_bond_cmd);
+                                                KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
+                                                gapc_bond_cmd);
 
     cmd->operation = GAPC_BOND;
     /// IO capabilities (@see gap_io_cap)
@@ -214,8 +214,8 @@ void app_sec_bond_req(uint8_t conidx)
 void app_sec_encrypt_req(uint8_t conidx, bd_addr_t peer_addr)
 {
     struct gapc_encrypt_cmd *cmd = KE_MSG_ALLOC(GAPC_ENCRYPT_CMD,
-                                                 KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
-                                                 gapc_encrypt_cmd);
+                                                KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
+                                                gapc_encrypt_cmd);
 
     cmd->operation = GAPC_ENCRYPT;
     #if (NVDS_SUPPORT)
@@ -251,17 +251,17 @@ void app_sec_encrypt_req(uint8_t conidx, bd_addr_t peer_addr)
  */
 
 static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
-                                     struct gapc_bond_req_ind const *param,
-                                     ke_task_id_t const dest_id,
-                                     ke_task_id_t const src_id)
+                                    struct gapc_bond_req_ind const *param,
+                                    ke_task_id_t const dest_id,
+                                    ke_task_id_t const src_id)
 {
     uint8_t conidx = KE_IDX_GET(src_id);
     //log_debug("%s@%d, request=%x\n", __func__, __LINE__, param->request);
 
     // Prepare the GAPC_BOND_CFM message
     struct gapc_bond_cfm *cfm = KE_MSG_ALLOC(GAPC_BOND_CFM,
-                                             src_id, TASK_APP,
-                                             gapc_bond_cfm);
+                                            src_id, TASK_APP,
+                                            gapc_bond_cfm);
 
     switch (param->request)
     {
@@ -397,6 +397,7 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
         {
             // Generate a PIN Code- (Between 100000 and 999999)
             uint32_t pin_code = (100000 + (co_rand_word()%900000));
+            log_debug("pin_code:%d\n",pin_code);
 
             cfm->accept  = true;
             cfm->request = GAPC_TK_EXCH;
@@ -741,7 +742,7 @@ int app_sec_gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
     }
     return (KE_MSG_CONSUMED);
 }
- /*
+/*
   * LOCAL VARIABLE DEFINITIONS
   ****************************************************************************************
   */
@@ -762,18 +763,18 @@ const struct ke_msg_handler app_sec_msg_handler_list[] =
 
 const struct app_subtask_handlers app_sec_handlers = {&app_sec_msg_handler_list[0], ARRAY_LEN(app_sec_msg_handler_list)};
 
-#else
-/**
- ****************************************************************************************
- * @brief Return if the device is currently bonded in the flash
- * @return if bonded return true, else return false.
- ****************************************************************************************
- */
-bool app_sec_get_bond_status(void)
-{
-    return 0;
-}
+// #else
+// /**
+//  ****************************************************************************************
+//  * @brief Return if the device is currently bonded in the flash
+//  * @return if bonded return true, else return false.
+//  ****************************************************************************************
+//  */
+// bool app_sec_get_bond_status(void)
+// {
+//     return 0;
+// }
 
-#endif //(BLE_APP_SEC)
+// #endif //(BLE_APP_SEC)
 
 /// @} APP

@@ -62,6 +62,7 @@
 /// NVDS has 8-bit length tags
 #define NVDS_8BIT_TAGLENGTH      1
 
+//tag长度限制，这里是1bytes，最多有255种
 #if !NVDS_EN_NEW
     /// Type of the tag length (8 or 16 bits)
     #if (NVDS_8BIT_TAGLENGTH)

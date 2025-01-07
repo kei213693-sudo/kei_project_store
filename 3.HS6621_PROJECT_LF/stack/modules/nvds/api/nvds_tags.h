@@ -106,12 +106,12 @@ enum NVDS_TAGS
     NVDS_TAG_OTAS_STATIC_ADDRESS        = 0x66,
     NVDS_TAG_APP_STATIC_ADDRESS         = 0x67,
 
-    NVDS_TAG_BT_LINK_KEY_FIRST          = 0x68,
+    NVDS_TAG_BT_LINK_KEY_FIRST          = 0x68,//经典蓝牙
     NVDS_TAG_BT_LINK_KEY_LAST           = 0x6E,
 
     NVDS_TAG_BLE_LINK_KEY_INDEX         = 0x6F,
-    NVDS_TAG_BLE_LINK_KEY_FIRST         = 0x70,
-    NVDS_TAG_BLE_LINK_KEY_LAST          = 0x7F,
+    NVDS_TAG_BLE_LINK_KEY_FIRST         = 0x70,//存储配对信息的开始地址
+    NVDS_TAG_BLE_LINK_KEY_LAST          = 0x7F,//存储配对信息的结束地址
     /// SC Private Key (Low Energy)
     NVDS_TAG_LE_PRIVATE_KEY_P256        = 0x80,
     /// SC Public Key (Low Energy)
@@ -131,6 +131,7 @@ enum NVDS_TAGS
     NVDS_TAG_APP_SPECIFIC_LAST          = 0xAF,
 };
 
+//每个tag最大只能给256bytes的存储空间
 enum NVDS_TAGS_LEN
 {
      // Definition of length associated to each parameters
