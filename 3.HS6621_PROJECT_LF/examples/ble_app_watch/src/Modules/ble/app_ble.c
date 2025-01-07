@@ -179,33 +179,12 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		log_debug("uart rx string:%s\n",pData);
 		log_debug_array_ex("uart rx hex", pData, u16Len);
 		
-		if(0 == strncmp("LED",(const char*)pData,3))
-		{//
-			uint8_t u8Opt = pData[3] - 0x30;
-			log_debug("LED opt:%d\n",u8Opt);
+		if(0 == strncmp("reboot",(const char*)pData,6))
+		{//强制重启
+			pmu_force_reboot();
 		}
-		// else if(0 == strncmp("flashtest",(const char*)pData,9))
-		// {//flash测试
-		// 	uint8_t u8Opt = pData[9] - 0x30;
-		// 	uint8_t data[128] = {0};
-		// 	uint8_t data2[128] = {0};
-		// 	uint8_t i = 0;
-		// 	for(i = u8Opt;i<(128 + u8Opt);i++)
-		// 	{
-		// 		data[i-u8Opt] = i;
-		// 	}
-			
-		// 	hal_flash_erase(HAL_FLASH_USER_DATA_START,(HAL_FLASH_USER_DATA_END - HAL_FLASH_USER_DATA_START));//先擦除
-		// 	hal_flash_write(HAL_FLASH_USER_DATA_START,data,128);//先写入
-		// 	hal_flash_read(HAL_FLASH_USER_DATA_START,data2,128);//再读取
-		// 	log_debug_array_ex("flash data",data2,128);//打印待写入的数据
-		// }
-		// else if(0 == strncmp("mcurx",(const char*)pData,5))
-		// {
-		// 	ke_timer_set(APP_BLE_OPT_MCU_RX, APP_BLE_TASK_ID, 0);//让log task去处理uart数据
-		// }
 		// else if(0 == strncmp("task",(const char*)pData,4))
-		// {//task state测试
+		// {//task state测试，暂时看不出什么成效
 		// 	extern ke_state_t appm_state[APP_IDX_MAX];//状态列表
 
 		// 	uint8_t u8Opt = pData[4] - 0x30;
@@ -215,10 +194,6 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		// 	log_debug_array_ex("appm_state hex", appm_state, APP_IDX_MAX);
 		// 	log_debug_array_ex("app_ble_task_state hex", app_ble_task_state, APP_BLE_IDX_MAX);
 		// }
-		else if(0 == strncmp("reboot",(const char*)pData,6))
-		{//强制重启
-			pmu_force_reboot();
-		}
 		else if(0 == strncmp("sysdump",(const char*)pData,7))
 		{//打印系统信息
 			log_debug("Version data:%s\n",APP_VERSION_DATE);
@@ -264,18 +239,29 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		{//断开连接
 			appm_disconnect(0);
 		}
-		else if(0 == strncmp("advstart",(const char*)pData,8))
-		{//启动广播
-			appm_adv_start();
-		}
-		else if(0 == strncmp("advstop",(const char*)pData,7))
+		else if(0 == strncmp("advOpt",(const char*)pData,6))
 		{//停止广播
-			uint8_t u8Opt = pData[7] - 0x30;
-			appm_adv_stop(u8Opt);//0代表暂停此次广播，1代表删除此次广播
+			uint8_t u8Opt = pData[6] - 0x30;
+			if(0 == u8Opt)
+			{//0代表暂停此次广播
+				appm_adv_stop(0);
+			}
+			else if(1 == u8Opt)
+			{//1代表删除此次广播
+				appm_adv_stop(1);
+			}
+			else if(2 == u8Opt)
+			{//启动广播
+				appm_adv_start();
+			}
+			else if(3 == u8Opt)
+			{//广播状态获取，参考枚举app_adv_state
+				log_debug("adv state:%d\n",appm_adv_get_state());
+			}
 		}
-		else if(0 == strncmp("advstate",(const char*)pData,8))
-		{//广播状态获取，参考枚举app_adv_state
-			log_debug("adv state:%d\n",appm_adv_get_state());
+		else if(0 == strncmp("rssi",(const char*)pData,4))
+		{//获取最新的rssi值
+			appm_get_rssi();
 		}
 		else if(0 == strncmp("DelBond",(const char*)pData,7))
 		{//删除绑定信息
@@ -286,16 +272,12 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			}
 			else
 			{//删掉除管理员之外的全部
-
+				
 			}
 		}
-		else if(0 == strncmp("rssi",(const char*)pData,4))
-		{//获取最新的rssi值
-			appm_get_rssi();
-		}
-		else if(0 == strncmp("SendSecReq",(const char*)pData,10))
+		else if(0 == strncmp("SendBond",(const char*)pData,8))
 		{
-			uint8_t u8Opt = pData[10] - 0x30;
+			uint8_t u8Opt = pData[8] - 0x30;
 			if(0 == u8Opt)
 			{
 				app_sec_send_security_req(0);//slave主动发送安全请求

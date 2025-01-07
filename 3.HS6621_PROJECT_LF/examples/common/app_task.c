@@ -278,9 +278,9 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 cmd->sugg_max_tx_time   = BLE_MAX_TIME;
                 //cmd->max_mtu            = 200;
                 /// Preferred LE PHY for data transmission (@see enum gap_phy)
-                cmd->tx_pref_phy = GAP_PHY_LE_2MBPS;
+                cmd->tx_pref_phy = GAP_PHY_LE_1MBPS;
                 /// Preferred LE PHY for data reception (@see enum gap_phy)
-                cmd->rx_pref_phy = GAP_PHY_LE_2MBPS;
+                cmd->rx_pref_phy = GAP_PHY_LE_1MBPS;
                 // Maximal MTU/MPS acceptable for device
                 cmd->max_mtu = 251;
                 cmd->max_mps = GAP_MAX_LE_MTU;
@@ -291,7 +291,7 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 #endif //(BLE_APP_HID)
 
                 // Host privacy disabled by default
-                cmd->privacy_cfg = GAPM_PRIV_CFG_PRIV_ADDR_BIT;//地址类型
+                cmd->privacy_cfg = 0;//GAPM_PRIV_CFG_PRIV_ADDR_BIT;//地址类型
                 memcpy(cmd->addr.addr, &app_env.addr.addr[0], 6);//配置地址参数
                 
                 #if ((NVDS_SUPPORT) && (BLE_APP_SEC))
