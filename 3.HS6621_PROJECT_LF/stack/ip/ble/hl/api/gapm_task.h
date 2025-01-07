@@ -433,7 +433,7 @@ enum gapm_write_att_perm
     /// Enable write access - no authentication required
     GAPM_WRITE_NO_AUTH     = 1,
     /// Write access requires unauthenticated link
-    GAPM_WRITE_UNAUTH      = 2,
+    GAPM_WRITE_UNAUTH      = 2,//client访问该特征值时，启动just work
     /// Write access requires authenticated link
     GAPM_WRITE_AUTH        = 3,
     /// Write access requires secure connected link

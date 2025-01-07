@@ -549,6 +549,23 @@ static int gapc_set_dev_info_req_ind_handler(ke_msg_id_t const msgid,
     return (KE_MSG_CONSUMED);
 }
 
+// static co_timer_t bond_check_timer;
+// static void bond_check_timer_handler(co_timer_t *timer, void *param)
+// {
+//     uint8_t conidx;
+
+//     if(param != NULL)
+//     {
+//         conidx = *(uint8_t*)param;
+//         log_debug("bond_check_timer_handler is called\n");
+//         if(app_sec_get_bond_status() == 0)
+//         {
+//             log_debug("not bond, disconn\n");
+//             appm_disconnect(conidx);
+//         }
+//     }
+// }
+
 /**
  ****************************************************************************************
  * @brief Handles connection complete event from the GAP. Enable all required profiles
@@ -585,9 +602,10 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
                 gapc_connection_cfm);
 
         #if(BLE_APP_SEC)
-		//权限设定，防止MIMT攻击并失能绑定
-        cfm->auth      = is_bond ? GAP_AUTH_REQ_MITM_BOND : GAP_AUTH_REQ_MITM_BOND; // TODO [FBE] restore valid data
-        //cfm->auth      = GAP_AUTH_REQ_SEC_CON_BOND;
+		//权限设定，走Legacy Pairing模式，启动MIMT保护，允许绑定
+        //；不支持Secure Connections Pairing模式
+        cfm->auth      = is_bond ? GAP_AUTH_REQ_MITM_BOND : GAP_AUTH_REQ_MITM_BOND;
+        //cfm->auth      = GAP_AUTH_REQ_MITM_BOND;
         #else // !(BLE_APP_SEC)
         cfm->auth      = GAP_AUTH_REQ_NO_MITM_NO_BOND;
         #endif // (BLE_APP_SEC)
@@ -639,13 +657,15 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
         #if (BLE_APP_SEC)
         if(is_bond)
         {
-            // Ask for the peer device to either start encryption
-            //app_sec_send_security_req(app_env.conidx);
+            log_debug("is bonded\n");
         }
         else
         {
-            // app_sec_send_security_req(app_env.conidx);//主动发送安全请求
-            // log_debug("send security req\n");
+            app_sec_send_security_req(app_env.conidx);//安全连接请求
+            //app_sec_bond_req(app_env.conidx);//绑定请求，对ios手机没用
+            log_debug("send bond req\n");
+            //启动定时器判定绑定是否成功，不成功就断开连接
+            // co_timer_set(&bond_check_timer, 5000, TIMER_ONE_SHOT, bond_check_timer_handler, &app_env.conidx);
         }
         #endif // (BLE_APP_SEC)
         //调用app_gap_connected_handler打印对端信息

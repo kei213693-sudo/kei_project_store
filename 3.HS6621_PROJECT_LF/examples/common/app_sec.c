@@ -169,6 +169,7 @@ void app_sec_remove_bond(void)
 }
 #endif //(NVDS_SUPPORT)
 
+//slave主动发送安全请求
 void app_sec_send_security_req(uint8_t conidx)
 {
     // Send security request
@@ -183,30 +184,30 @@ void app_sec_send_security_req(uint8_t conidx)
     ke_msg_send(cmd);
 }
 
-
+//slave主动发送配对绑定请求，对ios手机没用
 void app_sec_bond_req(uint8_t conidx)
 {
     struct gapc_bond_cmd *cmd = KE_MSG_ALLOC(GAPC_BOND_CMD,
-                                                KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
-                                                gapc_bond_cmd);
+                                            KE_BUILD_ID(TASK_GAPC, conidx), TASK_APP,
+                                            gapc_bond_cmd);
 
     cmd->operation = GAPC_BOND;
     /// IO capabilities (@see gap_io_cap)
-    cmd->pairing.iocap = GAP_IO_CAP_NO_INPUT_NO_OUTPUT;
-    cmd->pairing.oob = GAP_OOB_AUTH_DATA_NOT_PRESENT;
+    cmd->pairing.iocap = GAP_IO_CAP_DISPLAY_ONLY;//仅显示
+    cmd->pairing.oob = GAP_OOB_AUTH_DATA_NOT_PRESENT;//不支持OOB
     /// Authentication (@see gap_auth)
     /// Note in BT 4.1 the Auth Field is extended to include 'Key Notification' and
     /// and 'Secure Connections'.
-    cmd->pairing.auth = GAP_AUTH_REQ_NO_MITM_BOND;
+    cmd->pairing.auth = GAP_AUTH_REQ_MITM_BOND;//需要MIMT保护的绑定//GAP_AUTH_REQ_NO_MITM_BOND;
     /// Encryption key size (7 to 16)
     cmd->pairing.key_size = 16;
     ///Initiator key distribution (@see gap_kdist)
-    cmd->pairing.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+    cmd->pairing.ikey_dist = GAP_KDIST_IDKEY;//GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
     ///Responder key distribution (@see gap_kdist)
-    cmd->pairing.rkey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+    cmd->pairing.rkey_dist = GAP_KDIST_ENCKEY;//GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
 
     /// Device security requirements (minimum security level). (@see gap_sec_req)
-    cmd->pairing.sec_req = GAP_NO_SEC;
+    cmd->pairing.sec_req = GAP_SEC1_AUTH_PAIR_ENC;//Mode1 Level3
     // Send the message
     ke_msg_send(cmd);
 }
@@ -273,11 +274,12 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
             cfm->accept  = false;
 
             // Check if we are already bonded (Only one bonded connection is supported)
-            if (!app_sec_env.con_bonded[conidx])
+            //if (!app_sec_env.con_bonded[conidx])//屏蔽掉，不然只支持一个绑定数
             #endif // !BLE_APP_AM0
             {
                 cfm->accept  = true;
 
+                //auth参数配置，GAP_AUTH_REQ_MITM_BOND
                 #if (BLE_APP_HID || BLE_APP_HT)
                 // Pairing Features
                 cfm->data.pairing_feat.auth      = GAP_AUTH_REQ_MITM_BOND;
@@ -301,33 +303,34 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
                 cfm->data.pairing_feat.auth      = GAP_AUTH_REQ_NO_MITM_BOND;
                 #endif //(BLE_APP_HID || BLE_APP_HT)
 
+                //iocap参数配置，GAP_IO_CAP_DISPLAY_ONLY
                 #if (BLE_APP_HT)
                 cfm->data.pairing_feat.iocap     = GAP_IO_CAP_DISPLAY_ONLY;
                 #else
-                cfm->data.pairing_feat.iocap     = GAP_IO_CAP_NO_INPUT_NO_OUTPUT;
+                cfm->data.pairing_feat.iocap     = GAP_IO_CAP_DISPLAY_ONLY;//GAP_IO_CAP_NO_INPUT_NO_OUTPUT;
                 #endif //(BLE_APP_HT)
 
                 cfm->data.pairing_feat.key_size  = 16;
-                cfm->data.pairing_feat.oob       = GAP_OOB_AUTH_DATA_NOT_PRESENT;
-                cfm->data.pairing_feat.sec_req   = GAP_NO_SEC;
+                cfm->data.pairing_feat.oob       = GAP_OOB_AUTH_DATA_NOT_PRESENT;//不支持oop
+                cfm->data.pairing_feat.sec_req   = GAP_SEC1_AUTH_PAIR_ENC;//Mode1 Level3
 
                 #if (defined(BLE_APP_AM0))
                 cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
-                #if BLE_APP_AM0
-                // No Keys required from the Initiator
-                cfm->data.pairing_feat.ikey_dist = 0;
+                    #if BLE_APP_AM0
+                    // No Keys required from the Initiator
+                    cfm->data.pairing_feat.ikey_dist = 0;
+                    #else
+                    cfm->data.pairing_feat.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+                    #endif
                 #else
-                cfm->data.pairing_feat.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
-                #endif
-                #else
-#if (BLE_APP_PRIVACY)
-                cfm->data.pairing_feat.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
-                cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
-#else
-                cfm->data.pairing_feat.ikey_dist = GAP_KDIST_IDKEY;
-                cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY;
-                cfm->data.pairing_feat.auth      = GAP_AUTH_REQ_MITM_BOND;
-#endif
+                    #if (BLE_APP_PRIVACY)
+                    cfm->data.pairing_feat.ikey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+                    cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY | GAP_KDIST_IDKEY;
+                    #else
+                    cfm->data.pairing_feat.ikey_dist = GAP_KDIST_IDKEY;
+                    cfm->data.pairing_feat.rkey_dist = GAP_KDIST_ENCKEY;
+                    cfm->data.pairing_feat.auth      = GAP_AUTH_REQ_MITM_BOND;
+                    #endif//BLE_APP_PRIVACY
                 #endif // (defined(BLE_APP_AM0))
             }
         } break;
@@ -726,6 +729,7 @@ static int app_sec_msg_dflt_handler(ke_msg_id_t const msgid,
     return (KE_MSG_CONSUMED);
 }
 
+//用于删除解决“删除绑定后再次绑定会出现错误，除非重启再次绑定，主要是断联后并未修改之前的已绑定状态”的问题
 int app_sec_gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
                                     void *param,
                                     ke_task_id_t const dest_id,

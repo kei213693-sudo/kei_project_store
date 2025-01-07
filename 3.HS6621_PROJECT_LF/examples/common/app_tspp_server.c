@@ -73,7 +73,7 @@ void app_tspp_server_add_service(void)
             gapm_profile_task_add_cmd, sizeof(struct tspp_server_db_cfg));
     // Fill message
     req->operation   = GAPM_PROFILE_TASK_ADD;
-    req->sec_lvl     = PERM(SVC_AUTH, NO_AUTH)|PERM(SVC_MI,ENABLE);
+    req->sec_lvl     = PERM(SVC_AUTH, AUTH)|PERM(SVC_MI,ENABLE);//修改为mode1 level3配对模式
     req->prf_task_id = TASK_ID_TSPPS;
     req->app_task    = TASK_APP;
     req->start_hdl   = 0;

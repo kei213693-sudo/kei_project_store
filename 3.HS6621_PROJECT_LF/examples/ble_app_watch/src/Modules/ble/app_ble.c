@@ -298,12 +298,12 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			uint8_t u8Opt = pData[10] - 0x30;
 			if(0 == u8Opt)
 			{
-				app_sec_send_security_req(0);//主动发送安全请求
+				app_sec_send_security_req(0);//slave主动发送安全请求
 				log_debug("send security req\n");
 			}
 			else if(1 == u8Opt)
 			{
-				app_sec_bond_req(0);//主动发送安全请求
+				app_sec_bond_req(0);//slave主动发送配对绑定请求
 				log_debug("send bond req\n");
 			}
 		}

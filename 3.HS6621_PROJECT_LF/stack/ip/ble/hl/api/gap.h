@@ -468,13 +468,13 @@ enum gap_kdist
     /// No Keys to distribute
     GAP_KDIST_NONE = 0x00,
     /// Encryption key in distribution
-    GAP_KDIST_ENCKEY = (1 << 0),
+    GAP_KDIST_ENCKEY = (1 << 0),//长期密钥LTK分发使能位，使能之后才能分发LTK、EDIV、Rand。此位只在传统配对模式有效，因为安全连接配对模式是直接协商生成LTK的，并不需要分发LTK给对方。
     /// IRK (ID key)in distribution
-    GAP_KDIST_IDKEY  = (1 << 1),
+    GAP_KDIST_IDKEY  = (1 << 1),//IRK分发使能位
     /// CSRK(Signature key) in distribution
-    GAP_KDIST_SIGNKEY= (1 << 2),
+    GAP_KDIST_SIGNKEY= (1 << 2),//签名密钥CSRK分发使能位
     /// LTK in distribution
-    GAP_KDIST_LINKKEY=   (1 << 3),
+    GAP_KDIST_LINKKEY=   (1 << 3),//经典蓝牙LL层数据加密使能位
 
     GAP_KDIST_LAST =   (1 << 4)
 };
@@ -483,17 +483,17 @@ enum gap_kdist
 enum gap_sec_req
 {
     /// No security (no authentication and encryption)
-    GAP_NO_SEC = 0x00,
+    GAP_NO_SEC = 0x00,//Mode1 Level1
     /// Unauthenticated pairing with encryption
-    GAP_SEC1_NOAUTH_PAIR_ENC,
+    GAP_SEC1_NOAUTH_PAIR_ENC,//Mode1 Level2
     /// Authenticated pairing with encryption
-    GAP_SEC1_AUTH_PAIR_ENC,
+    GAP_SEC1_AUTH_PAIR_ENC,//Mode1 Level3
     /// Unauthenticated pairing with data signing
-    GAP_SEC2_NOAUTH_DATA_SGN,
+    GAP_SEC2_NOAUTH_DATA_SGN,//Mode2 Level1
     /// Authentication pairing with data signing
-    GAP_SEC2_AUTH_DATA_SGN,
+    GAP_SEC2_AUTH_DATA_SGN,//Mode2 Level2
     /// Secure Connection pairing with encryption
-    GAP_SEC1_SEC_CON_PAIR_ENC,
+    GAP_SEC1_SEC_CON_PAIR_ENC,//Mode1 Level4
 };
 
 /// Bit field use to select the preferred TX or RX LE PHY. 0 means no preferences

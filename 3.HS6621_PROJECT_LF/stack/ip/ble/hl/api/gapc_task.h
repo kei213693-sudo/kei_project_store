@@ -571,7 +571,7 @@ struct gapc_connection_cfm
     uint32_t rsign_counter;
 
     /// Authentication (@see gap_auth)
-    uint8_t auth;
+    uint8_t auth;//安全连接模式标志，决定配对方式的三要素之一
 
     #if (CONFIG_BLE_VERSION >= BLE_VERSION_51)
     /// client bond data information
