@@ -203,27 +203,28 @@ static void appm_build_adv_data(uint16_t max_length, uint16_t *p_length, uint8_t
     ASSERT_ERR(rem_len >= max_length);
 }
 
-static void appm_advertising_init(void)
+void appm_advertising_init(void)
 {
+    //广播参数配置
     struct app_adv_modes_config_tag adv_config;
-
     adv_config.whitelist_enabled = false;
     adv_config.directed_enabled = false;
     adv_config.directed_timeout = APP_ADV_DIRECTED_TIMEOUT;
     adv_config.fast_enabled = true;
-    adv_config.fast_interval = (uint32_t)g_stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_INTERVAL;
-    adv_config.fast_timeout = (uint32_t)g_stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_TIMEOUT;
+    adv_config.fast_interval = (uint32_t)g_stAppBleCtl.stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_INTERVAL;
+    adv_config.fast_timeout = (uint32_t)g_stAppBleCtl.stAppBleSysInfo.AdvInterval;//APP_ADV_FAST_TIMEOUT;
     adv_config.slow_enabled = false;
     adv_config.slow_interval = APP_ADV_SLOW_INTERVAL;
     adv_config.slow_timeout = APP_ADV_SLOW_TIMEOUT;
-
     appm_adv_init(NULL, &adv_config);
 
+    //广播包数据组包
     uint8_t default_adv_data[ADV_DATA_LEN - 3];
     uint16_t adv_len = 0;
     appm_build_adv_data(ADV_DATA_LEN - 3, &adv_len, (uint8_t*)default_adv_data);
     appm_adv_set_adv_data((uint8_t*)default_adv_data, adv_len);
 
+    //扫描响应包数据组包
     uint8_t res_data[APP_ADV_MAX_LEN];
     memcpy(res_data, APP_SCNRSP_DATA, APP_SCNRSP_DATA_LEN);
     appm_adv_set_res_data(res_data, APP_SCNRSP_DATA_LEN);
@@ -263,7 +264,7 @@ void appm_init(void)
     {
         // Get default Device Name (No name if not enough space)
         memcpy(app_env.dev_name, APP_DFLT_DEVICE_NAME, APP_DFLT_DEVICE_NAME_LEN);//前缀
-        memcpy(&app_env.dev_name[APP_DFLT_DEVICE_NAME_LEN], g_stAppBleSysInfo.sn, APP_BLE_SN_LEN);//sn码
+        memcpy(&app_env.dev_name[APP_DFLT_DEVICE_NAME_LEN], g_stAppBleCtl.stAppBleSysInfo.sn, APP_BLE_SN_LEN);//sn码
         app_env.dev_name_len = APP_DFLT_DEVICE_NAME_LEN + APP_BLE_SN_LEN;
     }
 

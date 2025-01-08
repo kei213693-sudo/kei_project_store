@@ -153,7 +153,40 @@
           <Name>JL2CM4 (-S0 -C0 -FO7  -FN1 -FC4000 -FD20000000 -FF0HS6621C -FL020000 -FS000000000</Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>748</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>4259806</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\common\app_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\ble_app_watch\../../common/app_task.c\748</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>385</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>4267344</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\..\common\app_task.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\ble_app_watch\../../common/app_task.c\385</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -169,6 +202,16 @@
           <count>2</count>
           <WinNumber>1</WinNumber>
           <ItemText>appm_state</ItemText>
+        </Ww>
+        <Ww>
+          <count>3</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>u16Value</ItemText>
+        </Ww>
+        <Ww>
+          <count>4</count>
+          <WinNumber>1</WinNumber>
+          <ItemText>app_adv_env</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -218,7 +261,7 @@
 
   <Group>
     <GroupName>startup</GroupName>
-    <tvExp>0</tvExp>
+    <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
     <RteFlg>0</RteFlg>

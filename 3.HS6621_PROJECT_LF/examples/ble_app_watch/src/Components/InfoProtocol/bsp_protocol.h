@@ -49,10 +49,10 @@ typedef struct
 //控制体
 typedef struct
 {//284bytes
-    uint32_t txlen;//接收数据总长度
-    uint32_t rxlen;
-    uint8_t txbuf[PROTOCOL_BUFF_SIZE];//存储tx buf的缓存
-    uint8_t rxbuf[PROTOCOL_BUFF_SIZE];//存储rx buf的缓存
+    uint32_t txLen;//接收数据总长度
+    uint32_t rxLen;
+    uint8_t txBuf[PROTOCOL_BUFF_SIZE];//存储tx buf的缓存
+    uint8_t rxBuf[PROTOCOL_BUFF_SIZE];//存储rx buf的缓存
     protocol_t tx;//控制指针
     protocol_t rx;
     uint16_t lasrsp;//最后一包的响应指令
@@ -163,11 +163,11 @@ typedef enum
 	cmdBleSnSetReq                       = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2a),//设置序列号
 	cmdBleSnSetRsp                       = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2b),//
 	
-	cmdBlePairAddReq                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2c),//启动配对
-	cmdBlePairAddRsp                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2d),//
+	cmdBleBondAddReq                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2c),//启动配对
+	cmdBleBondAddRsp                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2d),//
 	
-	cmdBlePairDelReq                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2e),//删除配对 
-	cmdBlePairDelRsp                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2f),//
+	cmdBleBondDelReq                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2e),//删除配对 
+	cmdBleBondDelRsp                     = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x2f),//
 	
 	cmdBleParamSetReq                    = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x30),//设置ble参数
 	cmdBleParamSetRsp                    = PROTOCOL_CMD(PROTOCOL_PID_BLE,0x31),//

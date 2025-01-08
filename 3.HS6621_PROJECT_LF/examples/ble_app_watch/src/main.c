@@ -64,8 +64,6 @@
 
 static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_WAKEUP_0) | BIT_MASK(PIN_WAKEUP_1));
 
-static co_timer_t simple_timer;
-
 /*********************************************************************
  * GLOBAL VARIABLES
  */
@@ -162,11 +160,6 @@ co_power_status_t power_sleep_status_handler(void)
     return pmu_status;
 }
 
-static void simple_timer_handler(co_timer_t *timer, void *param)
-{
-    //sysdump();
-}
-
 static void ble_stack_config(void)
 {
     pmu_dcdc_enable(true);
@@ -203,7 +196,6 @@ int main(void)
 
 	app_ble_init();//先初始化自定义任务
     appm_init();//再初始化ble协议参数
-    co_timer_set(&simple_timer, 1000,TIMER_REPEAT, simple_timer_handler, NULL);
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);

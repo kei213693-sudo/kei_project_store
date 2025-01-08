@@ -100,6 +100,8 @@ void app_sec_init(void);
  ****************************************************************************************
  */
 void app_sec_remove_bond(void);
+
+void app_sec_remove_bond_not_admin(void);
 #endif //(NVDS_SUPPORT)
 
 /**

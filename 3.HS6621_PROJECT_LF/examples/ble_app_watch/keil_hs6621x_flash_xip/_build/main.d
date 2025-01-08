@@ -120,3 +120,4 @@
 .\_build\main.o: ..\src\Peripheral\hal_flash.h
 .\_build\main.o: ..\src\Peripheral\hal_wdt.h
 .\_build\main.o: ..\src\Modules\ble\app_ble.h
+.\_build\main.o: ..\src\Components\InfoProtocol\bsp_protocol.h

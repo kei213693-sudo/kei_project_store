@@ -107,7 +107,7 @@ int32_t md5 (char *argv, uint8_t *md5_32)
 	memmove ( md5_32 + 12, (char *)&chain[3], sizeof(uint32_t) );
 	ke_free(string.str);
 	string.str = NULL;
-  return EXIT_SUCCESS;
+	return EXIT_SUCCESS;
 }
 
 

@@ -73,7 +73,7 @@ void hal_uart_log_RxIrqCheck(void)
     }
 }
 
-//获取rxbuf地址
+//获取rxBuf地址
 uint8_t *hal_uart_log_rx_buf_addr_get(void)
 {
 	if(g_stUartLogCtl.finsh == 1)
@@ -85,7 +85,7 @@ uint8_t *hal_uart_log_rx_buf_addr_get(void)
         return NULL;
     }
 }
-//获取rxbuf长度
+//获取rxBuf长度
 uint16_t hal_uart_log_rx_buf_len_get(void)
 {
 	if(g_stUartLogCtl.finsh == 1)
@@ -163,7 +163,7 @@ void hal_uart_fm33lg_RxIrqCheck(void)
     }
 }
 
-//获取rxbuf地址
+//获取rxBuf地址
 uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void)
 {
 	if(g_stUartFm33lgCtl.finsh == 1)
@@ -175,7 +175,7 @@ uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void)
         return NULL;
     }
 }
-//获取rxbuf长度
+//获取rxBuf长度
 uint8_t hal_uart_fm33lg_rx_buf_len_get(void)
 {
 	if(g_stUartFm33lgCtl.finsh == 1)
@@ -217,6 +217,7 @@ void hal_uart_fm33lg_tx_buf_set(uint8_t *pData,uint8_t u8Len)
 		g_stUartFm33lgCtl.txLen = u8Len;
 		memset(g_stUartFm33lgCtl.txBuf,0,HAL_UART_FM33LG_LEN);
 		memcpy(g_stUartFm33lgCtl.txBuf,pData,u8Len);
+        log_debug_array_ex("mcu tx hex",g_stUartFm33lgCtl.txBuf,g_stUartFm33lgCtl.txLen);
 
 		//非阻塞式发送
 		uart_send_noblock(HAL_UART_FM33LG_TYPE,(uint8_t **)&g_stUartFm33lgCtl.txBuf,(unsigned *)&g_stUartFm33lgCtl.txLen,hal_uart_fm33lg_tx_callback);

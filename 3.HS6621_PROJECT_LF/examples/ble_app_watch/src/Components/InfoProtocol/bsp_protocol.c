@@ -115,7 +115,7 @@ uint16_t protocol_parse(protocol_ctl_t *pProtocolCtl,uint8_t *buf,uint32_t len)
     return cmd;
 }
 
-//这样是不分配data存储空间，直接在txbuf上写数据，适用于应用层函数写在当前c文件bsp_protocol场景
+//这样是不分配data存储空间，直接在txBuf上写数据，适用于应用层函数写在当前c文件bsp_protocol场景
 /**************************************************************
 *函数功能描述 ：协议组包，处理包头
 *函数参数 ：cmd，命令码
@@ -128,9 +128,9 @@ void protocol_alloc_head(protocol_ctl_t *pProtocolCtl,uint16_t cmd,uint32_t len,
 {
     if(NULL != pProtocolCtl)
     {
-        memset(pProtocolCtl->txbuf,0,sizeof(pProtocolCtl->txbuf));//组包前先清空txbuffer
+        memset(pProtocolCtl->txBuf,0,sizeof(pProtocolCtl->txBuf));//组包前先清空txBuffer
 
-        pProtocolCtl->tx.head = (protocol_head_t *)&pProtocolCtl->txbuf[0];
+        pProtocolCtl->tx.head = (protocol_head_t *)&pProtocolCtl->txBuf[0];
         pProtocolCtl->tx.head->start[0] = PROTOCOL_START_1;
         pProtocolCtl->tx.head->start[1] = PROTOCOL_START_2;
         pProtocolCtl->tx.head->cmd = cmd;
@@ -140,10 +140,10 @@ void protocol_alloc_head(protocol_ctl_t *pProtocolCtl,uint16_t cmd,uint32_t len,
 
         if(len)
         {//数据包不为空
-            pProtocolCtl->tx.buf = &pProtocolCtl->txbuf[sizeof(protocol_head_t)];
+            pProtocolCtl->tx.buf = &pProtocolCtl->txBuf[sizeof(protocol_head_t)];
             if(NULL != param)
             {//理解：假定传入参数是&Pdata = param，也就是说*param = Pdata，所以实际上我们要更改是Pdata。而不是*Pdata，所以更改指针变量Pdata需要用到指针的指针
-                *param = pProtocolCtl->tx.buf;//将txbuf的存储空间取出来，不需要再重新定义临时变量来存储
+                *param = pProtocolCtl->tx.buf;//将txBuf的存储空间取出来，不需要再重新定义临时变量来存储
             }
         }
     }
@@ -159,13 +159,13 @@ void protocol_alloc_tail(protocol_ctl_t *pProtocolCtl)
 {
     if(NULL != pProtocolCtl)
     {
-        pProtocolCtl->tx.tail = (protocol_tail_t *)&pProtocolCtl->txbuf[pProtocolCtl->tx.head->len - sizeof(pProtocolCtl->tx.tail->crc) - sizeof(pProtocolCtl->tx.tail->end)];
+        pProtocolCtl->tx.tail = (protocol_tail_t *)&pProtocolCtl->txBuf[pProtocolCtl->tx.head->len - sizeof(pProtocolCtl->tx.tail->crc) - sizeof(pProtocolCtl->tx.tail->end)];
 
         //计算crc校验值
         pProtocolCtl->tx.tail->end = PROTOCOL_END;
-        pProtocolCtl->tx.tail->crc = calcCRC32((unsigned char *)&pProtocolCtl->txbuf[sizeof(pProtocolCtl->tx.head->start)]
+        pProtocolCtl->tx.tail->crc = calcCRC32((unsigned char *)&pProtocolCtl->txBuf[sizeof(pProtocolCtl->tx.head->start)]
             ,(char)(pProtocolCtl->tx.head->len - sizeof(pProtocolCtl->tx.head->start) - sizeof(pProtocolCtl->tx.tail->crc) - sizeof(pProtocolCtl->tx.tail->end)));
-        pProtocolCtl->txlen = pProtocolCtl->tx.head->len;
+        pProtocolCtl->txLen = pProtocolCtl->tx.head->len;
     }
 }
 

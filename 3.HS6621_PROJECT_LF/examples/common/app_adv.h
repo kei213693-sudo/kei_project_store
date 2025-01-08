@@ -102,22 +102,22 @@
 enum app_adv_state
 {
     /// Advertising activity does not exists
-    APP_ADV_STATE_IDLE = 0,
+    APP_ADV_STATE_IDLE = 0,//初始状态
     /// Creating advertising activity
-    APP_ADV_STATE_CREATING,
+    APP_ADV_STATE_CREATING,//调用appm_adv_init（）配置参数后设置
     /// Setting advertising data
-    APP_ADV_STATE_SETTING_ADV_DATA,
+    APP_ADV_STATE_SETTING_ADV_DATA,//调用（）配置广播包数据
     /// Setting scan response data
-    APP_ADV_STATE_SETTING_SCAN_RSP_DATA,
+    APP_ADV_STATE_SETTING_SCAN_RSP_DATA,//调用（）配置扫描响应包数据
 
     /// Advertising activity created
-    APP_ADV_STATE_CREATED,
+    APP_ADV_STATE_CREATED,//4
     /// Starting advertising activity
     APP_ADV_STATE_STARTING,
     /// Advertising activity started
-    APP_ADV_STATE_STARTED,
+    APP_ADV_STATE_STARTED,//6
     /// Stopping advertising activity
-    APP_ADV_STATE_STOPPING,
+    APP_ADV_STATE_STOPPING,//7
     /// deleting advertising activity
     APP_ADV_STATE_DELETING,
 

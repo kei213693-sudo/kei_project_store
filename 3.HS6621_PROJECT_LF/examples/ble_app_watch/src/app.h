@@ -66,10 +66,11 @@
  * DEFINES
  ****************************************************************************************
  */
+void app_audio_rx_cmd_handler(struct app_audio_rx_cmd_t const *param);
 void app_gap_connected_handler(struct gapc_connection_req_ind const *param);
 void app_gap_disconnected_handler(struct gapc_disconnect_ind const *param);
 void app_gap_param_update_ind_handler(struct gapc_param_updated_ind const *param);
-void app_smp_encrypted_handler(void const *param);
+void app_smp_encrypted_handler(uint8_t const *param);
 void app_gatt_mtu_changed_handler(struct gattc_mtu_changed_ind const *param);
 void app_tspp_empty_handler(void const *param);
 void app_tspp_full_handler(void const *param);
@@ -97,7 +98,7 @@ void app_ancs_recv_msg_handler(struct ancsc_ntf_attr_ind const *param);
 /**
  * Advertising Parameters
  */
-#define APP_ADV_FAST_INTERVAL     0x0050//0x0320//默认500ms 0x0028   /**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
+#define APP_ADV_FAST_INTERVAL     0x0320//默认500ms 0x0028   /**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
 #define APP_ADV_SLOW_INTERVAL     0x0C80   /**< Slow advertising interval (in units of 0.625 ms. This value corrsponds to 2 seconds). */
 
 #define APP_ADV_FAST_TIMEOUT      0       /**< The duration of the fast advertising period (in seconds). max 655, or 0 is no timeout*/
@@ -249,6 +250,7 @@ uint8_t appm_get_dev_name(uint8_t* name);
 
 void appm_get_rssi(void);
 
+void appm_advertising_init(void);
 
 //#endif //(BLE_APP_PRESENT)
 
