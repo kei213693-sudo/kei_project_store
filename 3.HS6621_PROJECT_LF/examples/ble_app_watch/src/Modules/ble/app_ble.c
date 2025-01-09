@@ -35,8 +35,8 @@
 static void app_ble_sys_info_reset(void);
 static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param);
 static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param);
+static void app_ble_adv_updata_timer_handler(co_timer_t *timer, void *param);
 
-static int app_ble_rssi(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
 static int app_ble_update_param(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
 static int app_ble_processRxRec(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
 static int app_ble_processTxRec(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
@@ -53,16 +53,13 @@ static void app_ble_cmdBleParamSetReq(void *pData);
 static void app_ble_cmdBleRssiSendReq(void *pData);
 
 /*******************************全局变量定义*******************************/
-app_ble_ctl_t g_stAppBleCtl = {0};
-co_timer_t g_pair_check_timer;
-co_timer_t g_rssi_get_timer;
-co_timer_t g_adv_upgrade_timer;
 
 /*******************************内部变量定义*******************************/
+static app_ble_ctl_t g_stAppBleCtl = {0};
+
 //任务参数相关
 KE_MSG_HANDLER_TAB(app_ble)
 {
-    {APP_BLE_OPT_GAP_RSSI,      (ke_msg_func_t)app_ble_rssi},//rssi操作
     {APP_BLE_OPT_UPDATA_PARAM,  (ke_msg_func_t)app_ble_update_param},//slave主动更新连接参数
     {APP_BLE_OPT_DEBUGLOG,      (ke_msg_func_t)app_ble_debug_log_handle},
 	{APP_BLE_OPT_MCU_RX,        (ke_msg_func_t)app_ble_processRxRec},
@@ -116,6 +113,11 @@ static const APP_BLE_CMD_FUC_TAB_T g_stBleCmdFucTab[] =
     ,NULL}
 };
 
+//定时任务相关
+static co_timer_t g_pair_check_timer;
+static co_timer_t g_rssi_get_timer;
+static co_timer_t g_adv_updata_timer;
+
 /*******************************实际函数的实现*******************************/
 /**************************************************************
 *函数功能描述 ：创建ble任务
@@ -168,8 +170,41 @@ int32_t app_ble_deinit(void)
 }
 
 /**************************************************************
-*函数功能描述 ：存储管理员mac addr
+*函数功能描述 ：返回广播间隔
 *函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+uint16_t app_ble_adv_inter_get(void)
+{
+	return g_stAppBleCtl.stAppBleSysInfo.AdvInterval;
+}
+
+/**************************************************************
+*函数功能描述 ：返回sn码存储地址
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+uint8_t *app_ble_sn_get(void)
+{
+	return g_stAppBleCtl.stAppBleSysInfo.sn;
+}
+
+/**************************************************************
+*函数功能描述 ：判定当前建立连接的手机是否是管理员用户
+*函数参数 ：
+*函数返回值 ：配对码，如果为0就是禁止配对
+*备注：
+**************************************************************/
+uint32_t app_ble_pair_check(void)
+{
+	return g_stAppBleCtl.u32Pincode;
+}
+
+/**************************************************************
+*函数功能描述 ：配对成功后操作，存储管理员mac addr、删除配对定时检查任务、更新pairNum数量
+*函数参数 ：pMacAddr，指向当前配对设备的mac addr
 *函数返回值 ：
 *备注：
 **************************************************************/
@@ -177,15 +212,17 @@ void app_ble_pair_succ_opt(uint8_t *pMacAddr)
 {
 	if(NULL != pMacAddr)
 	{
+		co_timer_del(&g_pair_check_timer);//配对成功，删除超时检测的定时任务
+		g_stAppBleCtl.u32Pincode = 0;//再次禁止配对
+
 		hal_flash_read(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
 
 		if(0 == g_stAppBleCtl.stAppBleSysInfo.pairNum)
 		{
-			memcpy(g_stAppBleCtl.stAppBleSysInfo.administratorMAC,pMacAddr,GAP_BD_ADDR_LEN);
+			memcpy(g_stAppBleCtl.stAppBleSysInfo.administratorMAC,pMacAddr,GAP_BD_ADDR_LEN);//存储管理用户mac地址
 			log_debug_array_ex("admin addr store",g_stAppBleCtl.stAppBleSysInfo.administratorMAC,GAP_BD_ADDR_LEN);
 		}
-
-		g_stAppBleCtl.stAppBleSysInfo.pairNum++;
+		g_stAppBleCtl.stAppBleSysInfo.pairNum++;//配对数量加一
 
 		hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
 		hal_flash_write(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
@@ -195,14 +232,12 @@ void app_ble_pair_succ_opt(uint8_t *pMacAddr)
 
 /**************************************************************
 *函数功能描述 ：判定当前建立连接的手机是否是管理员用户
-*函数参数 ：
-*函数返回值 ：
-*备注：1是管理员用户，2是普通员用户
+*函数参数 ：pMacAddr，指向当前配对设备的mac addr
+*函数返回值 ：1是管理员用户，2是普通员用户，0无权限设备（未配对）
+*备注：
 **************************************************************/
-uint8_t app_ble_admin_check(uint8_t *pMacAddr)
+void app_ble_admin_check(uint8_t *pMacAddr)
 {
-	g_stAppBleCtl.u8AdminFlag = 0;
-
 	if(NULL != pMacAddr)
 	{
 		if(0 == strncmp((const char*)pMacAddr,(const char*)g_stAppBleCtl.stAppBleSysInfo.administratorMAC,GAP_BD_ADDR_LEN))
@@ -216,79 +251,125 @@ uint8_t app_ble_admin_check(uint8_t *pMacAddr)
 			log_debug("Normal user.\n");
 		}
 	}
+	else
+	{
+		g_stAppBleCtl.u8AdminFlag = 0;
+	}
+}
+
+/**************************************************************
+*函数功能描述 ：返回用户权限标志
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+uint8_t app_ble_admin_get(void)
+{
 	return g_stAppBleCtl.u8AdminFlag;
 }
 
 /**************************************************************
-*函数功能描述 ：判定当前建立连接的手机是否是管理员用户
-*函数参数 ：opt，0停止定时获取（断开连接时调用
-				1启动定时获取（快速回连时调用
-				2接收最新数值并存储起来，过滤完成后传递给mcu（获取成功时调用
+*函数功能描述 ：返回管理员用户mac addr存储地址
+*函数参数 ：
 *函数返回值 ：
 *备注：
 **************************************************************/
-void app_ble_rssi_opt(uint8_t opt,int8_t i8Rssi)
+uint8_t *app_ble_admin_mac_get(void)
 {
-	if(0 == opt)
+	return g_stAppBleCtl.stAppBleSysInfo.administratorMAC;
+}
+
+/**************************************************************
+*函数功能描述 ：判定当前建立连接的手机是否是管理员用户
+*函数参数 ：enOpt，0停止定时获取（断开连接时调用
+				1启动定时获取（快速回连时调用
+				2接收最新数值并存储起来，过滤完成后传递给mcu（获取成功时调用
+				3设置获取周期
+			pData，最新的rssi数值/获取时间周期
+*函数返回值 ：
+*备注：
+**************************************************************/
+void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
+{
+	if(APP_BLE_RSSI_PERIOD_SET == enOpt)
 	{
-		co_timer_del(&g_rssi_get_timer);
+		if(NULL != pData)
+		{
+			uint16_t u16ConInterval = (uint16_t)(*((uint16_t *)pData));
+			//1.25，更新rsii监控周期，设定为连接间隔的2倍
+			g_stAppBleCtl.u16RssiGetPeriod = 2*((u16ConInterval)*5/4);
+		}
 	}
-	else if(1 == opt)
+	else if(APP_BLE_RSSI_START == enOpt)
 	{
-		log_debug("The startup period(%d ms) obtains the rssi\n",g_stAppBleCtl.u32RssiGetTime);
 		g_stAppBleCtl.u8RssiLen = 0;
 		memset(g_stAppBleCtl.g_i8RssiBuf,0x00,APP_BLE_RSSI_NUM);
 
-		co_timer_set(&g_rssi_get_timer, g_stAppBleCtl.u32RssiGetTime, TIMER_REPEAT
+		if(0 == g_stAppBleCtl.u16RssiGetPeriod)
+		{//避免未更新u16RssiGetPeriod就启动定时任务
+			g_stAppBleCtl.u16RssiGetPeriod = 100;
+		}
+		log_debug("The startup period(%d ms) obtains the rssi\n",g_stAppBleCtl.u16RssiGetPeriod);
+
+		co_timer_set(&g_rssi_get_timer, g_stAppBleCtl.u16RssiGetPeriod, TIMER_REPEAT
 			, app_ble_rssi_get_timer_handler, NULL);
 	}
-	else if(2 == opt)
+	else if(APP_BLE_RSSI_UPDATA_DATA == enOpt)
 	{
-		//log_debug("get rssi:%d dB\n",i8Rssi);//获取RSSI值
-		
-		g_stAppBleCtl.g_i8RssiBuf[g_stAppBleCtl.u8RssiLen] = i8Rssi;
-		g_stAppBleCtl.u8RssiLen++;
-
-		if(g_stAppBleCtl.u8RssiLen >= APP_BLE_RSSI_NUM)
+		if(NULL != pData)
 		{
+			int8_t i8Rssi = (int8_t)(*((int8_t*)pData));;//存储最新rssi数值，用于过滤
 			int8_t i8RssiAvg = 0xff;
-			//TODO 待添加rssi过滤api
-			// log_debug("rssi data[%d]:",APP_BLE_RSSI_NUM);
-			// for(uint8_t i = 0;i < APP_BLE_RSSI_NUM;i++)
-			// {
-			// 	log_debug(" %d",g_stAppBleCtl.g_i8RssiBuf[i]);
-			// }
-			// log_debug("\r\n");
+			//log_debug("get rssi:%d dB\n",i8Rssi);
 
-			//计算完成后清空buf
-			g_stAppBleCtl.u8RssiLen = 0;
-			memset(g_stAppBleCtl.g_i8RssiBuf,0x00,APP_BLE_RSSI_NUM);
+			g_stAppBleCtl.g_i8RssiBuf[g_stAppBleCtl.u8RssiLen] = i8Rssi;
+			g_stAppBleCtl.u8RssiLen++;
 
-			typedef struct Param_t
+			if(g_stAppBleCtl.u8RssiLen >= APP_BLE_RSSI_NUM)
 			{
-				int8_t i8Rssi;
-				uint8_t res[3];
-			}Param_t;
+				//TODO 待添加rssi过滤api
+				i8RssiAvg = g_stAppBleCtl.g_i8RssiBuf[0];
+				// log_debug("rssi data[%d]:",APP_BLE_RSSI_NUM);
+				// for(uint8_t i = 0;i < APP_BLE_RSSI_NUM;i++)
+				// {
+				// 	log_debug(" %d",g_stAppBleCtl.g_i8RssiBuf[i]);
+				// }
+				// log_debug("\r\n");
 
-			#if (APP_BLE_MSG_SWITCH)
-			//直接调用返回响应的api
-			Param_t stData;
-			stData.i8Rssi = i8RssiAvg;
-			app_ble_cmdBleRssiSendReq((void *)&stData);
-			#else
-			//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
-			Param_t *pStData = KE_MSG_ALLOC(APP_BLE_OPT_RSSI_SEND,
-											APP_BLE_TASK_ID, TASK_APP,
-											Param_t);
-			
-			pStData->i8Rssi = i8RssiAvg;
-			ke_msg_send(pStData);
-			#endif
+				//计算完成后清空buf
+				g_stAppBleCtl.u8RssiLen = 0;
+				memset(g_stAppBleCtl.g_i8RssiBuf,0x00,APP_BLE_RSSI_NUM);
+
+				typedef struct Param_t
+				{
+					int8_t i8Rssi;
+					uint8_t res[3];
+				}Param_t;
+
+				#if (APP_BLE_MSG_SWITCH)
+				//直接调用返回响应的api
+				Param_t stData;
+				stData.i8Rssi = i8RssiAvg;
+				app_ble_cmdBleRssiSendReq((void *)&stData);
+				#else
+				//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
+				Param_t *pStData = KE_MSG_ALLOC(APP_BLE_OPT_RSSI_SEND,
+												APP_BLE_TASK_ID, TASK_APP,
+												Param_t);
+				
+				pStData->i8Rssi = i8RssiAvg;
+				ke_msg_send(pStData);
+				#endif
+			}
 		}
+	}
+	else if(APP_BLE_RSSI_STOP == enOpt)
+	{
+		co_timer_del(&g_rssi_get_timer);
 	}
 	else
 	{
-		appm_get_rssi();
+		appm_get_rssi();//预留，只获取一次
 	}
 }
 
@@ -319,9 +400,9 @@ static void app_ble_sys_info_reset(void)
 **************************************************************/
 static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
 {
-    g_stAppBleCtl.u8PairFlag = 0;//禁止配对
-	appm_disconnect(0);//并断开连接
+    g_stAppBleCtl.u32Pincode = 0;//禁止配对
 	log_debug("pair bond check timerout,cancel pair\n");
+	appm_disconnect(0);//并断开连接
 }
 
 /**************************************************************
@@ -341,7 +422,7 @@ static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static void app_ble_adv_upgarde_timer_handler(co_timer_t *timer, void *param)
+static void app_ble_adv_updata_timer_handler(co_timer_t *timer, void *param)
 {
 	appm_advertising_init();
 	appm_adv_start();//启动广播
@@ -353,45 +434,14 @@ static void app_ble_adv_upgarde_timer_handler(co_timer_t *timer, void *param)
 *函数返回值 ：
 *备注：
 **************************************************************/
-static int app_ble_rssi(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id)
-{
-	typedef struct
-	{
-		uint8_t u8Opt;//1启动周期获取rssi定时任务
-					//2删除周期任务
-	}Ret_t;
-	Ret_t *pStRet = NULL;
-	
-	if(NULL != param)
-	{
-		pStRet = (Ret_t *)param;
-		if(1 == pStRet->u8Opt)
-		{
-			co_timer_set(&g_rssi_get_timer, g_stAppBleCtl.u32RssiGetTime, TIMER_REPEAT
-				, app_ble_rssi_get_timer_handler, NULL);
-		}
-		else
-		{
-			co_timer_del(&g_rssi_get_timer);
-		}
-	}
-	
-    return (KE_MSG_CONSUMED);
-}
-
-/**************************************************************
-*函数功能描述 ：slave发起连接参数更新，在建立连接后调用
-*函数参数 ：
-*函数返回值 ：
-*备注：
-**************************************************************/
-static int app_ble_update_param(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id)
+static int app_ble_update_param(ke_msg_id_t const msgid,
+								void const *param,
+								ke_task_id_t const dest_id,
+								ke_task_id_t const src_id)
 {
     log_debug("send con param updata req\n");
-	struct gapc_conn_param st_conn_param = {(100)*5/6,(100)*5/6,0,(3000)/10};//100ms,100ms,0潜伏时间，3s,写死
-
+	struct gapc_conn_param st_conn_param = {(100)*5/6,(100)*5/6,4,(3000)/10};//100ms,100ms,0潜伏时间，3s,写死
 	appm_update_param(&st_conn_param);
-	
     return (KE_MSG_CONSUMED);
 }
 
@@ -503,12 +553,10 @@ static void app_ble_cmdBleSnSetRsp(void *pData)
 **************************************************************/
 static void app_ble_cmdBleSnSetReq(void *pData)
 {
-	typedef struct
+	typedef struct Ret_t
 	{
 		uint8_t err;
 	}Ret_t;
-	Ret_t stRet;
-	stRet.err = 0;
 
 	typedef struct
 	{
@@ -530,11 +578,13 @@ static void app_ble_cmdBleSnSetReq(void *pData)
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
+	Ret_t stRet;
+	stRet.err = 0;
 	app_ble_cmdBleSnSetRsp((void *)&stRet);
 	#else
 	//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
 	Ret_t *pStRet = KE_MSG_ALLOC(APP_BLE_OPT_SN_SET,APP_BLE_TASK_ID, APP_BLE_TASK_ID,Ret_t);
-    pStRet->err = stRet.err;
+    pStRet->err = 0;
     ke_msg_send(pStRet);
 	#endif
 }
@@ -575,16 +625,13 @@ static void app_ble_cmdBleBondAddReq(void *pData)
 {
 	uint8_t md5_out[16];
 
-	typedef struct
+	typedef struct Ret_t
 	{
     	uint32_t u32Pincode;//配对码
 	}Ret_t;
-	Ret_t stRet;
-	stRet.u32Pincode = 0;
 
 	if(g_stAppBleCtl.stAppBleSysInfo.pairNum < APP_BLE_PAIR_NUM_MAX)
 	{
-		g_stAppBleCtl.u8PairFlag = 1;//允许配对
 		if(app_sec_get_bond_status() == 0)
 		{//一个手机都没绑定，根据sn码计算得到配对码
 			//通过md5算法加密sn码得到16bytes的输出结果
@@ -615,6 +662,7 @@ static void app_ble_cmdBleBondAddReq(void *pData)
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
+	Ret_t stRet;
 	stRet.u32Pincode = g_stAppBleCtl.u32Pincode;
 	app_ble_cmdBleBondAddRsp((void *)&stRet);
 	#else
@@ -659,12 +707,10 @@ static void app_ble_cmdBleBondDelRsp(void *pData)
 **************************************************************/
 static void app_ble_cmdBleBondDelReq(void *pData)
 {
-	typedef struct
+	typedef struct Ret_t
 	{
 		uint8_t err;
 	}Ret_t;
-	Ret_t stRet;
-	stRet.err = 0;
 
 	typedef struct
 	{
@@ -677,6 +723,7 @@ static void app_ble_cmdBleBondDelReq(void *pData)
 	//重新读一次flash
 	hal_flash_read(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
 
+	//再修改参数
 	if(0 == pStData->u8Opt)
 	{
 		app_sec_remove_bond_not_admin();
@@ -691,17 +738,19 @@ static void app_ble_cmdBleBondDelReq(void *pData)
 		log_debug("Delete all users!\n");
 	}
 
-	//再修改参数，擦除、写入
+	//最后擦除、写入
 	hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
 	hal_flash_write(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
+	Ret_t stRet;
+	stRet.err = 0;
 	app_ble_cmdBleBondDelRsp((void *)&stRet);
 	#else
 	//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
 	Ret_t *pStRet = KE_MSG_ALLOC(APP_BLE_OPT_BOND_DEL,APP_BLE_TASK_ID, APP_BLE_TASK_ID,Ret_t);
-    pStRet->err = stRet.err;
+    pStRet->err = 0;
     ke_msg_send(pStRet);
 	#endif
 }
@@ -740,12 +789,10 @@ static void app_ble_cmdBleParamSetRsp(void *pData)
 **************************************************************/
 static void app_ble_cmdBleParamSetReq(void *pData)
 {
-	typedef struct
+	typedef struct Ret_t
 	{
 		uint8_t err;
 	}Ret_t;
-	Ret_t stRet;
-	stRet.err = 0;
 
 	typedef struct
 	{
@@ -765,16 +812,18 @@ static void app_ble_cmdBleParamSetReq(void *pData)
 
 	//修改广播参数
 	appm_adv_stop(1);//必须先当前广播包删除，才能修改广播包数据，0代表暂停此次广播，1代表删除此次广播
-	co_timer_set(&g_adv_upgrade_timer, 1000, TIMER_ONE_SHOT//一定要延时足够的时间，等待当前广播包删除完毕，不然新的广播无法正常启动
-		, app_ble_adv_upgarde_timer_handler, NULL);
+	co_timer_set(&g_adv_updata_timer, 1000, TIMER_ONE_SHOT//一定要延时足够的时间，等待当前广播包删除完毕，不然新的广播无法正常启动
+		, app_ble_adv_updata_timer_handler, NULL);
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
+	Ret_t stRet;
+	stRet.err = 0;
 	app_ble_cmdBleBondDelRsp((void *)&stRet);
 	#else
 	//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
 	Ret_t *pStRet = KE_MSG_ALLOC(APP_BLE_OPT_BOND_DEL,APP_BLE_TASK_ID, APP_BLE_TASK_ID,Ret_t);
-    pStRet->err = stRet.err;
+    pStRet->err = 0;
     ke_msg_send(pStRet);
 	#endif
 }
@@ -798,8 +847,8 @@ static void app_ble_cmdBleRssiSendReq(void *pData)
 		,cmdBleRssiSendReq,sizeof(Param_t),(void*)&pStData);
 	if((pStData != NULL) && (NULL != pData))
 	{
-		memcpy(pStData,(const void*)pData,sizeof(Param_t));
-		// pStData->i8Rssi = *((int8_t*)pData);
+		memcpy(pStData,(const void*)pData,sizeof(Param_t));//传递结构体指针
+		// pStData->i8Rssi = *((int8_t*)pData);//传递单个变量指针
 	}
 	g_pBspProtocolApi->protocol_alloc_tail(&g_stBleProCtl);
 	
@@ -863,21 +912,35 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			log_debug("Pair num:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
 			log_debug_array_ex("Admin Mac Addr", g_stAppBleCtl.stAppBleSysInfo.administratorMAC, 6);
 			log_debug("AdvInterval:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625
-			log_debug("u32Pincode:%d\nu8PairFlag:%d\nu8AdminFlag:%d\nu32RssiGetTime:%d ms\n"
-					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8PairFlag,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u32RssiGetTime);
+			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\n"
+					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod);
 			
 			log_debug_array_ex("app_env", &app_env, sizeof(app_env));
 			log_debug_array_ex("app_sec_env", &app_sec_env, sizeof(app_sec_env));
 			log_debug("***************************************************\n");
 		}
 		else if(0 == strncmp("sysreset",(const char*)pData,8))
-		{
+		{//系统初始化
 			//重置存储信息
 			app_ble_sys_info_reset();
 			//清空控制信息
 			memset((uint8_t *)&g_stAppBleCtl.u32Pincode,0x00,sizeof(app_ble_ctl_t) - sizeof(app_ble_sys_info_t));
 			//清空ble绑定信息
 			app_sec_remove_bond();
+		}
+		else if(0 == strncmp("power",(const char*)pData,5))
+		{//配置rf功率
+			uint8_t u8Opt = pData[5] - 0x30;
+			if(u8Opt > RF_TX_POWER_MAX)
+			{//协议栈自动控制切换
+				rf_tx_power_set(true,0);
+				log_debug("rf power auto\n");
+			}
+			else
+			{//按照设定参数控制
+				rf_tx_power_set(false,u8Opt);
+				log_debug("rf power set:%d dB\n",u8Opt);
+			}
 		}
 		else if(0 == strncmp("bledis",(const char*)pData,6))
 		{//断开连接
@@ -924,7 +987,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			app_ble_cmdBleBondAddReq(NULL);
 		}
 		else if(0 == strncmp("bonddel",(const char*)pData,7))
-		{//删除配对指令
+		{//删除配对指令，1删除所有，0删除除管理员之外
 			uint8_t u8Opt = pData[7] - 0x30;//0不删管理员,1删除所有
 			typedef struct
 			{
@@ -937,7 +1000,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			app_ble_cmdBleBondDelReq((void *)&stParam);
 		}
 		else if(0 == strncmp("paramset",(const char*)pData,8))
-		{//参数配置指令
+		{//参数配置指令，xx*100ms
 			uint16_t u16Value = ((uint16_t)(pData[8] - 0x30) * 10) + (uint16_t)(pData[9] - 0x30);
 			u16Value *= 100;//单位，100ms，例如传入paramset10就是广播间隔为1000ms = 1s
 
@@ -953,15 +1016,15 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		else if(0 == strncmp("rssiopt",(const char*)pData,7))
 		{//rssi传递操作
 			uint8_t u8Opt = pData[7] - 0x30;
-			app_ble_rssi_opt(u8Opt,0);
+			app_ble_rssi_opt((APP_BLE_RSSI_E)u8Opt,0);
 			//也可以调用APP_BLE_OPT_GAP_RSSI
 		}
 		else
 		{}
-		
-		//清空接收缓存
-		hal_uart_log_rx_buf_reset();
 	}
+
+	//清空接收缓存
+	hal_uart_log_rx_buf_reset();
 
     return KE_MSG_CONSUMED;
 }

@@ -1081,7 +1081,7 @@ static int gapc_get_rssi_ind_handler(ke_msg_id_t const msgid,struct gapc_con_rss
 {
     if(NULL != param)
     {
-        app_ble_rssi_opt(2,param->rssi);
+        app_ble_rssi_opt(APP_BLE_RSSI_UPDATA_DATA,(void *)&param->rssi);
     }
 
     return (KE_MSG_CONSUMED);

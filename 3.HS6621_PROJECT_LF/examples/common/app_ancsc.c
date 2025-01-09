@@ -54,17 +54,17 @@ struct app_ancsc_env_tag app_ancsc_env;
 
 void app_ancsc_init(void)
 {
-    ancs_debug("%s\n",__func__);
+    // ancs_debug("%s\n",__func__);
     // Reset the environment
     memset(&app_ancsc_env, 0, sizeof(struct app_ancsc_env_tag));
 }
 
 void app_ancs_add_ancsc(void)
 {
-    ancs_debug("%s\n",__func__);
+    //ancs_debug("%s\n",__func__);
     struct gapm_profile_task_add_cmd *req = KE_MSG_ALLOC(GAPM_PROFILE_TASK_ADD_CMD,
-                                                  TASK_GAPM, TASK_APP,
-                                                  gapm_profile_task_add_cmd);
+                                                    TASK_GAPM, TASK_APP,
+                                                    gapm_profile_task_add_cmd);
     // Fill message
     req->operation = GAPM_PROFILE_TASK_ADD;
     req->sec_lvl = PERM(SVC_AUTH, ENABLE);

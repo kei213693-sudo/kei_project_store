@@ -76,9 +76,8 @@ void app_gap_connected_handler(struct gapc_connection_req_ind const *param)
     log_debug("----------%s@%d,conhdl:%d,Addr Type:%d,", __func__, __LINE__,param->conhdl,param->peer_addr_type);
     log_debug_array_ex("ADDR", &param->peer_addr, 6);
 
-    g_stAppBleCtl.u32RssiGetTime = 2*((param->con_interval)*5/4);//1.25
-
-    ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 300);//3s后主动发送连接参数更新请求
+    app_ble_rssi_opt(APP_BLE_RSSI_PERIOD_SET,(void *)&param->con_interval);//更新定时获取周期
+    ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 100);//1s后主动发送连接参数更新请求
 }
 
 /**
@@ -93,8 +92,8 @@ void app_gap_connected_handler(struct gapc_connection_req_ind const *param)
 void app_gap_disconnected_handler(struct gapc_disconnect_ind const *param)
 {
     log_debug("----------%s@%d,conhdl:%d,reason:0x%02x\n", __func__, __LINE__,param->conhdl, param->reason);
-    app_ble_rssi_opt(0,0);//停止定时获取rssi
     app_ble_admin_check(NULL);//清空管理员权限标志
+    app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
 }
 
 /**
@@ -112,20 +111,18 @@ void app_gap_param_update_ind_handler(struct gapc_param_updated_ind const *param
     log_debug("%s@%d,interval:%d ms,latency:%d,timeout:%d ms\n",__func__, __LINE__
         ,(param->con_interval)*5/4,param->con_latency,(param->sup_to)*10);
 
-    uint8_t u8Ret = app_ble_admin_check((uint8_t *)param);
-
-    if((ke_timer_active(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID)) //定时器准备运行
-        && (param->sup_to <= 300))//已经收到连接参数更新指令，且timeout <= 3s
-    {//关闭定时器,不再发送请求
-        ke_timer_clear(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID);
+    if(0 != app_ble_admin_get())
+    {//回连成功了
+        app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
+        app_ble_rssi_opt(APP_BLE_RSSI_PERIOD_SET,(void *)&param->con_interval);//更新定时获取周期
+        app_ble_rssi_opt(APP_BLE_RSSI_START,NULL);//重新启动
     }
 
-    if(0 != u8Ret)
-    {
-        g_stAppBleCtl.u32RssiGetTime = 2*((param->con_interval)*5/4);//1.25
-        app_ble_rssi_opt(0,0);//停止定时获取rssi
-        app_ble_rssi_opt(1,0);//重新启动
-    }
+    // if((ke_timer_active(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID)) //定时器准备运行
+    //     && (param->sup_to <= 300))//已经收到连接参数更新指令，且timeout <= 3s
+    // {//关闭定时器,不再发送请求
+    //     ke_timer_clear(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID);
+    // }
 }
 
 /**
@@ -142,12 +139,11 @@ void app_smp_encrypted_handler(uint8_t const *param)
 {
     log_debug("%s@%d\n", __func__, __LINE__);
 
-    uint8_t u8Ret = app_ble_admin_check((uint8_t *)param);
-
-    if(0 != u8Ret)
+    app_ble_admin_check((uint8_t *)param);//先检查
+    if(0 != app_ble_admin_get())//再判定
     {
-        app_ble_rssi_opt(0,0);//停止定时获取rssi
-        app_ble_rssi_opt(1,0);//快速回连成功，启动定时获取rssi任务
+        app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
+        app_ble_rssi_opt(APP_BLE_RSSI_START,NULL);//快速回连成功，启动定时获取rssi任务
     }
 }
 

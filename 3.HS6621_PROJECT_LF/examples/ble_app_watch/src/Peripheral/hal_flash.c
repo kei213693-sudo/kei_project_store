@@ -35,8 +35,8 @@ void hal_flash_init(void)
 		log_debug("bsp_flash_init err!\n");
 	}
 	
-	uint32_t flash_id = sf_read_id(HS_SF, HAL_FLASH_CS);
-	log_debug("flash_id:0x%08x\n",flash_id);
+	// uint32_t flash_id = sf_read_id(HS_SF, HAL_FLASH_CS);
+	// log_debug("flash_id:0x%08x\n",flash_id);
 }
 
 /**************************************************************

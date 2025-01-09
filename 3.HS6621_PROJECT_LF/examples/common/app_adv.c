@@ -182,7 +182,7 @@ static void appm_adv_build_adv_data(struct app_adv_data_tag* adv_data)
 //实际启动广播的api
 static void appm_adv_start_advertising(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     // Prepare the GAPM_ACTIVITY_START_CMD message
     struct gapm_activity_start_cmd *p_cmd = KE_MSG_ALLOC(GAPM_ACTIVITY_START_CMD,
                                                         TASK_GAPM, TASK_APP,
@@ -219,7 +219,7 @@ static void appm_adv_start_advertising(void)
 //实际关闭广播的api
 static void appm_adv_stop_advertising(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     // Prepare the GAPM_ACTIVITY_STOP_CMD message
     struct gapm_activity_stop_cmd *cmd = KE_MSG_ALLOC(GAPM_ACTIVITY_STOP_CMD,
                                                       TASK_GAPM, TASK_APP,
@@ -241,7 +241,7 @@ static void appm_adv_stop_advertising(void)
 
 static void appm_adv_set_adv_data_cmd(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     // Prepare the GAPM_SET_ADV_DATA_CMD message
     struct gapm_set_adv_data_cmd *p_cmd = KE_MSG_ALLOC_DYN(GAPM_SET_ADV_DATA_CMD,
                                                            TASK_GAPM, TASK_APP,
@@ -267,7 +267,7 @@ static void appm_adv_set_adv_data_cmd(void)
 
 static void appm_adv_set_scan_rsp_data_cmd(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     // Prepare the GAPM_SET_ADV_DATA_CMD message
     struct gapm_set_adv_data_cmd *p_cmd = KE_MSG_ALLOC_DYN(GAPM_SET_ADV_DATA_CMD,
                                                            TASK_GAPM, TASK_APP,
@@ -293,7 +293,7 @@ static void appm_adv_set_scan_rsp_data_cmd(void)
 //实际创建广播的api
 static void appm_adv_create_advertising(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     if (app_adv_env.state == APP_ADV_STATE_IDLE)
     {
         // Prepare the GAPM_ACTIVITY_CREATE_CMD message
@@ -418,7 +418,7 @@ static void appm_adv_create_advertising(void)
 //实际删除广播的api
 void appm_adv_delete_advertising(void)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     // Prepare the GAPM_ACTIVITY_CREATE_CMD message
     struct gapm_activity_delete_cmd *p_cmd = KE_MSG_ALLOC(GAPM_ACTIVITY_DELETE_CMD,
                                                               TASK_GAPM, TASK_APP,
@@ -439,10 +439,10 @@ void appm_adv_delete_advertising(void)
 
 static void appm_adv_fsm_next(void)
 {
-    log_debug("%s@%d, mode=%x, state=%x, next event=%x\r\n", __func__, __LINE__, 
-                app_adv_env.cur_mode,
-                app_adv_env.state,
-                app_adv_env.next_event);
+    //log_debug("%s@%d, mode=%x, state=%x, next event=%x\r\n", __func__, __LINE__, 
+//                app_adv_env.cur_mode,
+//                app_adv_env.state,
+//                app_adv_env.next_event);
 
 switch (app_adv_env.state)
     {
@@ -693,7 +693,7 @@ void appm_adv_create_ind_handler(void *p_param)
 {
     struct gapm_activity_created_ind *param = (struct gapm_activity_created_ind *)p_param;
 
-    log_debug("%s@%d,%x\n", __func__, __LINE__, param->actv_idx);
+    //log_debug("%s@%d,%x\n", __func__, __LINE__, param->actv_idx);
 
     if (param->actv_type == GAPM_ACTV_TYPE_ADV) {
         if (app_adv_env.state == APP_ADV_STATE_CREATING)
@@ -708,7 +708,7 @@ void appm_adv_stopped_ind_handler(void *p_param)
 {
     struct gapm_activity_stopped_ind *param = (struct gapm_activity_stopped_ind *)p_param;
 
-    log_debug("%s@%d,%x\n", __func__, __LINE__, param->reason);
+    //log_debug("%s@%d,%x\n", __func__, __LINE__, param->reason);
 
     if (param->actv_type == GAPM_ACTV_TYPE_ADV) {
 
@@ -768,7 +768,7 @@ void appm_adv_cmp_evt_handler(void *param)
 {
     struct gapm_cmp_evt *p_param = (struct gapm_cmp_evt *)param;
 
-    log_debug("%s@%d,%x,%x\n", __func__, __LINE__, p_param->operation, p_param->status);
+    //log_debug("%s@%d,%x,%x\n", __func__, __LINE__, p_param->operation, p_param->status);
 
     switch(p_param->operation) {
         case (GAPM_CREATE_ADV_ACTIVITY):

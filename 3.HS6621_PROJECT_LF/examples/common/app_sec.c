@@ -157,7 +157,6 @@ void app_sec_remove_bond(void)
             nvds_del(NVDS_TAG_BLE_LINK_KEY_FIRST+index) ;
         }
 
-
 #if (BLE_APP_HID)
         if (nvds_put(NVDS_TAG_MOUSE_NTF_CFG, NVDS_LEN_MOUSE_NTF_CFG,
                     (uint8_t *)&ntf_cfg) != NVDS_OK)
@@ -187,7 +186,9 @@ void app_sec_remove_bond_not_admin(void)
             memset(&info, 0, length);
             if (nvds_get(NVDS_TAG_BLE_LINK_KEY_FIRST+index, &length, (uint8_t *)&info) == NVDS_OK)
             {
-		        if(0 != strncmp((const char*)info.id_addr.addr.addr,(const char*)g_stAppBleCtl.stAppBleSysInfo.administratorMAC,GAP_BD_ADDR_LEN))
+		        if(0 != strncmp((const char*)info.id_addr.addr.addr
+                        ,(const char*)app_ble_admin_mac_get()
+                        ,GAP_BD_ADDR_LEN))
                 {
                     nvds_del(NVDS_TAG_BLE_LINK_KEY_FIRST+index);
                 }
@@ -285,7 +286,7 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
                                     ke_task_id_t const src_id)
 {
     uint8_t conidx = KE_IDX_GET(src_id);
-    log_debug("%s@%d, request=%x\n", __func__, __LINE__, param->request);
+    //log_debug("%s@%d, request=%x\n", __func__, __LINE__, param->request);
 
     // Prepare the GAPC_BOND_CFM message
     struct gapc_bond_cfm *cfm = KE_MSG_ALLOC(GAPC_BOND_CFM,
@@ -300,7 +301,7 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
             #ifndef BLE_APP_AM0
             // Check if we are already bonded (Only one bonded connection is supported)
             //if (!app_sec_env.con_bonded[conidx])//屏蔽掉，不然只支持一个绑定数
-            if(0 == g_stAppBleCtl.u8PairFlag)
+            if(0 == app_ble_pair_check())
             {//拒绝配对
                 cfm->accept  = false;
                 log_debug("This is not pairing mode,reject\n");
@@ -430,7 +431,7 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
         case (GAPC_TK_EXCH):
         {
             // Generate a PIN Code- (Between 100000 and 999999)
-            uint32_t pin_code = g_stAppBleCtl.u32Pincode;//(100000 + (co_rand_word()%900000));
+            uint32_t pin_code = app_ble_pair_check();//(100000 + (co_rand_word()%900000));
             log_debug("pin_code:%d\n",pin_code);
 
             cfm->accept  = true;
@@ -470,7 +471,7 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
 {
     uint8_t conidx = KE_IDX_GET(src_id);
 
-    log_debug("%s@%d, info=%x\n", __func__, __LINE__, param->info);
+    //log_debug("%s@%d, info=%x\n", __func__, __LINE__, param->info);
 
     switch (param->info)
     {
@@ -482,7 +483,6 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
             app_sec_env.bonded = true;
             app_sec_env.con_bonded[conidx] = true;
 
-            co_timer_del(&g_pair_check_timer);//配对成功，删除超时检测的定时任务
             app_ble_pair_succ_opt(app_sec_env.info[conidx].id_addr.addr.addr);//存储配对信息
 
             // Update the bonding status in the environment
@@ -562,6 +562,9 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
             // Enable HID Service
             app_hid_enable_prf(KE_IDX_GET(src_id));
             #endif //(BLE_APP_HID)
+
+            //配对成功之后，也要检查权限并启动rssi定时获取
+            APP_HANDLER(smp_encrypted, msgid, app_sec_env.info[conidx].id_addr.addr.addr, dest_id, src_id); // APP layer Callback
         } break;
 
         case (GAPC_REPEATED_ATTEMPT):
@@ -637,7 +640,7 @@ static int gapc_bond_cfm_handler(ke_msg_id_t const msgid,
                                         ke_task_id_t const dest_id,
                                         ke_task_id_t const src_id)
 {
-    log_debug("%s@%d\n", __func__, __LINE__);
+    //log_debug("%s@%d\n", __func__, __LINE__);
     log_debug("request=%x,accept=%x\n", param->request, param->accept);
     //union gapc_bond_cfm_data data;
     //
@@ -650,7 +653,7 @@ static int gapc_encrypt_req_ind_handler(ke_msg_id_t const msgid,
                                         ke_task_id_t const src_id)
 {
     uint8_t conidx = KE_IDX_GET(src_id);
-    log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
+    //log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
 
     // Prepare the GAPC_ENCRYPT_CFM message
     struct gapc_encrypt_cfm *cfm = KE_MSG_ALLOC(GAPC_ENCRYPT_CFM,
@@ -695,7 +698,7 @@ static int gapc_encrypt_req_ind_handler(ke_msg_id_t const msgid,
                     memcpy(&cfm->ltk, &info.ltk.ltk, sizeof(struct gap_sec_key));
 
                     APP_HANDLER(smp_encrypted, msgid, info.id_addr.addr.addr, dest_id, src_id); // APP layer Callback
-                    log_debug_array_ex("encrypted info hex", (uint8_t  *)&info, length);
+                    //log_debug_array_ex("encrypted info hex", (uint8_t  *)&info, length);
 
                     break;
                 }
@@ -731,7 +734,7 @@ static int gapc_encrypt_ind_handler(ke_msg_id_t const msgid,
 {
     // encryption/ re-encryption succeeded
     uint8_t conidx = KE_IDX_GET(src_id);
-    log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
+    //log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
 
     #if (BLE_APP_AM0)//未定义
     // Need to Setup Authenicated Payload TO for the connection.
@@ -779,7 +782,7 @@ int app_sec_gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
 {
     uint8_t conidx = KE_IDX_GET(src_id);
     //app_sec_env.bonded = false;
-    log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
+    //log_debug("%s@%d,conidx:%d\n", __func__, __LINE__,conidx);
 
     if (conidx < BLE_CONNECTION_MAX) {
 #if (BLE_APP_SEC_CON)
