@@ -29,7 +29,9 @@
 #define APP_BLE_PAIR_TIMEROUT 	(180*1000)//允许配对的超时时间，ms
 #define APP_BLE_PAIR_NUM_MAX 	(4)//最大允许配对个数
 
-#define APP_BLE_RSSI_NUM        (64)//
+#define APP_BLE_RSSI_TIME       (500)//计算一次均值的时间限制，ms
+#define APP_BLE_RSSI_NUM        (APP_BLE_RSSI_TIME*2/15)//存储rssi的最大buf，连接间隔最小为7.5ms，避免溢出设定为APP_BLE_RSSI_TIME/7.5
+#define APP_BLE_RSSI_WINDOW     (3)//移动平均法的窗口
 
 #define APP_BLE_MSG_SWITCH      (0)//传递信息的方式，1直接内部调用，0重新传给ble task让其再处理
 

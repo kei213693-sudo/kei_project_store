@@ -204,7 +204,7 @@ void hal_uart_fm33lg_rx_buf_reset(void)
 **************************************************************/
 static void hal_uart_fm33lg_tx_callback(void)
 {
-	log_debug("uart fm33lg tx complete.\n");
+	//log_debug("uart fm33lg tx complete.\n");
 }
 
 //设置待发送数据，并启动发送回调

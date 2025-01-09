@@ -159,7 +159,7 @@
           <Type>0</Type>
           <LineNumber>748</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>4259806</Address>
+          <Address>4259502</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -170,48 +170,12 @@
           <ExecCommand></ExecCommand>
           <Expression>\\ble_app_watch\../../common/app_task.c\748</Expression>
         </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>385</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>4267344</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\..\common\app_task.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\ble_app_watch\../../common/app_task.c\385</Expression>
-        </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>app_env</ItemText>
-        </Ww>
-        <Ww>
-          <count>1</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>app_ble_task_state</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>appm_state</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>u16Value</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>app_adv_env</ItemText>
+          <ItemText>g_stUartLogCtl</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>
@@ -960,7 +924,7 @@
   </Group>
 
   <Group>
-    <GroupName>MODU/ble</GroupName>
+    <GroupName>COMP/filter</GroupName>
     <tvExp>1</tvExp>
     <tvExpOptDlg>0</tvExpOptDlg>
     <cbSel>0</cbSel>
@@ -972,14 +936,34 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
+      <PathWithFileName>..\src\Components\filter\bsp_filter.c</PathWithFileName>
+      <FilenameWithoutPath>bsp_filter.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+  </Group>
+
+  <Group>
+    <GroupName>MODU/ble</GroupName>
+    <tvExp>1</tvExp>
+    <tvExpOptDlg>0</tvExpOptDlg>
+    <cbSel>0</cbSel>
+    <RteFlg>0</RteFlg>
+    <File>
+      <GroupNumber>10</GroupNumber>
+      <FileNumber>55</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
       <PathWithFileName>..\src\Modules\ble\app_ble.c</PathWithFileName>
       <FilenameWithoutPath>app_ble.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
     <File>
-      <GroupNumber>9</GroupNumber>
-      <FileNumber>55</FileNumber>
+      <GroupNumber>10</GroupNumber>
+      <FileNumber>56</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>

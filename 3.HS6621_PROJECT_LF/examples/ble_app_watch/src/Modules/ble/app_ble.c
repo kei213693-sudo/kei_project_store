@@ -29,6 +29,8 @@
 #include "sf.h"
 #include "app_sec.h"
 #include "app_adv.h"
+#include "bsp_filter.h"
+#include "gapc_task.h"
 
 
 /*******************************内部函数的声明*******************************/
@@ -295,9 +297,14 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 	{
 		if(NULL != pData)
 		{
-			uint16_t u16ConInterval = (uint16_t)(*((uint16_t *)pData));
-			//1.25，更新rsii监控周期，设定为连接间隔的2倍
-			g_stAppBleCtl.u16RssiGetPeriod = 2*((u16ConInterval)*5/4);
+			struct gapc_param_updated_ind const *param = (struct gapc_param_updated_ind const *)pData;
+			//uint16_t u16ConInterval = (uint16_t)(*((uint16_t *)pData));
+			//1.25，更新rsii监控周期，设定为连接间隔
+			g_stAppBleCtl.u16RssiGetPeriod = (param->con_interval)*5/4;
+			if(0 != param->con_latency)
+			{//考虑从机潜伏时间
+				g_stAppBleCtl.u16RssiGetPeriod *= param->con_latency;
+			}
 		}
 	}
 	else if(APP_BLE_RSSI_START == enOpt)
@@ -307,28 +314,29 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 
 		if(0 == g_stAppBleCtl.u16RssiGetPeriod)
 		{//避免未更新u16RssiGetPeriod就启动定时任务
-			g_stAppBleCtl.u16RssiGetPeriod = 100;
+			log_debug("u16RssiGetPeriod is 0,period(100 ms) obtains the rssi\n");
+			co_timer_set(&g_rssi_get_timer, 100, TIMER_REPEAT
+				, app_ble_rssi_get_timer_handler, NULL);
 		}
-		log_debug("The startup period(%d ms) obtains the rssi\n",g_stAppBleCtl.u16RssiGetPeriod);
-
-		co_timer_set(&g_rssi_get_timer, g_stAppBleCtl.u16RssiGetPeriod, TIMER_REPEAT
-			, app_ble_rssi_get_timer_handler, NULL);
+		else
+		{
+			log_debug("The startup period(%d ms) obtains the rssi\n",g_stAppBleCtl.u16RssiGetPeriod);
+			co_timer_set(&g_rssi_get_timer, g_stAppBleCtl.u16RssiGetPeriod, TIMER_REPEAT
+				, app_ble_rssi_get_timer_handler, NULL);
+		}
 	}
 	else if(APP_BLE_RSSI_UPDATA_DATA == enOpt)
 	{
 		if(NULL != pData)
 		{
-			int8_t i8Rssi = (int8_t)(*((int8_t*)pData));;//存储最新rssi数值，用于过滤
-			int8_t i8RssiAvg = 0xff;
-			//log_debug("get rssi:%d dB\n",i8Rssi);
-
-			g_stAppBleCtl.g_i8RssiBuf[g_stAppBleCtl.u8RssiLen] = i8Rssi;
+			g_stAppBleCtl.g_i8RssiBuf[g_stAppBleCtl.u8RssiLen] = (int8_t)(*((int8_t*)pData));;//存储最新rssi数值
 			g_stAppBleCtl.u8RssiLen++;
 
-			if(g_stAppBleCtl.u8RssiLen >= APP_BLE_RSSI_NUM)
-			{
-				//TODO 待添加rssi过滤api
-				i8RssiAvg = g_stAppBleCtl.g_i8RssiBuf[0];
+			//if(g_stAppBleCtl.u8RssiLen >= APP_BLE_RSSI_NUM)
+			if((g_stAppBleCtl.u8RssiLen * g_stAppBleCtl.u16RssiGetPeriod) >= APP_BLE_RSSI_TIME)
+			{//保证不同的连接间隔，传递rssi数值给mcu的时间是固定的
+				int8_t i8RssiAvg = bsp_filter_low_pass_moving_average(g_stAppBleCtl.g_i8RssiBuf,g_stAppBleCtl.u8RssiLen,APP_BLE_RSSI_WINDOW);
+				log_debug("rssi(%d) Average:%d dB\n",g_stAppBleCtl.u8RssiLen,i8RssiAvg);
 				// log_debug("rssi data[%d]:",APP_BLE_RSSI_NUM);
 				// for(uint8_t i = 0;i < APP_BLE_RSSI_NUM;i++)
 				// {
@@ -366,6 +374,7 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 	else if(APP_BLE_RSSI_STOP == enOpt)
 	{
 		co_timer_del(&g_rssi_get_timer);
+		g_stAppBleCtl.u16RssiGetPeriod = 0;
 	}
 	else
 	{
@@ -439,9 +448,12 @@ static int app_ble_update_param(ke_msg_id_t const msgid,
 								ke_task_id_t const dest_id,
 								ke_task_id_t const src_id)
 {
-    log_debug("send con param updata req\n");
-	struct gapc_conn_param st_conn_param = {(100)*5/6,(100)*5/6,4,(3000)/10};//100ms,100ms,0潜伏时间，3s,写死
-	appm_update_param(&st_conn_param);
+	if(0 == g_stAppBleCtl.u16RssiGetPeriod)
+	{//连接参数没有更新再主动发起
+		struct gapc_conn_param st_conn_param = {(50)*5/6,(50)*5/6,0,(2000)/10};//50ms,50ms,0潜伏时间，2s,写死
+		log_debug("con param updata req:%d ms,%d,%d ms\n",st_conn_param.intv_min*6/5,st_conn_param.latency,st_conn_param.time_out * 10);
+		appm_update_param(&st_conn_param);
+	}
     return (KE_MSG_CONSUMED);
 }
 
@@ -503,7 +515,7 @@ static int app_ble_processTxRec(ke_msg_id_t const msgid,
                                     ke_task_id_t const dest_id,
                                     ke_task_id_t const src_id)
 {
-	log_debug("App ble tx opt:%d\n",msgid);
+	// log_debug("App ble tx opt:%d\n",msgid);
 
 	for(uint8_t i = 0;i < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));i++)
     {
@@ -912,8 +924,9 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			log_debug("Pair num:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
 			log_debug_array_ex("Admin Mac Addr", g_stAppBleCtl.stAppBleSysInfo.administratorMAC, 6);
 			log_debug("AdvInterval:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625
-			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\n"
-					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod);
+			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\nrssiBufLen:%d\nrssiSendTime:%d ms\nrssiWindowSize:%d\n"
+					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod
+					,APP_BLE_RSSI_NUM,APP_BLE_RSSI_TIME,APP_BLE_RSSI_WINDOW);
 			
 			log_debug_array_ex("app_env", &app_env, sizeof(app_env));
 			log_debug_array_ex("app_sec_env", &app_sec_env, sizeof(app_sec_env));
@@ -968,6 +981,12 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 					}
 				}
 			}
+		}
+		else if(0 == strncmp("filter",(const char*)pData,6))
+		{//滤波器测试
+			int8_t data[APP_BLE_RSSI_NUM] = {-75,-76,-75,-75,-90,-75,-75,-75};
+			int8_t i8Average = bsp_filter_low_pass_moving_average(data,APP_BLE_RSSI_NUM,APP_BLE_RSSI_WINDOW);
+			log_debug("rssi Average:%d dB\n",i8Average);
 		}
 		
 		//*********************************************以下是用log cmd测试mcu cmd的指令码

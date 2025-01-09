@@ -76,8 +76,7 @@ void app_gap_connected_handler(struct gapc_connection_req_ind const *param)
     log_debug("----------%s@%d,conhdl:%d,Addr Type:%d,", __func__, __LINE__,param->conhdl,param->peer_addr_type);
     log_debug_array_ex("ADDR", &param->peer_addr, 6);
 
-    app_ble_rssi_opt(APP_BLE_RSSI_PERIOD_SET,(void *)&param->con_interval);//更新定时获取周期
-    ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 100);//1s后主动发送连接参数更新请求
+    ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 300);//3s后检查，是否要主动发送连接参数更新请求
 }
 
 /**
@@ -111,18 +110,18 @@ void app_gap_param_update_ind_handler(struct gapc_param_updated_ind const *param
     log_debug("%s@%d,interval:%d ms,latency:%d,timeout:%d ms\n",__func__, __LINE__
         ,(param->con_interval)*5/4,param->con_latency,(param->sup_to)*10);
 
-    if(0 != app_ble_admin_get())
-    {//回连成功了
-        app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
-        app_ble_rssi_opt(APP_BLE_RSSI_PERIOD_SET,(void *)&param->con_interval);//更新定时获取周期
-        app_ble_rssi_opt(APP_BLE_RSSI_START,NULL);//重新启动
-    }
-
     // if((ke_timer_active(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID)) //定时器准备运行
-    //     && (param->sup_to <= 300))//已经收到连接参数更新指令，且timeout <= 3s
+    //     && (param->sup_to <= 200) && (param->con_interval <= 40))//已经收到连接参数更新指令，且timeout <= 2s
     // {//关闭定时器,不再发送请求
     //     ke_timer_clear(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID);
     // }
+
+    if(0 != app_ble_admin_get())
+    {//回连成功了
+        app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
+        app_ble_rssi_opt(APP_BLE_RSSI_PERIOD_SET,(void *)param);//更新定时获取周期
+        app_ble_rssi_opt(APP_BLE_RSSI_START,NULL);//重新启动
+    }
 }
 
 /**
