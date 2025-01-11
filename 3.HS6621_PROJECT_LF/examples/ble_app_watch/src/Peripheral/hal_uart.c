@@ -48,7 +48,7 @@ static void hal_uart_log_rx_callback(uint8_t data)
 {
 	if(0 == g_stUartLogCtl.finsh)
 	{
-        pmu_lowpower_prevent(PMU_LP_UART0);//避免进入休眠，这里用PMU_LP_UART0还是PMU_LP_USER？
+        pmu_lowpower_prevent(PMU_LP_UART0);//避免进入休眠
 		
 		g_stUartLogCtl.rxBuf[g_stUartLogCtl.rxLen] = data;
 		g_stUartLogCtl.rxLen++;
@@ -73,6 +73,7 @@ static void hal_uart_log_timer_handler(co_timer_t *timer, void *param)
 {
     g_stUartLogCtl.finsh = 1;
     ke_timer_set(APP_BLE_OPT_DEBUGLOG, APP_BLE_TASK_ID, 0);//让log task去处理uart数据,此时src_id就是0xff
+    pmu_lowpower_allow(PMU_LP_UART0);//处理完毕，允许休眠
 }
 
 //获取rxBuf地址
@@ -105,7 +106,6 @@ void hal_uart_log_rx_buf_reset(void)
 	g_stUartLogCtl.finsh = 0;
 	g_stUartLogCtl.rxLen = 0;
 	memset(g_stUartLogCtl.rxBuf,0,HAL_UART_LOG_LEN);
-    pmu_lowpower_allow(PMU_LP_UART0);//处理完毕，允许休眠
 }
 
 /**************************************************************
@@ -134,7 +134,7 @@ static void hal_uart_fm33lg_rx_callback(uint8_t data)
 {
 	if(0 == g_stUartFm33lgCtl.finsh)
 	{
-        pmu_lowpower_prevent(PMU_LP_UART1);//避免进入休眠，这里用PMU_LP_UART0还是PMU_LP_USER？
+        pmu_lowpower_prevent(PMU_LP_UART1);//避免进入休眠
 
 		g_stUartFm33lgCtl.rxBuf[g_stUartFm33lgCtl.rxLen] = data;
 		g_stUartFm33lgCtl.rxLen++;
@@ -159,6 +159,7 @@ static void hal_uart_fm33lg_timer_handler(co_timer_t *timer, void *param)
 {
     g_stUartFm33lgCtl.finsh = 1;
     ke_timer_set(APP_BLE_OPT_MCU_RX, APP_BLE_TASK_ID, 0);//让log task去处理uart数据
+    pmu_lowpower_allow(PMU_LP_UART1);//处理完毕，允许休眠
 }
 
 //获取rxBuf地址
@@ -191,7 +192,6 @@ void hal_uart_fm33lg_rx_buf_reset(void)
 	g_stUartFm33lgCtl.finsh = 0;
 	g_stUartFm33lgCtl.rxLen = 0;
 	memset(g_stUartFm33lgCtl.rxBuf,0,HAL_UART_FM33LG_LEN);
-    pmu_lowpower_allow(PMU_LP_UART1);//处理完毕，允许休眠
 }
 
 /**************************************************************

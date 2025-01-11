@@ -33,39 +33,58 @@
 #include "hal_wdt.h"
 #include "app_ble.h"
 
+#define PIN_KEY_1                    24  // KEY1@EVB，需要接上靠近按键KEY1的跳线帽，按下按键才有效
+#define APP_WAKEUP_TIMEOUT          (300)//休眠唤醒超时时间，ms
 
-/*********************************************************************
- * MACROS
- */
+static co_timer_t g_wakeup_timer;
 
-#ifdef CONFIG_ASIC
-#define PIN_WAKEUP_1                    24  // KEY1@EVB，需要接上靠近按键KEY1的跳线帽，按下按键才有效
-#endif
+static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_KEY_1) | BIT_MASK(HAL_UART_LOG_RX_PIN) | BIT_MASK(HAL_UART_FM33LG_RX_PIN));
 
-/*********************************************************************
- * TYPEDEFS
- */
+/**************************************************************
+*函数功能描述 ：唤醒超时，强制休眠
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+static void app_wakeup_timer_handler(co_timer_t *timer, void *param)
+{
+    log_debug("lp status:%08X\n",pmu_lowpower_prevent_status());
 
+    if(PMU_LP_UART0 & pmu_lowpower_prevent_status())
+    {
+        pmu_lowpower_allow(PMU_LP_UART0);
+    }
 
-/*********************************************************************
- * CONSTANTS
- */
+    if(PMU_LP_UART1 & pmu_lowpower_prevent_status())
+    {
+        pmu_lowpower_allow(PMU_LP_UART1);
+    }
+}
 
+static void app_lowpower_wakeup_handler(uint32_t pin_mask)
+{
+    log_debug("wake_gpio: %08X\n", pin_mask);
 
-/*********************************************************************
- * LOCAL VARIABLES
- */
+    if(0 != (pin_mask & BIT_MASK(PIN_KEY_1)))
+    {
+        log_debug("key1 Wakeup\n");
+    }
 
-static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_WAKEUP_1));
+    if(0 != (pin_mask & BIT_MASK(HAL_UART_LOG_RX_PIN)))
+    {
+        log_debug("uart log Wakeup\n");
+        pmu_lowpower_prevent(PMU_LP_UART0);//先禁止休眠
+    }
 
-/*********************************************************************
- * GLOBAL VARIABLES
- */
+    if(0 != (pin_mask & BIT_MASK(HAL_UART_FM33LG_RX_PIN)))
+    {
+        log_debug("uart fm33lg Wakeup\n");
+        pmu_lowpower_prevent(PMU_LP_UART1);//先禁止休眠
+    }
 
-
-/*********************************************************************
- * LOCAL FUNCTIONS
- */
+    co_timer_set(&g_wakeup_timer, APP_WAKEUP_TIMEOUT//等待接收指令的时间长度，暂定300ms
+            , TIMER_ONE_SHOT, app_wakeup_timer_handler, NULL);
+}
 
 static void gpio_handler(uint32_t pin_mask)
 {
@@ -73,47 +92,28 @@ static void gpio_handler(uint32_t pin_mask)
     log_debug("gpio: %08X [%d]\n", pin_mask, counter++);
 }
 
-static void wakeup_gpio_handler(uint32_t pin_mask)
-{
-    static int counter = 0;
-    log_debug("wake_gpio: %08X [%d]\n", pin_mask, counter++);
-}
-
-//gpio pmu部分从sleep唤醒后不需要重新初始化
+//pmu部分从sleep唤醒后不需要重新初始化
 static void pinmux_init(void)
 {
-    // KEY1
-    pinmux_config(PIN_WAKEUP_1,  PINMUX_GPIO_MODE_CFG);
-    pmu_pin_mode_set(pin_wakeup_mask, PMU_PIN_MODE_PU);
+    pmu_wakeup_pin_set(pin_wakeup_mask, PMU_PIN_WAKEUP_LOW_LEVEL);
+    pmu_wakeup_pin_register_callback(app_lowpower_wakeup_handler, NULL);//sleep唤醒回调注册
 }
 
+//通用外设初始化
 static void peripheral_init(void)
 {
     // Init GPIO
     gpio_open();
 
-    // Wakeup Pin
-    gpio_set_direction(pin_wakeup_mask, GPIO_INPUT);
-    gpio_set_interrupt(pin_wakeup_mask, GPIO_BOTH_EDGE);
-    gpio_set_interrupt_callback(gpio_handler);
-
-    // wakeup
-    pmu_wakeup_pin_set(pin_wakeup_mask, PMU_PIN_WAKEUP_LOW_LEVEL);
-    pmu_wakeup_pin_register_callback(wakeup_gpio_handler, NULL);//sleep唤醒回调注册
+    // key1初始化
+    pinmux_config(PIN_KEY_1,  PINMUX_GPIO_MODE_CFG);
+    pmu_pin_mode_set(BITMASK(PIN_KEY_1), PMU_PIN_MODE_PU);
+    gpio_set_direction(BITMASK(PIN_KEY_1), GPIO_INPUT);
+    gpio_set_interrupt(BITMASK(PIN_KEY_1), GPIO_BOTH_EDGE);
+    gpio_set_interrupt_callback(gpio_handler);//通用gpio中断回调函数
 
     hal_uart_log_init();
     hal_uart_fm33lg_init();
-    hal_flash_init();
-	hal_wdt_init();
-}
-
-//休眠唤醒后重新初始化各类外设
-//GPIO, Timer, UART, I2C, SPI, WDT, Encoder, KPP, I2S,DMA, ADC
-static void peripheral_restore(void)
-{
-    // Init UART
-    hal_uart_log_init();
-	hal_uart_fm33lg_init();
     hal_flash_init();
 	hal_wdt_init();
 }
@@ -127,7 +127,7 @@ static void hardware_init(void)
 	
 	pinmux_init();
 
-    peripheral_init();//外设
+    peripheral_init();
 }
 
 static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_power_status_t power_status)
@@ -139,24 +139,16 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
             break;
 
         case POWER_SLEEP_LEAVE_TOP_HALF:
-            peripheral_restore();
+            //休眠唤醒后重新初始化各类外设
+            //GPIO, Timer, UART, I2C, SPI, WDT, Encoder, KPP, I2S,DMA, ADC
+            peripheral_init();
+            log_debug("h\n");//为什么这个打印不出来？？
             break;
 
         case POWER_SLEEP_LEAVE_BOTTOM_HALF://退出休眠
             log_debug("l\n");
             break;
     }
-}
-
-//状态改变后就会进入这个回调
-co_power_status_t power_sleep_status_handler(void)
-{
-    co_power_status_t pmu_status;
-
-    pmu_status = pmu_power_status();//直接查询状态值
-
-//    return MIN(POWER_SLEEP, pmu_status);
-    return pmu_status;
 }
 
 static void ble_stack_config(void)
@@ -178,8 +170,10 @@ static void ble_stack_config(void)
     pmu_xtal32m_change_param(1);//修改负载电容参数
 
     // Enable sleep, SWD will be closed.
-    co_power_sleep_enable(false);//失能sleep模式
-    //co_power_sleep_enable(true);//使能sleep模式，此时无法进入调试状态
+    //co_power_sleep_enable(false);//失能sleep模式
+    co_power_sleep_enable(true);//使能sleep模式，此时无法进入调试状态
+
+    co_power_register_sleep_event(power_sleep_event_handler);
 }
 
 /*********************************************************************
@@ -191,11 +185,9 @@ int main(void)
     ble_stack_config();
     hardware_init();
     rwip_init(RESET_NO_ERROR);
-    //co_power_register_user_status(power_sleep_status_handler);
-    co_power_register_sleep_event(power_sleep_event_handler);
 
 	app_ble_init();//先初始化自定义任务
-    appm_init();//再初始化ble协议参数
+    appm_init();//再初始化ble参数和任务
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);

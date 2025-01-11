@@ -21,33 +21,32 @@ Section Cross References
     startup_hs6621_flash.o(.text) refers to entry.o(.ARM.Collect$$$$00000000) for __main
     startup_hs6621_flash.o(.text) refers to entry_cc2.o(i.system_init_run2sf) for system_init_run2sf
     startup_hs6621_flash.o(.text) refers to main.o(i.main) for $Super$$main
+    main.o(i.app_lowpower_wakeup_handler) refers to printfa.o(i.__0printf) for __2printf
+    main.o(i.app_lowpower_wakeup_handler) refers to main.o(i.app_wakeup_timer_handler) for app_wakeup_timer_handler
+    main.o(i.app_lowpower_wakeup_handler) refers to main.o(.bss) for .bss
+    main.o(i.app_wakeup_timer_handler) refers to printfa.o(i.__0printf) for __2printf
     main.o(i.gpio_handler) refers to printfa.o(i.__0printf) for __2printf
     main.o(i.gpio_handler) refers to main.o(.data) for .data
-    main.o(i.hardware_init) refers to pmu.o(i.pmu_wakeup_pin_set) for pmu_wakeup_pin_set
-    main.o(i.hardware_init) refers to pmu.o(i.pmu_wakeup_pin_register_callback) for pmu_wakeup_pin_register_callback
-    main.o(i.hardware_init) refers to hal_uart.o(i.hal_uart_log_init) for hal_uart_log_init
-    main.o(i.hardware_init) refers to hal_uart.o(i.hal_uart_fm33lg_init) for hal_uart_fm33lg_init
-    main.o(i.hardware_init) refers to hal_flash.o(i.hal_flash_init) for hal_flash_init
-    main.o(i.hardware_init) refers to hal_wdt.o(i.hal_wdt_init) for hal_wdt_init
-    main.o(i.hardware_init) refers to main.o(.data) for .data
-    main.o(i.hardware_init) refers to main.o(i.gpio_handler) for gpio_handler
-    main.o(i.hardware_init) refers to main.o(i.wakeup_gpio_handler) for wakeup_gpio_handler
     main.o(i.main) refers to pmu.o(i.pmu_32k_enable_in_deep_sleep) for pmu_32k_enable_in_deep_sleep
     main.o(i.main) refers to pmu.o(i.pmu_xtal32m_change_param) for pmu_xtal32m_change_param
-    main.o(i.main) refers to main.o(i.hardware_init) for hardware_init
+    main.o(i.main) refers to pmu.o(i.pmu_wakeup_pin_set) for pmu_wakeup_pin_set
+    main.o(i.main) refers to pmu.o(i.pmu_wakeup_pin_register_callback) for pmu_wakeup_pin_register_callback
+    main.o(i.main) refers to main.o(i.peripheral_init) for peripheral_init
     main.o(i.main) refers to entry_cc2.o(i.rwip_init) for rwip_init
     main.o(i.main) refers to app_ble.o(i.app_ble_init) for app_ble_init
     main.o(i.main) refers to app.o(i.appm_init) for appm_init
     main.o(i.main) refers to printfa.o(i.__0printf) for __2printf
     main.o(i.main) refers to pmu.o(i.pmu_reboot_reason) for pmu_reboot_reason
     main.o(i.main) refers to main.o(i.power_sleep_event_handler) for power_sleep_event_handler
+    main.o(i.main) refers to main.o(.data) for .data
+    main.o(i.main) refers to main.o(i.app_lowpower_wakeup_handler) for app_lowpower_wakeup_handler
+    main.o(i.peripheral_init) refers to hal_uart.o(i.hal_uart_log_init) for hal_uart_log_init
+    main.o(i.peripheral_init) refers to hal_uart.o(i.hal_uart_fm33lg_init) for hal_uart_fm33lg_init
+    main.o(i.peripheral_init) refers to hal_flash.o(i.hal_flash_init) for hal_flash_init
+    main.o(i.peripheral_init) refers to hal_wdt.o(i.hal_wdt_init) for hal_wdt_init
+    main.o(i.peripheral_init) refers to main.o(i.gpio_handler) for gpio_handler
     main.o(i.power_sleep_event_handler) refers to printfa.o(i.__0printf) for __2printf
-    main.o(i.power_sleep_event_handler) refers to hal_uart.o(i.hal_uart_log_init) for hal_uart_log_init
-    main.o(i.power_sleep_event_handler) refers to hal_uart.o(i.hal_uart_fm33lg_init) for hal_uart_fm33lg_init
-    main.o(i.power_sleep_event_handler) refers to hal_flash.o(i.hal_flash_init) for hal_flash_init
-    main.o(i.power_sleep_event_handler) refers to hal_wdt.o(i.hal_wdt_init) for hal_wdt_init
-    main.o(i.wakeup_gpio_handler) refers to printfa.o(i.__0printf) for __2printf
-    main.o(i.wakeup_gpio_handler) refers to main.o(.data) for .data
+    main.o(i.power_sleep_event_handler) refers to main.o(i.peripheral_init) for peripheral_init
     app_event.o(i.app_ancs_recv_evt_handler) refers to printfa.o(i.__0printf) for __2printf
     app_event.o(i.app_ancs_recv_msg_handler) refers to printfa.o(i.__0printf) for __2printf
     app_event.o(i.app_audio_rx_cmd_handler) refers to printfa.o(i.__0printf) for __2printf
@@ -6386,7 +6385,6 @@ Removing Unused input sections from the image.
     Removing main.o(.rev16_text), (4 bytes).
     Removing main.o(.revsh_text), (4 bytes).
     Removing main.o(.rrx_text), (6 bytes).
-    Removing main.o(i.power_sleep_status_handler), (4 bytes).
     Removing app_event.o(.rev16_text), (4 bytes).
     Removing app_event.o(.revsh_text), (4 bytes).
     Removing app_event.o(.rrx_text), (6 bytes).
@@ -7301,7 +7299,7 @@ Removing Unused input sections from the image.
     Removing dsqrt.o(.text), (162 bytes).
     Removing cdcmple.o(.text), (48 bytes).
 
-917 unused section(s) (total 42224 bytes) removed from the image.
+916 unused section(s) (total 42220 bytes) removed from the image.
 
 ==============================================================================
 
@@ -7317,45 +7315,45 @@ Image Symbol Table
     ../clib/microlib/division.c              0x00000000   Number         0  uldiv.o ABSOLUTE
     ../clib/microlib/division.c              0x00000000   Number         0  uidiv.o ABSOLUTE
     ../clib/microlib/errno.c                 0x00000000   Number         0  errno.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
-    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
     ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry5.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry7b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry10b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry11b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8b.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry9a.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry2.o ABSOLUTE
+    ../clib/microlib/init/entry.s            0x00000000   Number         0  entry8a.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llshl.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llushr.o ABSOLUTE
     ../clib/microlib/longlong.c              0x00000000   Number         0  llsshr.o ABSOLUTE
-    ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  mallocr.o ABSOLUTE
     ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  malloc.o ABSOLUTE
-    ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  malloca.o ABSOLUTE
+    ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  mallocr.o ABSOLUTE
     ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  mallocra.o ABSOLUTE
+    ../clib/microlib/malloc/malloc.c         0x00000000   Number         0  malloca.o ABSOLUTE
     ../clib/microlib/malloc/mvars.c          0x00000000   Number         0  mvars.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf6.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfb.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfa.o ABSOLUTE
-    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf8.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf7.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf6.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf5.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf4.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf3.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf2.o ABSOLUTE
     ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf1.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfb.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf0.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printf8.o ABSOLUTE
+    ../clib/microlib/printf/printf.c         0x00000000   Number         0  printfa.o ABSOLUTE
     ../clib/microlib/printf/stubs.s          0x00000000   Number         0  stubs.o ABSOLUTE
     ../clib/microlib/stdlib/rand.c           0x00000000   Number         0  rand.o ABSOLUTE
     ../clib/microlib/string/memcmp.c         0x00000000   Number         0  memcmp.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmovea.o ABSOLUTE
-    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpya.o ABSOLUTE
     ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memmoveb.o ABSOLUTE
+    ../clib/microlib/string/memcpy.c         0x00000000   Number         0  memcpyb.o ABSOLUTE
     ../clib/microlib/string/memset.c         0x00000000   Number         0  memseta.o ABSOLUTE
     ../clib/microlib/string/strlen.c         0x00000000   Number         0  strlen.o ABSOLUTE
     ../clib/microlib/string/strncmp.c        0x00000000   Number         0  strncmp.o ABSOLUTE
@@ -7367,22 +7365,22 @@ Image Symbol Table
     ../clib/microlib/time/mktime.c           0x00000000   Number         0  mktime.o ABSOLUTE
     ../fplib/microlib/d2f.c                  0x00000000   Number         0  d2f.o ABSOLUTE
     ../fplib/microlib/f2d.c                  0x00000000   Number         0  f2d.o ABSOLUTE
-    ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
     ../fplib/microlib/fpadd.c                0x00000000   Number         0  fadd.o ABSOLUTE
+    ../fplib/microlib/fpadd.c                0x00000000   Number         0  dadd.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  ddiv.o ABSOLUTE
     ../fplib/microlib/fpdiv.c                0x00000000   Number         0  fdiv.o ABSOLUTE
     ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  fepilogue.o ABSOLUTE
     ../fplib/microlib/fpepilogue.c           0x00000000   Number         0  depilogue.o ABSOLUTE
-    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixi.o ABSOLUTE
     ../fplib/microlib/fpfix.c                0x00000000   Number         0  ffixi.o ABSOLUTE
-    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixul.o ABSOLUTE
+    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixi.o ABSOLUTE
     ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixui.o ABSOLUTE
-    ../fplib/microlib/fpflt.c                0x00000000   Number         0  fflti.o ABSOLUTE
+    ../fplib/microlib/fpfix.c                0x00000000   Number         0  dfixul.o ABSOLUTE
+    ../fplib/microlib/fpflt.c                0x00000000   Number         0  dflti.o ABSOLUTE
     ../fplib/microlib/fpflt.c                0x00000000   Number         0  ffltui.o ABSOLUTE
     ../fplib/microlib/fpflt.c                0x00000000   Number         0  dfltui.o ABSOLUTE
-    ../fplib/microlib/fpflt.c                0x00000000   Number         0  dflti.o ABSOLUTE
-    ../fplib/microlib/fpmul.c                0x00000000   Number         0  dmul.o ABSOLUTE
+    ../fplib/microlib/fpflt.c                0x00000000   Number         0  fflti.o ABSOLUTE
     ../fplib/microlib/fpmul.c                0x00000000   Number         0  fmul.o ABSOLUTE
+    ../fplib/microlib/fpmul.c                0x00000000   Number         0  dmul.o ABSOLUTE
     ../fplib/microlib/fpscalb.c              0x00000000   Number         0  fscalb.o ABSOLUTE
     ../fplib/microlib/fpscalb.c              0x00000000   Number         0  dscalb.o ABSOLUTE
     ../fplib/microlib/fpsqrt.c               0x00000000   Number         0  dsqrt.o ABSOLUTE
@@ -7391,16 +7389,16 @@ Image Symbol Table
     ../mathlib/floor.c                       0x00000000   Number         0  floor.o ABSOLUTE
     ../mathlib/fpclassify.c                  0x00000000   Number         0  fpclassify.o ABSOLUTE
     ../mathlib/poly.c                        0x00000000   Number         0  poly.o ABSOLUTE
-    ../mathlib/pow.c                         0x00000000   Number         0  pow.o ABSOLUTE
     ../mathlib/pow.c                         0x00000000   Number         0  pow_x.o ABSOLUTE
+    ../mathlib/pow.c                         0x00000000   Number         0  pow.o ABSOLUTE
     ../mathlib/qnan.c                        0x00000000   Number         0  qnan.o ABSOLUTE
     ../mathlib/rred.c                        0x00000000   Number         0  rred.o ABSOLUTE
-    ../mathlib/sin.c                         0x00000000   Number         0  sin.o ABSOLUTE
     ../mathlib/sin.c                         0x00000000   Number         0  sin_x.o ABSOLUTE
-    ../mathlib/sin_i.c                       0x00000000   Number         0  sin_i_x.o ABSOLUTE
+    ../mathlib/sin.c                         0x00000000   Number         0  sin.o ABSOLUTE
     ../mathlib/sin_i.c                       0x00000000   Number         0  sin_i.o ABSOLUTE
-    ../mathlib/sqrt.c                        0x00000000   Number         0  sqrt.o ABSOLUTE
+    ../mathlib/sin_i.c                       0x00000000   Number         0  sin_i_x.o ABSOLUTE
     ../mathlib/sqrt.c                        0x00000000   Number         0  sqrt_x.o ABSOLUTE
+    ../mathlib/sqrt.c                        0x00000000   Number         0  sqrt.o ABSOLUTE
     ..\..\..\coroutine\co.c                  0x00000000   Number         0  co.o ABSOLUTE
     ..\..\..\coroutine\co_allocator.c        0x00000000   Number         0  co_allocator.o ABSOLUTE
     ..\..\..\coroutine\co_mem.c              0x00000000   Number         0  co_mem.o ABSOLUTE
@@ -7758,15 +7756,17 @@ Image Symbol Table
     lld_con_evt_canceled_cbk                 0x00001253   Thumb Code    90  lld_con.o(.ramtext.code)
     lld_con_win_widening_local_drift_calc    0x000012ad   Thumb Code    92  lld_con.o(.ramtext.code)
     lld_con_slv_local_drift_estimate         0x00001309   Thumb Code   174  lld_con.o(.ramtext.code)
-    i.gpio_handler                           0x000013d4   Section        0  main.o(i.gpio_handler)
-    gpio_handler                             0x000013d5   Thumb Code    16  main.o(i.gpio_handler)
-    i.hardware_init                          0x000013fc   Section        0  main.o(i.hardware_init)
-    hardware_init                            0x000013fd   Thumb Code    90  main.o(i.hardware_init)
-    i.main                                   0x00001464   Section        0  main.o(i.main)
-    i.power_sleep_event_handler              0x00001530   Section        0  main.o(i.power_sleep_event_handler)
-    power_sleep_event_handler                0x00001531   Thumb Code    48  main.o(i.power_sleep_event_handler)
-    i.wakeup_gpio_handler                    0x00001568   Section        0  main.o(i.wakeup_gpio_handler)
-    wakeup_gpio_handler                      0x00001569   Thumb Code    16  main.o(i.wakeup_gpio_handler)
+    i.app_lowpower_wakeup_handler            0x000013d4   Section        0  main.o(i.app_lowpower_wakeup_handler)
+    app_lowpower_wakeup_handler              0x000013d5   Thumb Code    74  main.o(i.app_lowpower_wakeup_handler)
+    i.app_wakeup_timer_handler               0x00001474   Section        0  main.o(i.app_wakeup_timer_handler)
+    app_wakeup_timer_handler                 0x00001475   Thumb Code    48  main.o(i.app_wakeup_timer_handler)
+    i.gpio_handler                           0x000014b4   Section        0  main.o(i.gpio_handler)
+    gpio_handler                             0x000014b5   Thumb Code    16  main.o(i.gpio_handler)
+    i.main                                   0x000014dc   Section        0  main.o(i.main)
+    i.peripheral_init                        0x000015c8   Section        0  main.o(i.peripheral_init)
+    peripheral_init                          0x000015c9   Thumb Code    66  main.o(i.peripheral_init)
+    i.power_sleep_event_handler              0x00001610   Section        0  main.o(i.power_sleep_event_handler)
+    power_sleep_event_handler                0x00001611   Thumb Code    36  main.o(i.power_sleep_event_handler)
     RESET_FLASH                              0x00403000   Section       64  startup_hs6621_flash.o(RESET_FLASH)
     __VectorsFLASH                           0x00403000   Data           4  startup_hs6621_flash.o(RESET_FLASH)
     .ARM.Collect$$$$00000000                 0x00403040   Section        0  entry.o(.ARM.Collect$$$$00000000)
@@ -7814,8 +7814,8 @@ Image Symbol Table
     .text                                    0x004038ee   Section        0  llsshr.o(.text)
     .text                                    0x00403914   Section        0  localtime_w.o(.text)
     .text                                    0x00403920   Section        0  localtime_i.o(.text)
-    .text                                    0x004039ac   Section        0  iusefp.o(.text)
     .text                                    0x004039ac   Section        0  fepilogue.o(.text)
+    .text                                    0x004039ac   Section        0  iusefp.o(.text)
     .text                                    0x00403a1a   Section        0  depilogue.o(.text)
     .text                                    0x00403ad4   Section        0  dflti.o(.text)
     .text                                    0x00403af6   Section        0  dfixul.o(.text)
@@ -8796,10 +8796,10 @@ Image Symbol Table
     i.hal_uart_fm33lg_rx_buf_addr_get        0x00415858   Section        0  hal_uart.o(i.hal_uart_fm33lg_rx_buf_addr_get)
     i.hal_uart_fm33lg_rx_buf_len_get         0x00415870   Section        0  hal_uart.o(i.hal_uart_fm33lg_rx_buf_len_get)
     i.hal_uart_fm33lg_rx_buf_reset           0x00415884   Section        0  hal_uart.o(i.hal_uart_fm33lg_rx_buf_reset)
-    i.hal_uart_fm33lg_rx_callback            0x004158a4   Section        0  hal_uart.o(i.hal_uart_fm33lg_rx_callback)
-    hal_uart_fm33lg_rx_callback              0x004158a5   Thumb Code    64  hal_uart.o(i.hal_uart_fm33lg_rx_callback)
-    i.hal_uart_fm33lg_timer_handler          0x004158f0   Section        0  hal_uart.o(i.hal_uart_fm33lg_timer_handler)
-    hal_uart_fm33lg_timer_handler            0x004158f1   Thumb Code    16  hal_uart.o(i.hal_uart_fm33lg_timer_handler)
+    i.hal_uart_fm33lg_rx_callback            0x00415898   Section        0  hal_uart.o(i.hal_uart_fm33lg_rx_callback)
+    hal_uart_fm33lg_rx_callback              0x00415899   Thumb Code    64  hal_uart.o(i.hal_uart_fm33lg_rx_callback)
+    i.hal_uart_fm33lg_timer_handler          0x004158e4   Section        0  hal_uart.o(i.hal_uart_fm33lg_timer_handler)
+    hal_uart_fm33lg_timer_handler            0x004158e5   Thumb Code    28  hal_uart.o(i.hal_uart_fm33lg_timer_handler)
     i.hal_uart_fm33lg_tx_buf_set             0x00415904   Section        0  hal_uart.o(i.hal_uart_fm33lg_tx_buf_set)
     i.hal_uart_fm33lg_tx_callback            0x004159a8   Section        0  hal_uart.o(i.hal_uart_fm33lg_tx_callback)
     hal_uart_fm33lg_tx_callback              0x004159a9   Thumb Code     2  hal_uart.o(i.hal_uart_fm33lg_tx_callback)
@@ -8807,10 +8807,10 @@ Image Symbol Table
     i.hal_uart_log_rx_buf_addr_get           0x004159e8   Section        0  hal_uart.o(i.hal_uart_log_rx_buf_addr_get)
     i.hal_uart_log_rx_buf_len_get            0x00415a00   Section        0  hal_uart.o(i.hal_uart_log_rx_buf_len_get)
     i.hal_uart_log_rx_buf_reset              0x00415a14   Section        0  hal_uart.o(i.hal_uart_log_rx_buf_reset)
-    i.hal_uart_log_rx_callback               0x00415a34   Section        0  hal_uart.o(i.hal_uart_log_rx_callback)
-    hal_uart_log_rx_callback                 0x00415a35   Thumb Code    64  hal_uart.o(i.hal_uart_log_rx_callback)
-    i.hal_uart_log_timer_handler             0x00415a80   Section        0  hal_uart.o(i.hal_uart_log_timer_handler)
-    hal_uart_log_timer_handler               0x00415a81   Thumb Code    16  hal_uart.o(i.hal_uart_log_timer_handler)
+    i.hal_uart_log_rx_callback               0x00415a28   Section        0  hal_uart.o(i.hal_uart_log_rx_callback)
+    hal_uart_log_rx_callback                 0x00415a29   Thumb Code    64  hal_uart.o(i.hal_uart_log_rx_callback)
+    i.hal_uart_log_timer_handler             0x00415a74   Section        0  hal_uart.o(i.hal_uart_log_timer_handler)
+    hal_uart_log_timer_handler               0x00415a75   Thumb Code    28  hal_uart.o(i.hal_uart_log_timer_handler)
     i.hal_wdt_init                           0x00415a94   Section        0  hal_wdt.o(i.hal_wdt_init)
     i.hci_acl_data_handler                   0x00415a9c   Section        0  l2cc_task.o(i.hci_acl_data_handler)
     hci_acl_data_handler                     0x00415a9d   Thumb Code    60  l2cc_task.o(i.hci_acl_data_handler)
@@ -10104,166 +10104,167 @@ Image Symbol Table
     .conststring                             0x00430740   Section       31  lld_adv.o(.conststring)
     .conststring                             0x00430760   Section       75  lld_per_adv.o(.conststring)
     .conststring                             0x004307ac   Section      258  lld_con.o(.conststring)
-    .data                                    0x20001598   Section       12  main.o(.data)
-    pin_wakeup_mask                          0x20001598   Data           4  main.o(.data)
-    counter                                  0x2000159c   Data           4  main.o(.data)
-    counter                                  0x200015a0   Data           4  main.o(.data)
-    .data                                    0x200015a4   Section        4  retarget.o(.data)
-    .data                                    0x200015a8   Section       24  app_wechat.o(.data)
-    sendSize                                 0x200015a8   Data           1  app_wechat.o(.data)
-    g_recv_data                              0x200015b8   Data           8  app_wechat.o(.data)
-    .data                                    0x200015c0   Section        1  app_tspp_server.o(.data)
-    .data                                    0x200015c1   Section        1  app_task.o(.data)
-    .data                                    0x200015c2   Section        2  app_ancsc.o(.data)
-    .data                                    0x200015c4   Section        1  app_onmicro_dfu.o(.data)
-    .data                                    0x200015c8   Section       12  ancsc_task.o(.data)
-    fifo_fr                                  0x200015c8   Data           1  ancsc_task.o(.data)
-    fifo_ra                                  0x200015c9   Data           1  ancsc_task.o(.data)
-    pending_timestamp                        0x200015cc   Data           4  ancsc_task.o(.data)
-    last_request_uid                         0x200015d0   Data           4  ancsc_task.o(.data)
-    .data                                    0x200015d4   Section        6  ancsc_utils.o(.data)
-    header_len                               0x200015d4   Data           1  ancsc_utils.o(.data)
-    item_recv_len                            0x200015d5   Data           1  ancsc_utils.o(.data)
-    m_parse                                  0x200015d6   Data           1  ancsc_utils.o(.data)
-    header                                   0x200015d7   Data           3  ancsc_utils.o(.data)
-    .data                                    0x200015da   Section        4  dfu_task.o(.data)
-    end_status                               0x200015da   Data           1  dfu_task.o(.data)
-    ctrl_flag                                0x200015dc   Data           2  dfu_task.o(.data)
-    .data                                    0x200015e0   Section       16  onmicro_dfu.o(.data)
-    TEST_LEN                                 0x200015e0   Data           4  onmicro_dfu.o(.data)
-    p_env                                    0x200015e4   Data           4  onmicro_dfu.o(.data)
-    m_data_crc                               0x200015e8   Data           4  onmicro_dfu.o(.data)
-    m_data_offset                            0x200015ec   Data           4  onmicro_dfu.o(.data)
-    .data                                    0x200015f0   Section       12  mpbledemo2.o(.data)
-    fix_head_len                             0x200015f0   Data           1  mpbledemo2.o(.data)
-    bleDemoHeadLen                           0x200015f2   Data           2  mpbledemo2.o(.data)
-    m_mpbledemo2_handler                     0x200015f8   Data           4  mpbledemo2.o(.data)
-    .data                                    0x200015fc   Section       48  mpbledemo2.o(.data)
-    .data                                    0x2000162c   Section        4  app_ble.o(.data)
-    g_pBspProtocolApi                        0x2000162c   Data           4  app_ble.o(.data)
-    .data                                    0x20001630   Section        1  app_ble.o(.data)
-    app_ble_task_state                       0x20001630   Data           1  app_ble.o(.data)
-    .data                                    0x20001634   Section        4  adc.o(.data)
-    adc_new_temp                             0x20001634   Data           4  adc.o(.data)
-    .data                                    0x20001638   Section        8  rtc.o(.data)
-    rtc_env                                  0x20001638   Data           8  rtc.o(.data)
-    .data                                    0x20001640   Section       32  audio.o(.data)
-    audio_env                                0x20001640   Data          32  audio.o(.data)
-    .data                                    0x20001660   Section       12  entry_cc2.o(.data)
-    .data                                    0x2000166c   Section        2  entry_cc2.o(.data)
-    .data                                    0x2000166e   Section        3  entry_cc2.o(.data)
-    rwip_rst_state                           0x2000166e   Data           1  entry_cc2.o(.data)
-    m_calib_is_restored                      0x2000166f   Data           1  entry_cc2.o(.data)
-    m_calib_is_save_to_flash                 0x20001670   Data           1  entry_cc2.o(.data)
-    .data                                    0x20001671   Section        1  co_port_hs6621_cc2.o(.data)
-    calib_repair_env_calib_start_temperature 0x20001671   Data           1  co_port_hs6621_cc2.o(.data)
-    .data                                    0x20001674   Section       32  co_allocator.o(.data)
-    .data                                    0x20001694   Section       16  cfg_nvds.o(.data)
-    nvds_purge_get_data_err                  0x20001694   Data           1  cfg_nvds.o(.data)
-    nvds_reclaim_used_size_err               0x20001695   Data           1  cfg_nvds.o(.data)
-    nvds_reclaim_get_data_err                0x20001696   Data           1  cfg_nvds.o(.data)
-    nvds_magic_number                        0x20001698   Data          12  cfg_nvds.o(.data)
-    .data                                    0x200016a4   Section        1  cpft.o(.data)
-    .data                                    0x200016a5   Section        1  hci.o(.data)
-    .data                                    0x200016a6   Section        8  hci_fc.o(.data)
-    hci_fc_env                               0x200016a6   Data           8  hci_fc.o(.data)
-    .data                                    0x200016b0   Section       16  sch_plan.o(.data)
-    time_msb                                 0x200016b0   Data           1  sch_plan.o(.data)
-    conflict_elt                             0x200016b4   Data           4  sch_plan.o(.data)
-    sch_plan_env                             0x200016b8   Data           8  sch_plan.o(.data)
-    .data                                    0x200016c0   Section        8  sch_slice.o(.data)
-    .data                                    0x200016c8   Section        4  l2cc.o(.data)
-    .data                                    0x200016cc   Section        1  l2cc_task.o(.data)
-    .data                                    0x200016d0   Section        4  gattc.o(.data)
-    .data                                    0x200016d4   Section        1  gattc_task.o(.data)
-    .data                                    0x200016d5   Section        1  gattm_task.o(.data)
-    .data                                    0x200016d8   Section        4  gapc.o(.data)
-    .data                                    0x200016dc   Section        1  gapc_task.o(.data)
-    .data                                    0x200016dd   Section        1  gapm_task.o(.data)
-    .data                                    0x200016de   Section        1  llm_task.o(.data)
-    llm_state                                0x200016de   Data           1  llm_task.o(.data)
-    .data                                    0x200016e0   Section        8  llc.o(.data)
-    .data                                    0x200016e8   Section        2  llc_task.o(.data)
-    llc_state                                0x200016e8   Data           2  llc_task.o(.data)
-    .data                                    0x200016ec   Section        8  lld.o(.data)
-    lld_rpa_renew_env                        0x200016f0   Data           4  lld.o(.data)
-    .data                                    0x200016f4   Section        8  lld_adv.o(.data)
-    .data                                    0x200016fc   Section        8  lld_per_adv.o(.data)
-    lld_per_adv_env                          0x200016fc   Data           8  lld_per_adv.o(.data)
-    .data                                    0x20001704   Section        4  lld_test.o(.data)
-    lld_test_env                             0x20001704   Data           4  lld_test.o(.data)
-    .data                                    0x20001708   Section        4  rand.o(.data)
-    _rand_state                              0x20001708   Data           4  rand.o(.data)
-    .data                                    0x2000170c   Section        4  mvars.o(.data)
-    .data                                    0x20001710   Section        4  mvars.o(.data)
-    .data                                    0x20001714   Section        4  errno.o(.data)
-    _errno                                   0x20001714   Data           4  errno.o(.data)
-    .bss                                     0x20001718   Section       48  app.o(.bss)
-    .bss                                     0x20001748   Section      540  app_adv.o(.bss)
-    app_adv_env                              0x20001748   Data         540  app_adv.o(.bss)
-    .bss                                     0x20001964   Section       78  app_sec.o(.bss)
-    .bss                                     0x200019b2   Section      122  app_wechat.o(.bss)
-    g_send_wechat                            0x200019b2   Data         122  app_wechat.o(.bss)
-    .bss                                     0x20001a2c   Section     4096  app_tspp_server.o(.bss)
-    .bss                                     0x20002a2c   Section       40  app_hid.o(.bss)
-    app_hid_env                              0x20002a2c   Data          16  app_hid.o(.bss)
-    app_hid_timer                            0x20002a3c   Data          24  app_hid.o(.bss)
-    .bss                                     0x20002a54   Section       64  ancsc_task.o(.bss)
-    pending_uid                              0x20002a54   Data          64  ancsc_task.o(.bss)
-    .bss                                     0x20002a94   Section      312  ancsc_utils.o(.bss)
-    m_ancs_data                              0x20002a94   Data         312  ancsc_utils.o(.bss)
-    .bss                                     0x20002bd0   Section      304  onmicro_dfu.o(.bss)
-    env                                      0x20002bd0   Data          44  onmicro_dfu.o(.bss)
-    m_cache                                  0x20002c00   Data         128  onmicro_dfu.o(.bss)
-    m_cmd_buf                                0x20002c80   Data         128  onmicro_dfu.o(.bss)
-    .bss                                     0x20002d00   Section    13612  rwmem.o(.bss)
-    rwip_heap_env                            0x20002d00   Data         784  rwmem.o(.bss)
-    rwip_heap_db                             0x20003010   Data        3084  rwmem.o(.bss)
-    rwip_heap_msg                            0x20003c1c   Data        9732  rwmem.o(.bss)
-    rwip_heap_non_ret                        0x20006220   Data          12  rwmem.o(.bss)
-    .bss                                     0x2000622c   Section       12  mpbledemo2.o(.bss)
-    .bss                                     0x20006238   Section       28  mpbledemo2.o(.bss)
-    .bss                                     0x20006254   Section       48  wechat_util.o(.bss)
-    .bss                                     0x20006284   Section      360  hal_uart.o(.bss)
-    g_stUartLogCtl                           0x20006284   Data          44  hal_uart.o(.bss)
-    g_stUartFm33lgCtl                        0x200062b0   Data         268  hal_uart.o(.bss)
-    g_uart_log_timer                         0x200063bc   Data          24  hal_uart.o(.bss)
-    g_uart_fm33lg_timer                      0x200063d4   Data          24  hal_uart.o(.bss)
-    .bss                                     0x200063ec   Section      476  app_ble.o(.bss)
-    g_stAppBleCtl                            0x200063ec   Data         112  app_ble.o(.bss)
-    g_stBleProCtl                            0x2000645c   Data         292  app_ble.o(.bss)
-    g_pair_check_timer                       0x20006580   Data          24  app_ble.o(.bss)
-    g_rssi_get_timer                         0x20006598   Data          24  app_ble.o(.bss)
-    g_adv_updata_timer                       0x200065b0   Data          24  app_ble.o(.bss)
-    .bss                                     0x200065c8   Section      220  adc.o(.bss)
-    adc_env                                  0x200065c8   Data         220  adc.o(.bss)
-    .bss                                     0x200066a4   Section       24  calib_repair.o(.bss)
-    .bss                                     0x200066bc   Section       24  timer.o(.bss)
-    tim_env                                  0x200066bc   Data          24  timer.o(.bss)
-    .bss                                     0x200066d4   Section      200  dma_nds.o(.bss)
-    dma_env                                  0x200066d4   Data         200  dma_nds.o(.bss)
-    .bss                                     0x2000679c   Section       56  cfg_nvds.o(.bss)
-    nvds_env                                 0x2000679c   Data          56  cfg_nvds.o(.bss)
-    .bss                                     0x200067d4   Section       26  hci.o(.bss)
-    .bss                                     0x200067f0   Section       24  hci_tl.o(.bss)
-    hci_tl_env                               0x200067f0   Data          24  hci_tl.o(.bss)
-    .bss                                     0x20006808   Section       32  sch_slice.o(.bss)
-    sch_slice_env                            0x20006808   Data          32  sch_slice.o(.bss)
-    .bss                                     0x20006828   Section       12  aes.o(.bss)
-    .bss                                     0x20006834   Section       32  h4tl.o(.bss)
-    h4tl_env                                 0x20006834   Data          32  h4tl.o(.bss)
-    .bss                                     0x20006854   Section      120  ke_task.o(.bss)
-    ke_task_env                              0x20006854   Data         120  ke_task.o(.bss)
-    .bss                                     0x200068cc   Section       48  ke.o(.bss)
-    .bss                                     0x200068fc   Section       12  l2cm.o(.bss)
-    .bss                                     0x20006908   Section       32  gattm.o(.bss)
-    .bss                                     0x20006928   Section       72  gapm.o(.bss)
-    .bss                                     0x20006970   Section      280  prf.o(.bss)
-    .bss                                     0x20006a88   Section      240  llm.o(.bss)
-    .bss                                     0x20006b78   Section       44  localtime_w.o(.bss)
-    _tms                                     0x20006b78   Data          44  localtime_w.o(.bss)
-    HEAP                                     0x20006ba8   Section        0  startup_hs6621_flash.o(HEAP)
-    STACK                                    0x20006ba8   Section     4096  startup_hs6621_flash.o(STACK)
+    .data                                    0x20001640   Section        8  main.o(.data)
+    pin_wakeup_mask                          0x20001640   Data           4  main.o(.data)
+    counter                                  0x20001644   Data           4  main.o(.data)
+    .data                                    0x20001648   Section        4  retarget.o(.data)
+    .data                                    0x2000164c   Section       24  app_wechat.o(.data)
+    sendSize                                 0x2000164c   Data           1  app_wechat.o(.data)
+    g_recv_data                              0x2000165c   Data           8  app_wechat.o(.data)
+    .data                                    0x20001664   Section        1  app_tspp_server.o(.data)
+    .data                                    0x20001665   Section        1  app_task.o(.data)
+    .data                                    0x20001666   Section        2  app_ancsc.o(.data)
+    .data                                    0x20001668   Section        1  app_onmicro_dfu.o(.data)
+    .data                                    0x2000166c   Section       12  ancsc_task.o(.data)
+    fifo_fr                                  0x2000166c   Data           1  ancsc_task.o(.data)
+    fifo_ra                                  0x2000166d   Data           1  ancsc_task.o(.data)
+    pending_timestamp                        0x20001670   Data           4  ancsc_task.o(.data)
+    last_request_uid                         0x20001674   Data           4  ancsc_task.o(.data)
+    .data                                    0x20001678   Section        6  ancsc_utils.o(.data)
+    header_len                               0x20001678   Data           1  ancsc_utils.o(.data)
+    item_recv_len                            0x20001679   Data           1  ancsc_utils.o(.data)
+    m_parse                                  0x2000167a   Data           1  ancsc_utils.o(.data)
+    header                                   0x2000167b   Data           3  ancsc_utils.o(.data)
+    .data                                    0x2000167e   Section        4  dfu_task.o(.data)
+    end_status                               0x2000167e   Data           1  dfu_task.o(.data)
+    ctrl_flag                                0x20001680   Data           2  dfu_task.o(.data)
+    .data                                    0x20001684   Section       16  onmicro_dfu.o(.data)
+    TEST_LEN                                 0x20001684   Data           4  onmicro_dfu.o(.data)
+    p_env                                    0x20001688   Data           4  onmicro_dfu.o(.data)
+    m_data_crc                               0x2000168c   Data           4  onmicro_dfu.o(.data)
+    m_data_offset                            0x20001690   Data           4  onmicro_dfu.o(.data)
+    .data                                    0x20001694   Section       12  mpbledemo2.o(.data)
+    fix_head_len                             0x20001694   Data           1  mpbledemo2.o(.data)
+    bleDemoHeadLen                           0x20001696   Data           2  mpbledemo2.o(.data)
+    m_mpbledemo2_handler                     0x2000169c   Data           4  mpbledemo2.o(.data)
+    .data                                    0x200016a0   Section       48  mpbledemo2.o(.data)
+    .data                                    0x200016d0   Section        4  app_ble.o(.data)
+    g_pBspProtocolApi                        0x200016d0   Data           4  app_ble.o(.data)
+    .data                                    0x200016d4   Section        1  app_ble.o(.data)
+    app_ble_task_state                       0x200016d4   Data           1  app_ble.o(.data)
+    .data                                    0x200016d8   Section        4  adc.o(.data)
+    adc_new_temp                             0x200016d8   Data           4  adc.o(.data)
+    .data                                    0x200016dc   Section        8  rtc.o(.data)
+    rtc_env                                  0x200016dc   Data           8  rtc.o(.data)
+    .data                                    0x200016e4   Section       32  audio.o(.data)
+    audio_env                                0x200016e4   Data          32  audio.o(.data)
+    .data                                    0x20001704   Section       12  entry_cc2.o(.data)
+    .data                                    0x20001710   Section        2  entry_cc2.o(.data)
+    .data                                    0x20001712   Section        3  entry_cc2.o(.data)
+    rwip_rst_state                           0x20001712   Data           1  entry_cc2.o(.data)
+    m_calib_is_restored                      0x20001713   Data           1  entry_cc2.o(.data)
+    m_calib_is_save_to_flash                 0x20001714   Data           1  entry_cc2.o(.data)
+    .data                                    0x20001715   Section        1  co_port_hs6621_cc2.o(.data)
+    calib_repair_env_calib_start_temperature 0x20001715   Data           1  co_port_hs6621_cc2.o(.data)
+    .data                                    0x20001718   Section       32  co_allocator.o(.data)
+    .data                                    0x20001738   Section       16  cfg_nvds.o(.data)
+    nvds_purge_get_data_err                  0x20001738   Data           1  cfg_nvds.o(.data)
+    nvds_reclaim_used_size_err               0x20001739   Data           1  cfg_nvds.o(.data)
+    nvds_reclaim_get_data_err                0x2000173a   Data           1  cfg_nvds.o(.data)
+    nvds_magic_number                        0x2000173c   Data          12  cfg_nvds.o(.data)
+    .data                                    0x20001748   Section        1  cpft.o(.data)
+    .data                                    0x20001749   Section        1  hci.o(.data)
+    .data                                    0x2000174a   Section        8  hci_fc.o(.data)
+    hci_fc_env                               0x2000174a   Data           8  hci_fc.o(.data)
+    .data                                    0x20001754   Section       16  sch_plan.o(.data)
+    time_msb                                 0x20001754   Data           1  sch_plan.o(.data)
+    conflict_elt                             0x20001758   Data           4  sch_plan.o(.data)
+    sch_plan_env                             0x2000175c   Data           8  sch_plan.o(.data)
+    .data                                    0x20001764   Section        8  sch_slice.o(.data)
+    .data                                    0x2000176c   Section        4  l2cc.o(.data)
+    .data                                    0x20001770   Section        1  l2cc_task.o(.data)
+    .data                                    0x20001774   Section        4  gattc.o(.data)
+    .data                                    0x20001778   Section        1  gattc_task.o(.data)
+    .data                                    0x20001779   Section        1  gattm_task.o(.data)
+    .data                                    0x2000177c   Section        4  gapc.o(.data)
+    .data                                    0x20001780   Section        1  gapc_task.o(.data)
+    .data                                    0x20001781   Section        1  gapm_task.o(.data)
+    .data                                    0x20001782   Section        1  llm_task.o(.data)
+    llm_state                                0x20001782   Data           1  llm_task.o(.data)
+    .data                                    0x20001784   Section        8  llc.o(.data)
+    .data                                    0x2000178c   Section        2  llc_task.o(.data)
+    llc_state                                0x2000178c   Data           2  llc_task.o(.data)
+    .data                                    0x20001790   Section        8  lld.o(.data)
+    lld_rpa_renew_env                        0x20001794   Data           4  lld.o(.data)
+    .data                                    0x20001798   Section        8  lld_adv.o(.data)
+    .data                                    0x200017a0   Section        8  lld_per_adv.o(.data)
+    lld_per_adv_env                          0x200017a0   Data           8  lld_per_adv.o(.data)
+    .data                                    0x200017a8   Section        4  lld_test.o(.data)
+    lld_test_env                             0x200017a8   Data           4  lld_test.o(.data)
+    .data                                    0x200017ac   Section        4  rand.o(.data)
+    _rand_state                              0x200017ac   Data           4  rand.o(.data)
+    .data                                    0x200017b0   Section        4  mvars.o(.data)
+    .data                                    0x200017b4   Section        4  mvars.o(.data)
+    .data                                    0x200017b8   Section        4  errno.o(.data)
+    _errno                                   0x200017b8   Data           4  errno.o(.data)
+    .bss                                     0x200017bc   Section       24  main.o(.bss)
+    g_wakeup_timer                           0x200017bc   Data          24  main.o(.bss)
+    .bss                                     0x200017d4   Section       48  app.o(.bss)
+    .bss                                     0x20001804   Section      540  app_adv.o(.bss)
+    app_adv_env                              0x20001804   Data         540  app_adv.o(.bss)
+    .bss                                     0x20001a20   Section       78  app_sec.o(.bss)
+    .bss                                     0x20001a6e   Section      122  app_wechat.o(.bss)
+    g_send_wechat                            0x20001a6e   Data         122  app_wechat.o(.bss)
+    .bss                                     0x20001ae8   Section     4096  app_tspp_server.o(.bss)
+    .bss                                     0x20002ae8   Section       40  app_hid.o(.bss)
+    app_hid_env                              0x20002ae8   Data          16  app_hid.o(.bss)
+    app_hid_timer                            0x20002af8   Data          24  app_hid.o(.bss)
+    .bss                                     0x20002b10   Section       64  ancsc_task.o(.bss)
+    pending_uid                              0x20002b10   Data          64  ancsc_task.o(.bss)
+    .bss                                     0x20002b50   Section      312  ancsc_utils.o(.bss)
+    m_ancs_data                              0x20002b50   Data         312  ancsc_utils.o(.bss)
+    .bss                                     0x20002c90   Section      304  onmicro_dfu.o(.bss)
+    env                                      0x20002c90   Data          44  onmicro_dfu.o(.bss)
+    m_cache                                  0x20002cc0   Data         128  onmicro_dfu.o(.bss)
+    m_cmd_buf                                0x20002d40   Data         128  onmicro_dfu.o(.bss)
+    .bss                                     0x20002dc0   Section    13612  rwmem.o(.bss)
+    rwip_heap_env                            0x20002dc0   Data         784  rwmem.o(.bss)
+    rwip_heap_db                             0x200030d0   Data        3084  rwmem.o(.bss)
+    rwip_heap_msg                            0x20003cdc   Data        9732  rwmem.o(.bss)
+    rwip_heap_non_ret                        0x200062e0   Data          12  rwmem.o(.bss)
+    .bss                                     0x200062ec   Section       12  mpbledemo2.o(.bss)
+    .bss                                     0x200062f8   Section       28  mpbledemo2.o(.bss)
+    .bss                                     0x20006314   Section       48  wechat_util.o(.bss)
+    .bss                                     0x20006344   Section      360  hal_uart.o(.bss)
+    g_stUartLogCtl                           0x20006344   Data          44  hal_uart.o(.bss)
+    g_stUartFm33lgCtl                        0x20006370   Data         268  hal_uart.o(.bss)
+    g_uart_log_timer                         0x2000647c   Data          24  hal_uart.o(.bss)
+    g_uart_fm33lg_timer                      0x20006494   Data          24  hal_uart.o(.bss)
+    .bss                                     0x200064ac   Section      476  app_ble.o(.bss)
+    g_stAppBleCtl                            0x200064ac   Data         112  app_ble.o(.bss)
+    g_stBleProCtl                            0x2000651c   Data         292  app_ble.o(.bss)
+    g_pair_check_timer                       0x20006640   Data          24  app_ble.o(.bss)
+    g_rssi_get_timer                         0x20006658   Data          24  app_ble.o(.bss)
+    g_adv_updata_timer                       0x20006670   Data          24  app_ble.o(.bss)
+    .bss                                     0x20006688   Section      220  adc.o(.bss)
+    adc_env                                  0x20006688   Data         220  adc.o(.bss)
+    .bss                                     0x20006764   Section       24  calib_repair.o(.bss)
+    .bss                                     0x2000677c   Section       24  timer.o(.bss)
+    tim_env                                  0x2000677c   Data          24  timer.o(.bss)
+    .bss                                     0x20006794   Section      200  dma_nds.o(.bss)
+    dma_env                                  0x20006794   Data         200  dma_nds.o(.bss)
+    .bss                                     0x2000685c   Section       56  cfg_nvds.o(.bss)
+    nvds_env                                 0x2000685c   Data          56  cfg_nvds.o(.bss)
+    .bss                                     0x20006894   Section       26  hci.o(.bss)
+    .bss                                     0x200068b0   Section       24  hci_tl.o(.bss)
+    hci_tl_env                               0x200068b0   Data          24  hci_tl.o(.bss)
+    .bss                                     0x200068c8   Section       32  sch_slice.o(.bss)
+    sch_slice_env                            0x200068c8   Data          32  sch_slice.o(.bss)
+    .bss                                     0x200068e8   Section       12  aes.o(.bss)
+    .bss                                     0x200068f4   Section       32  h4tl.o(.bss)
+    h4tl_env                                 0x200068f4   Data          32  h4tl.o(.bss)
+    .bss                                     0x20006914   Section      120  ke_task.o(.bss)
+    ke_task_env                              0x20006914   Data         120  ke_task.o(.bss)
+    .bss                                     0x2000698c   Section       48  ke.o(.bss)
+    .bss                                     0x200069bc   Section       12  l2cm.o(.bss)
+    .bss                                     0x200069c8   Section       32  gattm.o(.bss)
+    .bss                                     0x200069e8   Section       72  gapm.o(.bss)
+    .bss                                     0x20006a30   Section      280  prf.o(.bss)
+    .bss                                     0x20006b48   Section      240  llm.o(.bss)
+    .bss                                     0x20006c38   Section       44  localtime_w.o(.bss)
+    _tms                                     0x20006c38   Data          44  localtime_w.o(.bss)
+    HEAP                                     0x20006c68   Section        0  startup_hs6621_flash.o(HEAP)
+    STACK                                    0x20006c68   Section     4096  startup_hs6621_flash.o(STACK)
 
     Global Symbols
 
@@ -10323,7 +10324,7 @@ Image Symbol Table
     calib_patch_new                          0x000003b9   Thumb Code   196  co_port_hs6621_cc2.o(.ramtext.code)
     calib_rf_restore                         0x000004d9   Thumb Code   122  co_port_hs6621_cc2.o(.ramtext.code)
     co_sleep_new                             0x0000063b   Thumb Code   206  co_port_hs6621_cc2.o(.ramtext.code)
-    $Super$$main                             0x00001465   Thumb Code   102  main.o(i.main)
+    $Super$$main                             0x000014dd   Thumb Code   126  main.o(i.main)
     ldr_startup_check                        0x00100199   Thumb Code     0  hs6621c_rom_c2.lib ABSOLUTE
     ldr_is_isp_mode                          0x001001ad   Thumb Code     0  hs6621c_rom_c2.lib ABSOLUTE
     ldr_enter_isp                            0x00100531   Thumb Code     0  hs6621c_rom_c2.lib ABSOLUTE
@@ -11202,12 +11203,12 @@ Image Symbol Table
     hal_uart_fm33lg_init                     0x0041581d   Thumb Code    52  hal_uart.o(i.hal_uart_fm33lg_init)
     hal_uart_fm33lg_rx_buf_addr_get          0x00415859   Thumb Code    18  hal_uart.o(i.hal_uart_fm33lg_rx_buf_addr_get)
     hal_uart_fm33lg_rx_buf_len_get           0x00415871   Thumb Code    16  hal_uart.o(i.hal_uart_fm33lg_rx_buf_len_get)
-    hal_uart_fm33lg_rx_buf_reset             0x00415885   Thumb Code    28  hal_uart.o(i.hal_uart_fm33lg_rx_buf_reset)
+    hal_uart_fm33lg_rx_buf_reset             0x00415885   Thumb Code    16  hal_uart.o(i.hal_uart_fm33lg_rx_buf_reset)
     hal_uart_fm33lg_tx_buf_set               0x00415905   Thumb Code   110  hal_uart.o(i.hal_uart_fm33lg_tx_buf_set)
     hal_uart_log_init                        0x004159ad   Thumb Code    52  hal_uart.o(i.hal_uart_log_init)
     hal_uart_log_rx_buf_addr_get             0x004159e9   Thumb Code    18  hal_uart.o(i.hal_uart_log_rx_buf_addr_get)
     hal_uart_log_rx_buf_len_get              0x00415a01   Thumb Code    16  hal_uart.o(i.hal_uart_log_rx_buf_len_get)
-    hal_uart_log_rx_buf_reset                0x00415a15   Thumb Code    28  hal_uart.o(i.hal_uart_log_rx_buf_reset)
+    hal_uart_log_rx_buf_reset                0x00415a15   Thumb Code    16  hal_uart.o(i.hal_uart_log_rx_buf_reset)
     hal_wdt_init                             0x00415a95   Thumb Code     6  hal_wdt.o(i.hal_wdt_init)
     hci_acl_data_handler                     0x00415add   Thumb Code   144  llc_hci.o(i.hci_acl_data_handler)
     hci_basic_cmd_cmp_evt_cfg_handler        0x00415cb9   Thumb Code   106  gapm_cfg.o(i.hci_basic_cmd_cmp_evt_cfg_handler)
@@ -11709,55 +11710,55 @@ Image Symbol Table
     connect_req_dur_tab                      0x00430214   Data           8  lld_con.o(.constdata)
     byte_tx_time                             0x0043021c   Data           8  lld_con.o(.constdata)
     fixed_tx_time                            0x00430224   Data           8  lld_con.o(.constdata)
-    __stdout                                 0x200015a4   Data           4  retarget.o(.data)
-    m_wechat_handler                         0x200015ac   Data           4  app_wechat.o(.data)
-    app_wechat_env                           0x200015b0   Data           7  app_wechat.o(.data)
-    app_tspp_server_env                      0x200015c0   Data           1  app_tspp_server.o(.data)
-    appm_state                               0x200015c1   Data           1  app_task.o(.data)
-    app_ancsc_env                            0x200015c2   Data           2  app_ancsc.o(.data)
-    onmicro_dfu_reset_flag                   0x200015c4   Data           1  app_onmicro_dfu.o(.data)
-    challeange                               0x200015f4   Data           4  mpbledemo2.o(.data)
-    mpbledemo2_data_handler                  0x200015fc   Data          48  mpbledemo2.o(.data)
-    rwip_param                               0x20001660   Data          12  entry_cc2.o(.data)
-    rwip_app_main_task                       0x2000166c   Data           2  entry_cc2.o(.data)
-    co_allocator_env                         0x20001674   Data          32  co_allocator.o(.data)
-    calib_repair_env_vco_ldo                 0x200016a4   Data           1  cpft.o(.data)
-    hci_ext_host                             0x200016a5   Data           1  hci.o(.data)
-    sch_slice_params                         0x200016c0   Data           8  sch_slice.o(.data)
-    l2cc_env                                 0x200016c8   Data           4  l2cc.o(.data)
-    l2cc_state                               0x200016cc   Data           1  l2cc_task.o(.data)
-    gattc_env                                0x200016d0   Data           4  gattc.o(.data)
-    gattc_state                              0x200016d4   Data           1  gattc_task.o(.data)
-    gattm_state                              0x200016d5   Data           1  gattm_task.o(.data)
-    gapc_env                                 0x200016d8   Data           4  gapc.o(.data)
-    gapc_state                               0x200016dc   Data           1  gapc_task.o(.data)
-    gapm_state                               0x200016dd   Data           1  gapm_task.o(.data)
-    llc_env                                  0x200016e0   Data           8  llc.o(.data)
-    aa_gen                                   0x200016ec   Data           3  lld.o(.data)
-    sc_adv_chsel2                            0x200016f4   Data           1  lld_adv.o(.data)
-    sc_env_aa_adv                            0x200016f8   Data           4  lld_adv.o(.data)
-    __microlib_freelist                      0x2000170c   Data           4  mvars.o(.data)
-    __microlib_freelist_initialised          0x20001710   Data           4  mvars.o(.data)
-    app_env                                  0x20001718   Data          48  app.o(.bss)
-    app_sec_env                              0x20001964   Data          78  app_sec.o(.bss)
-    app_tspp_trans_data_buffer               0x20001a2c   Data        4096  app_tspp_server.o(.bss)
-    m_info                                   0x2000622c   Data          12  mpbledemo2.o(.bss)
-    mpbledemo2Sta                            0x20006238   Data          12  mpbledemo2.o(.bss)
-    md5_type_and_id                          0x20006244   Data          16  mpbledemo2.o(.bss)
-    first_handler                            0x20006254   Data          48  wechat_util.o(.bss)
-    local_drift_dyn_table                    0x200066a4   Data          24  calib_repair.o(.bss)
-    hci_env                                  0x200067d4   Data          26  hci.o(.bss)
-    aes_env                                  0x20006828   Data          12  aes.o(.bss)
-    ke_env                                   0x200068cc   Data          48  ke.o(.bss)
-    l2cm_env                                 0x200068fc   Data          12  l2cm.o(.bss)
-    gattm_env                                0x20006908   Data          32  gattm.o(.bss)
-    gapm_env                                 0x20006928   Data          72  gapm.o(.bss)
-    prf_env                                  0x20006970   Data         280  prf.o(.bss)
-    llm_env                                  0x20006a88   Data         240  llm.o(.bss)
-    Stack_Mem                                0x20006ba8   Data        4096  startup_hs6621_flash.o(STACK)
-    __heap_base                              0x20006ba8   Data           0  startup_hs6621_flash.o(HEAP)
-    __heap_limit                             0x20006ba8   Data           0  startup_hs6621_flash.o(HEAP)
-    __initial_sp                             0x20007ba8   Data           0  startup_hs6621_flash.o(STACK)
+    __stdout                                 0x20001648   Data           4  retarget.o(.data)
+    m_wechat_handler                         0x20001650   Data           4  app_wechat.o(.data)
+    app_wechat_env                           0x20001654   Data           7  app_wechat.o(.data)
+    app_tspp_server_env                      0x20001664   Data           1  app_tspp_server.o(.data)
+    appm_state                               0x20001665   Data           1  app_task.o(.data)
+    app_ancsc_env                            0x20001666   Data           2  app_ancsc.o(.data)
+    onmicro_dfu_reset_flag                   0x20001668   Data           1  app_onmicro_dfu.o(.data)
+    challeange                               0x20001698   Data           4  mpbledemo2.o(.data)
+    mpbledemo2_data_handler                  0x200016a0   Data          48  mpbledemo2.o(.data)
+    rwip_param                               0x20001704   Data          12  entry_cc2.o(.data)
+    rwip_app_main_task                       0x20001710   Data           2  entry_cc2.o(.data)
+    co_allocator_env                         0x20001718   Data          32  co_allocator.o(.data)
+    calib_repair_env_vco_ldo                 0x20001748   Data           1  cpft.o(.data)
+    hci_ext_host                             0x20001749   Data           1  hci.o(.data)
+    sch_slice_params                         0x20001764   Data           8  sch_slice.o(.data)
+    l2cc_env                                 0x2000176c   Data           4  l2cc.o(.data)
+    l2cc_state                               0x20001770   Data           1  l2cc_task.o(.data)
+    gattc_env                                0x20001774   Data           4  gattc.o(.data)
+    gattc_state                              0x20001778   Data           1  gattc_task.o(.data)
+    gattm_state                              0x20001779   Data           1  gattm_task.o(.data)
+    gapc_env                                 0x2000177c   Data           4  gapc.o(.data)
+    gapc_state                               0x20001780   Data           1  gapc_task.o(.data)
+    gapm_state                               0x20001781   Data           1  gapm_task.o(.data)
+    llc_env                                  0x20001784   Data           8  llc.o(.data)
+    aa_gen                                   0x20001790   Data           3  lld.o(.data)
+    sc_adv_chsel2                            0x20001798   Data           1  lld_adv.o(.data)
+    sc_env_aa_adv                            0x2000179c   Data           4  lld_adv.o(.data)
+    __microlib_freelist                      0x200017b0   Data           4  mvars.o(.data)
+    __microlib_freelist_initialised          0x200017b4   Data           4  mvars.o(.data)
+    app_env                                  0x200017d4   Data          48  app.o(.bss)
+    app_sec_env                              0x20001a20   Data          78  app_sec.o(.bss)
+    app_tspp_trans_data_buffer               0x20001ae8   Data        4096  app_tspp_server.o(.bss)
+    m_info                                   0x200062ec   Data          12  mpbledemo2.o(.bss)
+    mpbledemo2Sta                            0x200062f8   Data          12  mpbledemo2.o(.bss)
+    md5_type_and_id                          0x20006304   Data          16  mpbledemo2.o(.bss)
+    first_handler                            0x20006314   Data          48  wechat_util.o(.bss)
+    local_drift_dyn_table                    0x20006764   Data          24  calib_repair.o(.bss)
+    hci_env                                  0x20006894   Data          26  hci.o(.bss)
+    aes_env                                  0x200068e8   Data          12  aes.o(.bss)
+    ke_env                                   0x2000698c   Data          48  ke.o(.bss)
+    l2cm_env                                 0x200069bc   Data          12  l2cm.o(.bss)
+    gattm_env                                0x200069c8   Data          32  gattm.o(.bss)
+    gapm_env                                 0x200069e8   Data          72  gapm.o(.bss)
+    prf_env                                  0x20006a30   Data         280  prf.o(.bss)
+    llm_env                                  0x20006b48   Data         240  llm.o(.bss)
+    Stack_Mem                                0x20006c68   Data        4096  startup_hs6621_flash.o(STACK)
+    __heap_base                              0x20006c68   Data           0  startup_hs6621_flash.o(HEAP)
+    __heap_limit                             0x20006c68   Data           0  startup_hs6621_flash.o(HEAP)
+    __initial_sp                             0x20007c68   Data           0  startup_hs6621_flash.o(STACK)
     encoder_env                              0x2000f48c   Data           0  hs6621c_rom_peripheral_c2.symdefs ABSOLUTE
     pmu_env                                  0x2000f498   Data           0  hs6621c_rom_peripheral_c2.symdefs ABSOLUTE
     sfs_env                                  0x2000f584   Data           0  hs6621c_rom_peripheral_c2.symdefs ABSOLUTE
@@ -11791,7 +11792,7 @@ Memory Map of the image
 
   Image Entry point : 0x00403041
 
-  Load Region FLASH_LOAD (Base: 0x00403000, Size: 0x0002efc4, Max: 0x00800000, ABSOLUTE, COMPRESSED[0x0002eec8])
+  Load Region FLASH_LOAD (Base: 0x00403000, Size: 0x0002f06c, Max: 0x00800000, ABSOLUTE, COMPRESSED[0x0002ef74])
 
     Execution Region VECTOR_RAM (Exec base: 0x00000000, Load base: 0x004308b0, Size: 0x00000140, Max: 0xffffffff, ABSOLUTE)
 
@@ -11810,15 +11811,16 @@ Memory Map of the image
     0x000007fc   0x004310ac   0x00000bd8   Code   RO        15614    .ramtext.code       hs6621c_lib_c2.lib(lld_con.o)
 
 
-    Execution Region APP_CODE_RAM (Exec base: 0x000013d4, Load base: 0x00431c84, Size: 0x000001c0, Max: 0xffffffff, ABSOLUTE)
+    Execution Region APP_CODE_RAM (Exec base: 0x000013d4, Load base: 0x00431c84, Size: 0x0000026c, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x000013d4   0x00431c84   0x00000028   Code   RO           14    i.gpio_handler      main.o
-    0x000013fc   0x00431cac   0x00000068   Code   RO           15    i.hardware_init     main.o
-    0x00001464   0x00431d14   0x000000cc   Code   RO           16    i.main              main.o
-    0x00001530   0x00431de0   0x00000038   Code   RO           17    i.power_sleep_event_handler  main.o
-    0x00001568   0x00431e18   0x0000002c   Code   RO           19    i.wakeup_gpio_handler  main.o
+    0x000013d4   0x00431c84   0x000000a0   Code   RO           14    i.app_lowpower_wakeup_handler  main.o
+    0x00001474   0x00431d24   0x00000040   Code   RO           15    i.app_wakeup_timer_handler  main.o
+    0x000014b4   0x00431d64   0x00000028   Code   RO           16    i.gpio_handler      main.o
+    0x000014dc   0x00431d8c   0x000000ec   Code   RO           17    i.main              main.o
+    0x000015c8   0x00431e78   0x00000048   Code   RO           18    i.peripheral_init   main.o
+    0x00001610   0x00431ec0   0x00000030   Code   RO           19    i.power_sleep_event_handler  main.o
 
 
     Execution Region VECTOR_FLASH (Exec base: 0x00403000, Load base: 0x00403000, Size: 0x00000040, Max: 0xffffffff, ABSOLUTE)
@@ -12614,18 +12616,18 @@ Memory Map of the image
     0x0041581c   0x0041581c   0x0000003c   Code   RO         3948    i.hal_uart_fm33lg_init  hal_uart.o
     0x00415858   0x00415858   0x00000018   Code   RO         3949    i.hal_uart_fm33lg_rx_buf_addr_get  hal_uart.o
     0x00415870   0x00415870   0x00000014   Code   RO         3950    i.hal_uart_fm33lg_rx_buf_len_get  hal_uart.o
-    0x00415884   0x00415884   0x00000020   Code   RO         3951    i.hal_uart_fm33lg_rx_buf_reset  hal_uart.o
-    0x004158a4   0x004158a4   0x0000004c   Code   RO         3952    i.hal_uart_fm33lg_rx_callback  hal_uart.o
-    0x004158f0   0x004158f0   0x00000014   Code   RO         3953    i.hal_uart_fm33lg_timer_handler  hal_uart.o
+    0x00415884   0x00415884   0x00000014   Code   RO         3951    i.hal_uart_fm33lg_rx_buf_reset  hal_uart.o
+    0x00415898   0x00415898   0x0000004c   Code   RO         3952    i.hal_uart_fm33lg_rx_callback  hal_uart.o
+    0x004158e4   0x004158e4   0x00000020   Code   RO         3953    i.hal_uart_fm33lg_timer_handler  hal_uart.o
     0x00415904   0x00415904   0x000000a4   Code   RO         3954    i.hal_uart_fm33lg_tx_buf_set  hal_uart.o
     0x004159a8   0x004159a8   0x00000002   Code   RO         3955    i.hal_uart_fm33lg_tx_callback  hal_uart.o
     0x004159aa   0x004159aa   0x00000002   PAD
     0x004159ac   0x004159ac   0x0000003c   Code   RO         3956    i.hal_uart_log_init  hal_uart.o
     0x004159e8   0x004159e8   0x00000018   Code   RO         3957    i.hal_uart_log_rx_buf_addr_get  hal_uart.o
     0x00415a00   0x00415a00   0x00000014   Code   RO         3958    i.hal_uart_log_rx_buf_len_get  hal_uart.o
-    0x00415a14   0x00415a14   0x00000020   Code   RO         3959    i.hal_uart_log_rx_buf_reset  hal_uart.o
-    0x00415a34   0x00415a34   0x0000004c   Code   RO         3960    i.hal_uart_log_rx_callback  hal_uart.o
-    0x00415a80   0x00415a80   0x00000014   Code   RO         3961    i.hal_uart_log_timer_handler  hal_uart.o
+    0x00415a14   0x00415a14   0x00000014   Code   RO         3959    i.hal_uart_log_rx_buf_reset  hal_uart.o
+    0x00415a28   0x00415a28   0x0000004c   Code   RO         3960    i.hal_uart_log_rx_callback  hal_uart.o
+    0x00415a74   0x00415a74   0x00000020   Code   RO         3961    i.hal_uart_log_timer_handler  hal_uart.o
     0x00415a94   0x00415a94   0x00000006   Code   RO         4052    i.hal_wdt_init      hal_wdt.o
     0x00415a9a   0x00415a9a   0x00000002   PAD
     0x00415a9c   0x00415a9c   0x00000040   Code   RO         9507    i.hci_acl_data_handler  hs6621c_lib_c2.lib(l2cc_task.o)
@@ -13584,105 +13586,106 @@ Memory Map of the image
     0x004307ac   0x004307ac   0x00000102   Data   RO        15652    .conststring        hs6621c_lib_c2.lib(lld_con.o)
 
 
-    Execution Region APP (Exec base: 0x20001598, Load base: 0x00431e44, Size: 0x00006610, Max: 0xffffffff, ABSOLUTE, COMPRESSED[0x00000084])
+    Execution Region APP (Exec base: 0x20001640, Load base: 0x00431ef0, Size: 0x00006628, Max: 0xffffffff, ABSOLUTE, COMPRESSED[0x00000084])
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20001598   COMPRESSED   0x0000000c   Data   RW           20    .data               main.o
-    0x200015a4   COMPRESSED   0x00000004   Data   RW          542    .data               retarget.o
-    0x200015a8   COMPRESSED   0x00000018   Data   RW         1007    .data               app_wechat.o
-    0x200015c0   COMPRESSED   0x00000001   Data   RW         1119    .data               app_tspp_server.o
-    0x200015c1   COMPRESSED   0x00000001   Data   RW         1221    .data               app_task.o
-    0x200015c2   COMPRESSED   0x00000002   Data   RW         1502    .data               app_ancsc.o
-    0x200015c4   COMPRESSED   0x00000001   Data   RW         1574    .data               app_onmicro_dfu.o
-    0x200015c5   COMPRESSED   0x00000003   PAD
-    0x200015c8   COMPRESSED   0x0000000c   Data   RW         2286    .data               ancsc_task.o
-    0x200015d4   COMPRESSED   0x00000006   Data   RW         2378    .data               ancsc_utils.o
-    0x200015da   COMPRESSED   0x00000004   Data   RW         2493    .data               dfu_task.o
-    0x200015de   COMPRESSED   0x00000002   PAD
-    0x200015e0   COMPRESSED   0x00000010   Data   RW         2589    .data               onmicro_dfu.o
-    0x200015f0   COMPRESSED   0x0000000c   Data   RW         3798    .data               mpbledemo2.o
-    0x200015fc   COMPRESSED   0x00000030   Data   RW         3799    .data               mpbledemo2.o
-    0x2000162c   COMPRESSED   0x00000004   Data   RW         4248    .data               app_ble.o
-    0x20001630   COMPRESSED   0x00000001   Data   RW         4249    .data               app_ble.o
-    0x20001631   COMPRESSED   0x00000003   PAD
-    0x20001634   COMPRESSED   0x00000004   Data   RW         4706    .data               hs6621c_rom_peripheral_ext_c2.lib(adc.o)
-    0x20001638   COMPRESSED   0x00000008   Data   RW         5805    .data               hs6621c_rom_peripheral_ext_c2.lib(rtc.o)
-    0x20001640   COMPRESSED   0x00000020   Data   RW         6112    .data               hs6621c_rom_peripheral_ext_c2.lib(audio.o)
-    0x20001660   COMPRESSED   0x0000000c   Data   RW         6530    .data               hs6621c_lib_c2.lib(entry_cc2.o)
-    0x2000166c   COMPRESSED   0x00000002   Data   RW         6531    .data               hs6621c_lib_c2.lib(entry_cc2.o)
-    0x2000166e   COMPRESSED   0x00000003   Data   RW         6532    .data               hs6621c_lib_c2.lib(entry_cc2.o)
-    0x20001671   COMPRESSED   0x00000001   Data   RW         6816    .data               hs6621c_lib_c2.lib(co_port_hs6621_cc2.o)
-    0x20001672   COMPRESSED   0x00000002   PAD
-    0x20001674   COMPRESSED   0x00000020   Data   RW         6954    .data               hs6621c_lib_c2.lib(co_allocator.o)
-    0x20001694   COMPRESSED   0x00000010   Data   RW         7400    .data               hs6621c_lib_c2.lib(cfg_nvds.o)
-    0x200016a4   COMPRESSED   0x00000001   Data   RW         7559    .data               hs6621c_lib_c2.lib(cpft.o)
-    0x200016a5   COMPRESSED   0x00000001   Data   RW         7646    .data               hs6621c_lib_c2.lib(hci.o)
-    0x200016a6   COMPRESSED   0x00000008   Data   RW         7949    .data               hs6621c_lib_c2.lib(hci_fc.o)
-    0x200016ae   COMPRESSED   0x00000002   PAD
-    0x200016b0   COMPRESSED   0x00000010   Data   RW         8007    .data               hs6621c_lib_c2.lib(sch_plan.o)
-    0x200016c0   COMPRESSED   0x00000008   Data   RW         8077    .data               hs6621c_lib_c2.lib(sch_slice.o)
-    0x200016c8   COMPRESSED   0x00000004   Data   RW         9396    .data               hs6621c_lib_c2.lib(l2cc.o)
-    0x200016cc   COMPRESSED   0x00000001   Data   RW         9528    .data               hs6621c_lib_c2.lib(l2cc_task.o)
-    0x200016cd   COMPRESSED   0x00000003   PAD
-    0x200016d0   COMPRESSED   0x00000004   Data   RW        10547    .data               hs6621c_lib_c2.lib(gattc.o)
-    0x200016d4   COMPRESSED   0x00000001   Data   RW        10717    .data               hs6621c_lib_c2.lib(gattc_task.o)
-    0x200016d5   COMPRESSED   0x00000001   Data   RW        10957    .data               hs6621c_lib_c2.lib(gattm_task.o)
-    0x200016d6   COMPRESSED   0x00000002   PAD
-    0x200016d8   COMPRESSED   0x00000004   Data   RW        11052    .data               hs6621c_lib_c2.lib(gapc.o)
-    0x200016dc   COMPRESSED   0x00000001   Data   RW        11290    .data               hs6621c_lib_c2.lib(gapc_task.o)
-    0x200016dd   COMPRESSED   0x00000001   Data   RW        11866    .data               hs6621c_lib_c2.lib(gapm_task.o)
-    0x200016de   COMPRESSED   0x00000001   Data   RW        13408    .data               hs6621c_lib_c2.lib(llm_task.o)
-    0x200016df   COMPRESSED   0x00000001   PAD
-    0x200016e0   COMPRESSED   0x00000008   Data   RW        13920    .data               hs6621c_lib_c2.lib(llc.o)
-    0x200016e8   COMPRESSED   0x00000002   Data   RW        14137    .data               hs6621c_lib_c2.lib(llc_task.o)
-    0x200016ea   COMPRESSED   0x00000002   PAD
-    0x200016ec   COMPRESSED   0x00000008   Data   RW        15042    .data               hs6621c_lib_c2.lib(lld.o)
-    0x200016f4   COMPRESSED   0x00000008   Data   RW        15236    .data               hs6621c_lib_c2.lib(lld_adv.o)
-    0x200016fc   COMPRESSED   0x00000008   Data   RW        15388    .data               hs6621c_lib_c2.lib(lld_per_adv.o)
-    0x20001704   COMPRESSED   0x00000004   Data   RW        15527    .data               hs6621c_lib_c2.lib(lld_test.o)
-    0x20001708   COMPRESSED   0x00000004   Data   RW        15889    .data               mc_w.l(rand.o)
-    0x2000170c   COMPRESSED   0x00000004   Data   RW        16308    .data               mc_w.l(mvars.o)
-    0x20001710   COMPRESSED   0x00000004   Data   RW        16309    .data               mc_w.l(mvars.o)
-    0x20001714   COMPRESSED   0x00000004   Data   RW        16313    .data               mc_w.l(errno.o)
-    0x20001718        -       0x00000030   Zero   RW          619    .bss                app.o
-    0x20001748        -       0x0000021c   Zero   RW          766    .bss                app_adv.o
-    0x20001964        -       0x0000004e   Zero   RW          892    .bss                app_sec.o
-    0x200019b2        -       0x0000007a   Zero   RW         1004    .bss                app_wechat.o
-    0x20001a2c        -       0x00001000   Zero   RW         1115    .bss                app_tspp_server.o
-    0x20002a2c        -       0x00000028   Zero   RW         1361    .bss                app_hid.o
-    0x20002a54        -       0x00000040   Zero   RW         2284    .bss                ancsc_task.o
-    0x20002a94        -       0x00000138   Zero   RW         2377    .bss                ancsc_utils.o
-    0x20002bcc   COMPRESSED   0x00000004   PAD
-    0x20002bd0        -       0x00000130   Zero   RW         2585    .bss                onmicro_dfu.o
-    0x20002d00        -       0x0000352c   Zero   RW         3182    .bss                rwmem.o
-    0x2000622c        -       0x0000000c   Zero   RW         3792    .bss                mpbledemo2.o
-    0x20006238        -       0x0000001c   Zero   RW         3793    .bss                mpbledemo2.o
-    0x20006254        -       0x00000030   Zero   RW         3903    .bss                wechat_util.o
-    0x20006284        -       0x00000168   Zero   RW         3962    .bss                hal_uart.o
-    0x200063ec        -       0x000001dc   Zero   RW         4244    .bss                app_ble.o
-    0x200065c8        -       0x000000dc   Zero   RW         4704    .bss                hs6621c_rom_peripheral_ext_c2.lib(adc.o)
-    0x200066a4        -       0x00000018   Zero   RW         5086    .bss                hs6621c_rom_peripheral_ext_c2.lib(calib_repair.o)
-    0x200066bc        -       0x00000018   Zero   RW         5994    .bss                hs6621c_rom_peripheral_ext_c2.lib(timer.o)
-    0x200066d4        -       0x000000c8   Zero   RW         6404    .bss                hs6621c_rom_peripheral_ext_c2.lib(dma_nds.o)
-    0x2000679c        -       0x00000038   Zero   RW         7397    .bss                hs6621c_lib_c2.lib(cfg_nvds.o)
-    0x200067d4        -       0x0000001a   Zero   RW         7644    .bss                hs6621c_lib_c2.lib(hci.o)
-    0x200067ee   COMPRESSED   0x00000002   PAD
-    0x200067f0        -       0x00000018   Zero   RW         7744    .bss                hs6621c_lib_c2.lib(hci_tl.o)
-    0x20006808        -       0x00000020   Zero   RW         8076    .bss                hs6621c_lib_c2.lib(sch_slice.o)
-    0x20006828        -       0x0000000c   Zero   RW         8152    .bss                hs6621c_lib_c2.lib(aes.o)
-    0x20006834        -       0x00000020   Zero   RW         8714    .bss                hs6621c_lib_c2.lib(h4tl.o)
-    0x20006854        -       0x00000078   Zero   RW         9069    .bss                hs6621c_lib_c2.lib(ke_task.o)
-    0x200068cc        -       0x00000030   Zero   RW         9158    .bss                hs6621c_lib_c2.lib(ke.o)
-    0x200068fc        -       0x0000000c   Zero   RW         9321    .bss                hs6621c_lib_c2.lib(l2cm.o)
-    0x20006908        -       0x00000020   Zero   RW        10873    .bss                hs6621c_lib_c2.lib(gattm.o)
-    0x20006928        -       0x00000048   Zero   RW        11669    .bss                hs6621c_lib_c2.lib(gapm.o)
-    0x20006970        -       0x00000118   Zero   RW        13029    .bss                hs6621c_lib_c2.lib(prf.o)
-    0x20006a88        -       0x000000f0   Zero   RW        13286    .bss                hs6621c_lib_c2.lib(llm.o)
-    0x20006b78        -       0x0000002c   Zero   RW        16303    .bss                mc_w.l(localtime_w.o)
-    0x20006ba4   COMPRESSED   0x00000004   PAD
-    0x20006ba8        -       0x00000000   Zero   RW            2    HEAP                startup_hs6621_flash.o
-    0x20006ba8        -       0x00001000   Zero   RW            1    STACK               startup_hs6621_flash.o
+    0x20001640   COMPRESSED   0x00000008   Data   RW           21    .data               main.o
+    0x20001648   COMPRESSED   0x00000004   Data   RW          542    .data               retarget.o
+    0x2000164c   COMPRESSED   0x00000018   Data   RW         1007    .data               app_wechat.o
+    0x20001664   COMPRESSED   0x00000001   Data   RW         1119    .data               app_tspp_server.o
+    0x20001665   COMPRESSED   0x00000001   Data   RW         1221    .data               app_task.o
+    0x20001666   COMPRESSED   0x00000002   Data   RW         1502    .data               app_ancsc.o
+    0x20001668   COMPRESSED   0x00000001   Data   RW         1574    .data               app_onmicro_dfu.o
+    0x20001669   COMPRESSED   0x00000003   PAD
+    0x2000166c   COMPRESSED   0x0000000c   Data   RW         2286    .data               ancsc_task.o
+    0x20001678   COMPRESSED   0x00000006   Data   RW         2378    .data               ancsc_utils.o
+    0x2000167e   COMPRESSED   0x00000004   Data   RW         2493    .data               dfu_task.o
+    0x20001682   COMPRESSED   0x00000002   PAD
+    0x20001684   COMPRESSED   0x00000010   Data   RW         2589    .data               onmicro_dfu.o
+    0x20001694   COMPRESSED   0x0000000c   Data   RW         3798    .data               mpbledemo2.o
+    0x200016a0   COMPRESSED   0x00000030   Data   RW         3799    .data               mpbledemo2.o
+    0x200016d0   COMPRESSED   0x00000004   Data   RW         4248    .data               app_ble.o
+    0x200016d4   COMPRESSED   0x00000001   Data   RW         4249    .data               app_ble.o
+    0x200016d5   COMPRESSED   0x00000003   PAD
+    0x200016d8   COMPRESSED   0x00000004   Data   RW         4706    .data               hs6621c_rom_peripheral_ext_c2.lib(adc.o)
+    0x200016dc   COMPRESSED   0x00000008   Data   RW         5805    .data               hs6621c_rom_peripheral_ext_c2.lib(rtc.o)
+    0x200016e4   COMPRESSED   0x00000020   Data   RW         6112    .data               hs6621c_rom_peripheral_ext_c2.lib(audio.o)
+    0x20001704   COMPRESSED   0x0000000c   Data   RW         6530    .data               hs6621c_lib_c2.lib(entry_cc2.o)
+    0x20001710   COMPRESSED   0x00000002   Data   RW         6531    .data               hs6621c_lib_c2.lib(entry_cc2.o)
+    0x20001712   COMPRESSED   0x00000003   Data   RW         6532    .data               hs6621c_lib_c2.lib(entry_cc2.o)
+    0x20001715   COMPRESSED   0x00000001   Data   RW         6816    .data               hs6621c_lib_c2.lib(co_port_hs6621_cc2.o)
+    0x20001716   COMPRESSED   0x00000002   PAD
+    0x20001718   COMPRESSED   0x00000020   Data   RW         6954    .data               hs6621c_lib_c2.lib(co_allocator.o)
+    0x20001738   COMPRESSED   0x00000010   Data   RW         7400    .data               hs6621c_lib_c2.lib(cfg_nvds.o)
+    0x20001748   COMPRESSED   0x00000001   Data   RW         7559    .data               hs6621c_lib_c2.lib(cpft.o)
+    0x20001749   COMPRESSED   0x00000001   Data   RW         7646    .data               hs6621c_lib_c2.lib(hci.o)
+    0x2000174a   COMPRESSED   0x00000008   Data   RW         7949    .data               hs6621c_lib_c2.lib(hci_fc.o)
+    0x20001752   COMPRESSED   0x00000002   PAD
+    0x20001754   COMPRESSED   0x00000010   Data   RW         8007    .data               hs6621c_lib_c2.lib(sch_plan.o)
+    0x20001764   COMPRESSED   0x00000008   Data   RW         8077    .data               hs6621c_lib_c2.lib(sch_slice.o)
+    0x2000176c   COMPRESSED   0x00000004   Data   RW         9396    .data               hs6621c_lib_c2.lib(l2cc.o)
+    0x20001770   COMPRESSED   0x00000001   Data   RW         9528    .data               hs6621c_lib_c2.lib(l2cc_task.o)
+    0x20001771   COMPRESSED   0x00000003   PAD
+    0x20001774   COMPRESSED   0x00000004   Data   RW        10547    .data               hs6621c_lib_c2.lib(gattc.o)
+    0x20001778   COMPRESSED   0x00000001   Data   RW        10717    .data               hs6621c_lib_c2.lib(gattc_task.o)
+    0x20001779   COMPRESSED   0x00000001   Data   RW        10957    .data               hs6621c_lib_c2.lib(gattm_task.o)
+    0x2000177a   COMPRESSED   0x00000002   PAD
+    0x2000177c   COMPRESSED   0x00000004   Data   RW        11052    .data               hs6621c_lib_c2.lib(gapc.o)
+    0x20001780   COMPRESSED   0x00000001   Data   RW        11290    .data               hs6621c_lib_c2.lib(gapc_task.o)
+    0x20001781   COMPRESSED   0x00000001   Data   RW        11866    .data               hs6621c_lib_c2.lib(gapm_task.o)
+    0x20001782   COMPRESSED   0x00000001   Data   RW        13408    .data               hs6621c_lib_c2.lib(llm_task.o)
+    0x20001783   COMPRESSED   0x00000001   PAD
+    0x20001784   COMPRESSED   0x00000008   Data   RW        13920    .data               hs6621c_lib_c2.lib(llc.o)
+    0x2000178c   COMPRESSED   0x00000002   Data   RW        14137    .data               hs6621c_lib_c2.lib(llc_task.o)
+    0x2000178e   COMPRESSED   0x00000002   PAD
+    0x20001790   COMPRESSED   0x00000008   Data   RW        15042    .data               hs6621c_lib_c2.lib(lld.o)
+    0x20001798   COMPRESSED   0x00000008   Data   RW        15236    .data               hs6621c_lib_c2.lib(lld_adv.o)
+    0x200017a0   COMPRESSED   0x00000008   Data   RW        15388    .data               hs6621c_lib_c2.lib(lld_per_adv.o)
+    0x200017a8   COMPRESSED   0x00000004   Data   RW        15527    .data               hs6621c_lib_c2.lib(lld_test.o)
+    0x200017ac   COMPRESSED   0x00000004   Data   RW        15889    .data               mc_w.l(rand.o)
+    0x200017b0   COMPRESSED   0x00000004   Data   RW        16308    .data               mc_w.l(mvars.o)
+    0x200017b4   COMPRESSED   0x00000004   Data   RW        16309    .data               mc_w.l(mvars.o)
+    0x200017b8   COMPRESSED   0x00000004   Data   RW        16313    .data               mc_w.l(errno.o)
+    0x200017bc        -       0x00000018   Zero   RW           20    .bss                main.o
+    0x200017d4        -       0x00000030   Zero   RW          619    .bss                app.o
+    0x20001804        -       0x0000021c   Zero   RW          766    .bss                app_adv.o
+    0x20001a20        -       0x0000004e   Zero   RW          892    .bss                app_sec.o
+    0x20001a6e        -       0x0000007a   Zero   RW         1004    .bss                app_wechat.o
+    0x20001ae8        -       0x00001000   Zero   RW         1115    .bss                app_tspp_server.o
+    0x20002ae8        -       0x00000028   Zero   RW         1361    .bss                app_hid.o
+    0x20002b10        -       0x00000040   Zero   RW         2284    .bss                ancsc_task.o
+    0x20002b50        -       0x00000138   Zero   RW         2377    .bss                ancsc_utils.o
+    0x20002c88   COMPRESSED   0x00000008   PAD
+    0x20002c90        -       0x00000130   Zero   RW         2585    .bss                onmicro_dfu.o
+    0x20002dc0        -       0x0000352c   Zero   RW         3182    .bss                rwmem.o
+    0x200062ec        -       0x0000000c   Zero   RW         3792    .bss                mpbledemo2.o
+    0x200062f8        -       0x0000001c   Zero   RW         3793    .bss                mpbledemo2.o
+    0x20006314        -       0x00000030   Zero   RW         3903    .bss                wechat_util.o
+    0x20006344        -       0x00000168   Zero   RW         3962    .bss                hal_uart.o
+    0x200064ac        -       0x000001dc   Zero   RW         4244    .bss                app_ble.o
+    0x20006688        -       0x000000dc   Zero   RW         4704    .bss                hs6621c_rom_peripheral_ext_c2.lib(adc.o)
+    0x20006764        -       0x00000018   Zero   RW         5086    .bss                hs6621c_rom_peripheral_ext_c2.lib(calib_repair.o)
+    0x2000677c        -       0x00000018   Zero   RW         5994    .bss                hs6621c_rom_peripheral_ext_c2.lib(timer.o)
+    0x20006794        -       0x000000c8   Zero   RW         6404    .bss                hs6621c_rom_peripheral_ext_c2.lib(dma_nds.o)
+    0x2000685c        -       0x00000038   Zero   RW         7397    .bss                hs6621c_lib_c2.lib(cfg_nvds.o)
+    0x20006894        -       0x0000001a   Zero   RW         7644    .bss                hs6621c_lib_c2.lib(hci.o)
+    0x200068ae   COMPRESSED   0x00000002   PAD
+    0x200068b0        -       0x00000018   Zero   RW         7744    .bss                hs6621c_lib_c2.lib(hci_tl.o)
+    0x200068c8        -       0x00000020   Zero   RW         8076    .bss                hs6621c_lib_c2.lib(sch_slice.o)
+    0x200068e8        -       0x0000000c   Zero   RW         8152    .bss                hs6621c_lib_c2.lib(aes.o)
+    0x200068f4        -       0x00000020   Zero   RW         8714    .bss                hs6621c_lib_c2.lib(h4tl.o)
+    0x20006914        -       0x00000078   Zero   RW         9069    .bss                hs6621c_lib_c2.lib(ke_task.o)
+    0x2000698c        -       0x00000030   Zero   RW         9158    .bss                hs6621c_lib_c2.lib(ke.o)
+    0x200069bc        -       0x0000000c   Zero   RW         9321    .bss                hs6621c_lib_c2.lib(l2cm.o)
+    0x200069c8        -       0x00000020   Zero   RW        10873    .bss                hs6621c_lib_c2.lib(gattm.o)
+    0x200069e8        -       0x00000048   Zero   RW        11669    .bss                hs6621c_lib_c2.lib(gapm.o)
+    0x20006a30        -       0x00000118   Zero   RW        13029    .bss                hs6621c_lib_c2.lib(prf.o)
+    0x20006b48        -       0x000000f0   Zero   RW        13286    .bss                hs6621c_lib_c2.lib(llm.o)
+    0x20006c38        -       0x0000002c   Zero   RW        16303    .bss                mc_w.l(localtime_w.o)
+    0x20006c64   COMPRESSED   0x00000004   PAD
+    0x20006c68        -       0x00000000   Zero   RW            2    HEAP                startup_hs6621_flash.o
+    0x20006c68        -       0x00001000   Zero   RW            1    STACK               startup_hs6621_flash.o
 
 
 ==============================================================================
@@ -13715,11 +13718,11 @@ Image component sizes
        680          0          0          0          0      16532   epb.o
       2530        456          0          0          0      19872   epb_mmbp.o
        266         30          8          0          0       3170   hal_flash.o
-       630        130          0          0        360      10119   hal_uart.o
+       630        130          0          0        360      10111   hal_uart.o
          6          0          0          0          0        487   hal_wdt.o
       2198         74        200          0          0      13337   hogpd.o
       1584         38         64          0          0      11590   hogpd_task.o
-       448        176          0         12          0     136286   main.o
+       620        254          0          8         24     136894   main.o
        598         50        112          0          0       6607   md5.o
       1390        170        142         60         40      19657   mpbledemo2.o
       3924       1268        326         16        304      18423   onmicro_dfu.o
@@ -13735,9 +13738,9 @@ Image component sizes
         74          4          0          0         48       5279   wechat_util.o
 
     ----------------------------------------------------------------------
-     35936       6606       5008        156      24240     541899   Object Totals
+     36108       6684       5008        152      24268     542499   Object Totals
          0          0         80          0          0          0   (incl. Generated)
-        54          0         16          8          4          0   (incl. Padding)
+        54          0         16          8          8          0   (incl. Padding)
 
     ----------------------------------------------------------------------
 
@@ -13926,15 +13929,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-    179592      15252      12476        384      25744    3475061   Grand Totals
-    179592      15252      12476        132      25744    3475061   ELF Image Totals (compressed)
-    179592      15252      12476        132          0          0   ROM Totals
+    179764      15330      12476        380      25772    3475609   Grand Totals
+    179764      15330      12476        132      25772    3475609   ELF Image Totals (compressed)
+    179764      15330      12476        132          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)               192068 ( 187.57kB)
-    Total RW  Size (RW Data + ZI Data)             26128 (  25.52kB)
-    Total ROM Size (Code + RO Data + RW Data)     192200 ( 187.70kB)
+    Total RO  Size (Code + RO Data)               192240 ( 187.73kB)
+    Total RW  Size (RW Data + ZI Data)             26152 (  25.54kB)
+    Total ROM Size (Code + RO Data + RW Data)     192372 ( 187.86kB)
 
 ==============================================================================
 
