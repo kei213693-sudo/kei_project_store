@@ -34,6 +34,10 @@ void hal_flash_init(void)
 	{
 		log_debug("bsp_flash_init err!\n");
 	}
+
+	//调用了也没用，pmu还是显示SF1 SF2的clock被使能，但是实际没有用到，感觉是使能了一个SF，所有的clock都会被启用
+	// sf_disable(HS_SF1, 0);
+	// sf_disable(HS_SF2, 0);
 	
 	//相同型号芯片id相同，例如HS6621CG-C就是0x00856014
 	// uint32_t flash_id = sf_read_id(HS_SF, HAL_FLASH_CS);

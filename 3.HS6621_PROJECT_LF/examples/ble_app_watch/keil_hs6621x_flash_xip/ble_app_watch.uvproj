@@ -691,11 +691,6 @@
               <FilePath>..\src\Peripheral\hal_uart.c</FilePath>
             </File>
             <File>
-              <FileName>hal_timer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\Peripheral\hal_timer.c</FilePath>
-            </File>
-            <File>
               <FileName>hal_wdt.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\Peripheral\hal_wdt.c</FilePath>
@@ -739,11 +734,6 @@
               <FileName>app_ble.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\Modules\ble\app_ble.c</FilePath>
-            </File>
-            <File>
-              <FileName>bsp_ble.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\Modules\ble\bsp_ble.c</FilePath>
             </File>
           </Files>
         </Group>

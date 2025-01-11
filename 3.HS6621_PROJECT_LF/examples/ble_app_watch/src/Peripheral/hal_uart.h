@@ -2,7 +2,6 @@
 #define  _HAL_UART_H_
 /*******************************头文件*******************************/
 #include <stdint.h>
-#include "hal_timer.h"
 
 /*******************************宏定义*******************************/
 //log调试日志串口
@@ -11,8 +10,7 @@
 #define HAL_UART_LOG_RX_PIN             6
 #define HAL_UART_LOG_BAUDRATE           115200
 #define HAL_UART_LOG_LEN    	        (32)
-#define HAL_UART_LOG_RX_IRQ_TIMEOUT     ((3*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
-
+#define HAL_UART_LOG_RX_IRQ_TIMEOUT     (5)//rx irq超时时间，5ms		//115200传输一个bytes需要8/115200 = 69.4us的时间，所以定时1ms没有数据传来就判定一次数据传输完成
 
 //MCU通信串口
 #define HAL_UART_FM33LG_TYPE            HS_UART1//uart1支持DMA、16深度FIFO，uart0都不支持
@@ -20,7 +18,7 @@
 #define HAL_UART_FM33LG_RX_PIN          9
 #define HAL_UART_FM33LG_BAUDRATE        115200
 #define HAL_UART_FM33LG_LEN    	        (128)//tx+rx最大数据长度，确保 >= PROTOCOL_BUFF_SIZE
-#define HAL_UART_FM33LG_RX_IRQ_TIMEOUT  ((3*1000)/HAL_TIMER_TIM0_BASE_US)//rx irq超时时间，5ms
+#define HAL_UART_FM33LG_RX_IRQ_TIMEOUT  (3)//rx irq超时时间，3ms
 #define HAL_UART_FM33LG_DMA             (0)//1启动DMA模式
 
 /*******************************结构体、枚举等******************************/
@@ -48,14 +46,12 @@ typedef struct
 
 /*******************************全局函数的声明*******************************/
 void hal_uart_log_init(void);
-void hal_uart_log_RxIrqCheck(void);
 uint8_t *hal_uart_log_rx_buf_addr_get(void);
 uint16_t hal_uart_log_rx_buf_len_get(void);
 void hal_uart_log_rx_buf_reset(void);
 
 
 void hal_uart_fm33lg_init(void);
-void hal_uart_fm33lg_RxIrqCheck(void);
 uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void);
 uint8_t hal_uart_fm33lg_rx_buf_len_get(void);
 void hal_uart_fm33lg_rx_buf_reset(void);

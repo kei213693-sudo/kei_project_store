@@ -39,14 +39,12 @@
 ".\_build\mpbledemo2.o"
 ".\_build\wechat_util.o"
 ".\_build\hal_uart.o"
-".\_build\hal_timer.o"
 ".\_build\hal_wdt.o"
 ".\_build\hal_flash.o"
 ".\_build\bsp_protocol.o"
 ".\_build\crc32_1.o"
 ".\_build\bsp_filter.o"
 ".\_build\app_ble.o"
-".\_build\bsp_ble.o"
 --library_type=microlib --strict --scatter "..\..\..\lib\keil\scatter_hs6621_flash.sct"
 --via=..\..\..\lib\keil\armlink.via --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

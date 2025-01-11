@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "app_ble.h"
-#include "bsp_ble.h"
 
 #include "rwip_config.h"
 #include "co_utils.h"
@@ -402,13 +401,23 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 **************************************************************/
 static void app_ble_sys_info_reset(void)
 {
-	uint8_t md5_out[16];
+	uint8_t uid[16];
 	uint8_t sn_temp[APP_BLE_SN_LEN + 1] = "000000001";
 	memset(&g_stAppBleCtl.stAppBleSysInfo,0x00,sizeof(app_ble_sys_info_t));//清空
 
 	memcpy(g_stAppBleCtl.stAppBleSysInfo.sn,sn_temp,APP_BLE_SN_LEN);//配置sn码
-	md5((char *)g_stAppBleCtl.stAppBleSysInfo.sn, md5_out);
-	memcpy(g_stAppBleCtl.stAppBleSysInfo.localMacAddr,&md5_out[10],GAP_BD_ADDR_LEN);//修改本地mac addr，取md5最后6bytes数值
+	//修改本地mac addr，根据芯片uid计算
+	sfs_read_uid_ex(uid,sizeof(uid));
+	for(uint8_t i = 0;i < GAP_BD_ADDR_LEN;i++)
+	{
+		for(uint8_t j = i;j < 16;j += GAP_BD_ADDR_LEN)
+		{//a[0] = b[0] + b[6] + b[12]
+			//…………
+			//a[4] = b[4] + b[10]
+			//a[5] = b[5] + b[11]
+			g_stAppBleCtl.stAppBleSysInfo.localMacAddr[i] += uid[j];
+		}
+	}
 	g_stAppBleCtl.stAppBleSysInfo.AdvInterval = APP_ADV_FAST_INTERVAL;//默认500ms
 	hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
 	hal_flash_write(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
@@ -512,6 +521,9 @@ static int app_ble_processRxRec(ke_msg_id_t const msgid,
 			}
 		}
 	}
+	
+	hal_uart_fm33lg_rx_buf_reset();
+
 	return (KE_MSG_CONSUMED);
 }
 
@@ -591,14 +603,25 @@ static void app_ble_cmdBleSnSetReq(void *pData)
 	}Param_t;
 	Param_t *pStData = (Param_t *)pData;
 
-	uint8_t md5_out[16];
+	uint8_t uid[16];
 
 	//重新读一次flash
 	hal_flash_read(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
 
 	memcpy(g_stAppBleCtl.stAppBleSysInfo.sn,pStData->u8SN,APP_BLE_SN_LEN);//修改sn
-	md5((char *)g_stAppBleCtl.stAppBleSysInfo.sn, md5_out);
-	memcpy(g_stAppBleCtl.stAppBleSysInfo.localMacAddr,&md5_out[10],GAP_BD_ADDR_LEN);//修改本地mac addr，取md5最后6bytes数值
+	//修改本地mac addr，根据芯片uid计算
+	sfs_read_uid_ex(uid,sizeof(uid));
+	memset(g_stAppBleCtl.stAppBleSysInfo.localMacAddr,0,GAP_BD_ADDR_LEN);//先清空
+	for(uint8_t i = 0;i < GAP_BD_ADDR_LEN;i++)
+	{
+		for(uint8_t j = i;j < 16;j += GAP_BD_ADDR_LEN)
+		{//a[0] = b[0] + b[6] + b[12]
+			//…………
+			//a[4] = b[4] + b[10]
+			//a[5] = b[5] + b[11]
+			g_stAppBleCtl.stAppBleSysInfo.localMacAddr[i] += uid[j];
+		}
+	}
 	g_stAppBleCtl.stAppBleSysInfo.AdvInterval = APP_ADV_FAST_INTERVAL;//广播间隔恢复默认数值500ms
 
 	hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
@@ -926,6 +949,8 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		// }
 		else if(0 == strncmp("coreuidget",(const char*)pData,10))
 		{//获取芯片uid
+			//demo板子：41 50 32 57 30 31 38 17 00 AB DC 16 56 06 00 78
+			//开发板1： 42 50 30 48 37 37 34 01 00 80 BD 17 56 06 00 78
 			uint8_t uid[16];
 			sfs_read_uid_ex(uid,sizeof(uid));
 			log_debug_array_ex("core uid", uid,sizeof(uid));
@@ -960,6 +985,22 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			//清空ble绑定信息
 			app_sec_remove_bond();
 		}
+		else if(0 == strncmp("sleepOpt",(const char*)pData,8))
+		{//休眠操作
+			uint8_t u8Opt = pData[6] - 0x30;//0不删管理员,1删除所有
+			if(0 == u8Opt)
+			{//允许休眠
+				pmu_lowpower_allow(PMU_LP_USER);
+			}
+			else if(1 == u8Opt)
+			{//禁止休眠
+				pmu_lowpower_prevent(PMU_LP_USER);
+			}
+			else if(2 == u8Opt)
+			{//休眠状态打印，参考co_power_status_t
+				log_debug("adv state:%d\n",pmu_power_status());
+			}
+		}
 		else if(0 == strncmp("power",(const char*)pData,5))
 		{//配置rf功率
 			uint8_t u8Opt = pData[5] - 0x30;
@@ -972,6 +1013,22 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			{//按照设定参数控制
 				rf_tx_power_set(false,u8Opt);
 				log_debug("rf power set:%d dB\n",u8Opt);
+			}
+		}
+		else if(0 == strncmp("advOpt",(const char*)pData,6))
+		{//广播操作
+			uint8_t u8Opt = pData[6] - 0x30;//0不删管理员,1删除所有
+			if(0 == u8Opt)
+			{
+				appm_adv_start();
+			}
+			else if(1 == u8Opt)
+			{
+				appm_adv_stop(0);
+			}
+			else if(2 == u8Opt)
+			{//广播状态打印，参考枚举app_adv_state
+				log_debug("adv state:%d\n",appm_adv_get_state());
 			}
 		}
 		else if(0 == strncmp("bledis",(const char*)pData,6))
