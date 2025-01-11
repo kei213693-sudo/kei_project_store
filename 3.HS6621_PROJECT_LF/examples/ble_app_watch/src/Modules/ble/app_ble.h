@@ -72,13 +72,15 @@ typedef struct
 {//存储在内部flash的系统参数
     uint8_t sn[APP_BLE_SN_LEN];//序列号
     uint8_t res0[16 - APP_BLE_SN_LEN];//预留
+    uint8_t localMacAddr[GAP_BD_ADDR_LEN];//本地public addr，根据sn码加密计算得到
+    uint8_t res1[2];//预留
 
-    uint8_t administratorMAC[GAP_BD_ADDR_LEN];//管理员用户mac addr，用于权限认定
+    uint8_t adminMacAddr[GAP_BD_ADDR_LEN];//管理员用户mac addr，用于权限认定
     uint8_t pairNum;//已配对手机个数
-    uint8_t res1;//预留
+    uint8_t res2;//预留
 
     uint16_t AdvInterval;//广播间隔, *0.625ms
-    uint8_t res2[2];//预留
+    uint8_t res3[2];//预留
 }app_ble_sys_info_t;
 
 typedef struct
@@ -110,8 +112,9 @@ extern int32_t app_ble_deinit(void);
 
 extern uint16_t app_ble_adv_inter_get(void);
 extern uint8_t *app_ble_sn_get(void);
+extern uint8_t *app_ble_mac_addr_get(void);
 extern uint32_t app_ble_pair_check(void);//控制u32Pincode
-extern void app_ble_pair_succ_opt(uint8_t *pMacAddr);//控制u32Pincode，stAppBleSysInfo的administratorMAC、pairNum
+extern void app_ble_pair_succ_opt(uint8_t *pMacAddr);//控制u32Pincode，stAppBleSysInfo的adminMacAddr、pairNum
 extern void app_ble_admin_check(uint8_t *pMacAddr);//控制u8AdminFlag
 extern uint8_t app_ble_admin_get(void);
 extern uint8_t *app_ble_admin_mac_get(void);

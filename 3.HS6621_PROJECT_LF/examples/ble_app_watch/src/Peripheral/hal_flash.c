@@ -35,6 +35,7 @@ void hal_flash_init(void)
 		log_debug("bsp_flash_init err!\n");
 	}
 	
+	//相同型号芯片id相同，例如HS6621CG-C就是0x00856014
 	// uint32_t flash_id = sf_read_id(HS_SF, HAL_FLASH_CS);
 	// log_debug("flash_id:0x%08x\n",flash_id);
 }

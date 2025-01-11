@@ -420,7 +420,7 @@ static int gapc_bond_req_ind_handler(ke_msg_id_t const msgid,
             #endif //(NVDS_SUPPORT)
             {
                 //ASSERT_ERR(0);
-                memcpy(cfm->data.irk.addr.addr.addr, &co_default_bdaddr,sizeof(co_default_bdaddr));
+                memcpy(cfm->data.irk.addr.addr.addr, app_ble_mac_addr_get(),GAP_BD_ADDR_LEN);
             }
             // load device address
             cfm->data.irk.addr.addr_type = (cfm->data.irk.addr.addr.addr[5] & 0xC0) ? ADDR_RAND : ADDR_PUBLIC;

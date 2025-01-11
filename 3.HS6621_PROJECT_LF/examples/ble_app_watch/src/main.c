@@ -42,11 +42,7 @@
 #ifdef CONFIG_ASIC
 #define PIN_WAKEUP_0                    2   // UART-RTS@EVB
 #define PIN_WAKEUP_1                    24  // KEY1@EVB
-
 #endif
-
-#define HCI_UART_BAUDRATE               115200
-#define DEBUG_UART_BAUDRATE             115200
 
 /*********************************************************************
  * TYPEDEFS
@@ -112,7 +108,6 @@ static void peripheral_init(void)
 	hal_timer_init();
     hal_flash_init();
 	hal_wdt_init();
-    
 }
 
 static void peripheral_restore(void)
@@ -136,16 +131,16 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
 {
     switch(sleep_state)
     {
-        case POWER_SLEEP_ENTRY:
-//            log_debug("sleep entry\n");
+        case POWER_SLEEP_ENTRY://进入休眠
+//            log_debug("e\n");
             break;
 
         case POWER_SLEEP_LEAVE_TOP_HALF:
             peripheral_restore();
             break;
 
-        case POWER_SLEEP_LEAVE_BOTTOM_HALF:
-//            log_debug("sleep leave\n");
+        case POWER_SLEEP_LEAVE_BOTTOM_HALF://退出休眠
+//            log_debug("l\n");
             break;
     }
 }
@@ -199,8 +194,7 @@ int main(void)
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);
-	//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
-    log_debug("reboot reason:%d\n", pmu_reboot_reason());
+    log_debug("reboot reason:%d\n", pmu_reboot_reason());//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
 	log_debug("APP start\n");//从上电到这里最少要花1000ms
 
     while(1)

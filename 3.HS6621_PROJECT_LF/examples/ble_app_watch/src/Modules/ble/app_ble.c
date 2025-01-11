@@ -21,6 +21,7 @@
 #include "sysdump.h"
 #include "md5.h"
 #include "nvds.h"
+#include "mbr.h"
 
 #include "hal_uart.h"
 #include "hal_flash.h"
@@ -194,6 +195,17 @@ uint8_t *app_ble_sn_get(void)
 }
 
 /**************************************************************
+*函数功能描述 ：返回mac addr存储地址
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+uint8_t *app_ble_mac_addr_get(void)
+{
+	return g_stAppBleCtl.stAppBleSysInfo.localMacAddr;
+}
+
+/**************************************************************
 *函数功能描述 ：判定当前建立连接的手机是否是管理员用户
 *函数参数 ：
 *函数返回值 ：配对码，如果为0就是禁止配对
@@ -221,8 +233,8 @@ void app_ble_pair_succ_opt(uint8_t *pMacAddr)
 
 		if(0 == g_stAppBleCtl.stAppBleSysInfo.pairNum)
 		{
-			memcpy(g_stAppBleCtl.stAppBleSysInfo.administratorMAC,pMacAddr,GAP_BD_ADDR_LEN);//存储管理用户mac地址
-			log_debug_array_ex("admin addr store",g_stAppBleCtl.stAppBleSysInfo.administratorMAC,GAP_BD_ADDR_LEN);
+			memcpy(g_stAppBleCtl.stAppBleSysInfo.adminMacAddr,pMacAddr,GAP_BD_ADDR_LEN);//存储管理用户mac地址
+			log_debug_array_ex("admin addr store",g_stAppBleCtl.stAppBleSysInfo.adminMacAddr,GAP_BD_ADDR_LEN);
 		}
 		g_stAppBleCtl.stAppBleSysInfo.pairNum++;//配对数量加一
 
@@ -242,7 +254,7 @@ void app_ble_admin_check(uint8_t *pMacAddr)
 {
 	if(NULL != pMacAddr)
 	{
-		if(0 == strncmp((const char*)pMacAddr,(const char*)g_stAppBleCtl.stAppBleSysInfo.administratorMAC,GAP_BD_ADDR_LEN))
+		if(0 == strncmp((const char*)pMacAddr,(const char*)g_stAppBleCtl.stAppBleSysInfo.adminMacAddr,GAP_BD_ADDR_LEN))
 		{
 			g_stAppBleCtl.u8AdminFlag = 1;//管理员用户
 			log_debug("Administrator user!\n");
@@ -278,7 +290,7 @@ uint8_t app_ble_admin_get(void)
 **************************************************************/
 uint8_t *app_ble_admin_mac_get(void)
 {
-	return g_stAppBleCtl.stAppBleSysInfo.administratorMAC;
+	return g_stAppBleCtl.stAppBleSysInfo.adminMacAddr;
 }
 
 /**************************************************************
@@ -390,11 +402,13 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 **************************************************************/
 static void app_ble_sys_info_reset(void)
 {
+	uint8_t md5_out[16];
 	uint8_t sn_temp[APP_BLE_SN_LEN + 1] = "000000001";
-	memset(&g_stAppBleCtl.stAppBleSysInfo,0x00,sizeof(app_ble_sys_info_t));
+	memset(&g_stAppBleCtl.stAppBleSysInfo,0x00,sizeof(app_ble_sys_info_t));//清空
 
-	memcpy(g_stAppBleCtl.stAppBleSysInfo.sn,sn_temp,APP_BLE_SN_LEN);
-	g_stAppBleCtl.stAppBleSysInfo.pairNum = 0;
+	memcpy(g_stAppBleCtl.stAppBleSysInfo.sn,sn_temp,APP_BLE_SN_LEN);//配置sn码
+	md5((char *)g_stAppBleCtl.stAppBleSysInfo.sn, md5_out);
+	memcpy(g_stAppBleCtl.stAppBleSysInfo.localMacAddr,&md5_out[10],GAP_BD_ADDR_LEN);//修改本地mac addr，取md5最后6bytes数值
 	g_stAppBleCtl.stAppBleSysInfo.AdvInterval = APP_ADV_FAST_INTERVAL;//默认500ms
 	hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
 	hal_flash_write(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
@@ -577,10 +591,14 @@ static void app_ble_cmdBleSnSetReq(void *pData)
 	}Param_t;
 	Param_t *pStData = (Param_t *)pData;
 
+	uint8_t md5_out[16];
+
 	//重新读一次flash
 	hal_flash_read(HAL_FLASH_USER_DATA_START,(uint8_t *)&g_stAppBleCtl.stAppBleSysInfo,sizeof(app_ble_sys_info_t));
 
 	memcpy(g_stAppBleCtl.stAppBleSysInfo.sn,pStData->u8SN,APP_BLE_SN_LEN);//修改sn
+	md5((char *)g_stAppBleCtl.stAppBleSysInfo.sn, md5_out);
+	memcpy(g_stAppBleCtl.stAppBleSysInfo.localMacAddr,&md5_out[10],GAP_BD_ADDR_LEN);//修改本地mac addr，取md5最后6bytes数值
 	g_stAppBleCtl.stAppBleSysInfo.AdvInterval = APP_ADV_FAST_INTERVAL;//广播间隔恢复默认数值500ms
 
 	hal_flash_erase(HAL_FLASH_USER_DATA_START,SF_SECTOR_SIZE);
@@ -746,7 +764,7 @@ static void app_ble_cmdBleBondDelReq(void *pData)
 	{
 		app_sec_remove_bond();
 		g_stAppBleCtl.stAppBleSysInfo.pairNum = 0;
-		memset(g_stAppBleCtl.stAppBleSysInfo.administratorMAC,0x00,GAP_BD_ADDR_LEN);
+		memset(g_stAppBleCtl.stAppBleSysInfo.adminMacAddr,0x00,GAP_BD_ADDR_LEN);
 		log_debug("Delete all users!\n");
 	}
 
@@ -921,8 +939,9 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			sysdump();
 
 			log_debug_array_ex("SN", g_stAppBleCtl.stAppBleSysInfo.sn, APP_BLE_SN_LEN);
+			log_debug_array_ex("Local Mac Addr", g_stAppBleCtl.stAppBleSysInfo.localMacAddr, 6);
 			log_debug("Pair num:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
-			log_debug_array_ex("Admin Mac Addr", g_stAppBleCtl.stAppBleSysInfo.administratorMAC, 6);
+			log_debug_array_ex("Admin Mac Addr", g_stAppBleCtl.stAppBleSysInfo.adminMacAddr, 6);
 			log_debug("AdvInterval:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625
 			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\nrssiBufLen:%d\nrssiSendTime:%d ms\nrssiWindowSize:%d\n"
 					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod
@@ -987,6 +1006,13 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			int8_t data[APP_BLE_RSSI_NUM] = {-75,-76,-75,-75,-90,-75,-75,-75};
 			int8_t i8Average = bsp_filter_low_pass_moving_average(data,APP_BLE_RSSI_NUM,APP_BLE_RSSI_WINDOW);
 			log_debug("rssi Average:%d dB\n",i8Average);
+		}
+		else if(0 == strncmp("area",(const char*)pData,5))
+		{//flash参数测试
+			uint32_t addr;
+			uint32_t len;
+			mbr_get_free_area(&addr,&len);
+			log_debug("flash free area Addr:0x%x,%d bytes\n",addr,len);
 		}
 		
 		//*********************************************以下是用log cmd测试mcu cmd的指令码

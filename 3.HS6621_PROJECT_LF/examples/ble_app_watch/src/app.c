@@ -273,7 +273,7 @@ void appm_init(void)
     // if (nvds_get(NVDS_TAG_BD_ADDRESS, &len, &app_env.addr.addr[0]) != NVDS_OK)
     #endif //(NVDS_SUPPORT)
     {
-        memcpy(&app_env.addr.addr[0], &co_default_bdaddr, 6);
+        memcpy(&app_env.addr.addr[0], app_ble_mac_addr_get(), 6);
         log_debug_array_ex("Mac Addr", app_env.addr.addr, 6);
     }
     #if defined(DEBUG_ADDR)

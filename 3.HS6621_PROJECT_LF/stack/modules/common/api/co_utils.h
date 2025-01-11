@@ -178,6 +178,7 @@ extern const uint16_t co_sca2ppm[];
 extern const struct bd_addr co_null_bdaddr;
 
 /// Default BD address
+//相同SDK的mac addr相同，例如OM6621x_3619就是20 CC 21 66 BF 01
 extern const struct bd_addr co_default_bdaddr;
 
 /// Table for converting rate to PHY
