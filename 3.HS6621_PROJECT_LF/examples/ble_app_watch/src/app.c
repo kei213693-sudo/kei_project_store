@@ -25,7 +25,7 @@
 
 #include "rwip_config.h"             // SW configuration
 
-//#if (BLE_APP_PRESENT)
+#if (BLE_APP_PRESENT)
 
 #include <string.h>
 
@@ -212,7 +212,7 @@ void appm_advertising_init(void)
     adv_config.directed_timeout = APP_ADV_DIRECTED_TIMEOUT;
     adv_config.fast_enabled = true;
     adv_config.fast_interval = (uint32_t)app_ble_adv_inter_get();//APP_ADV_FAST_INTERVAL;
-    adv_config.fast_timeout = (uint32_t)app_ble_adv_inter_get();//APP_ADV_FAST_TIMEOUT;
+    adv_config.fast_timeout = APP_ADV_FAST_TIMEOUT;
     adv_config.slow_enabled = false;
     adv_config.slow_interval = APP_ADV_SLOW_INTERVAL;
     adv_config.slow_timeout = APP_ADV_SLOW_TIMEOUT;
@@ -276,9 +276,6 @@ void appm_init(void)
         memcpy(&app_env.addr.addr[0], app_ble_mac_addr_get(), 6);
         log_debug_array_ex("Mac Addr", app_env.addr.addr, 6);
     }
-    #if defined(DEBUG_ADDR)
-        //memcpy(&app_env.addr.addr[0], DEBUG_ADDR, 6); // !!  JUST FOR DEBUG  !!
-    #endif
 
     /*------------------------------------------------------
      * INITIALIZE ALL MODULES
@@ -434,6 +431,6 @@ void appm_get_rssi(void)
     ke_msg_send(cmd);
 }
 
-//#endif //(BLE_APP_PRESENT)
+#endif //(BLE_APP_PRESENT)
 
 /// @} APP

@@ -33,12 +33,21 @@
 #include "hal_wdt.h"
 #include "app_ble.h"
 
-#define PIN_KEY_1                    24  // KEY1@EVB，需要接上靠近按键KEY1的跳线帽，按下按键才有效
+#define KEY_ENBLE                    (0)//key1按键使能标志
+
+#if(KEY_ENBLE)
+#define PIN_KEY_1                    24  //PB8 KEY1@EVB，需要接上靠近按键KEY1的跳线帽，按下按键才有效
+#endif
+
 #define APP_WAKEUP_TIMEOUT          (300)//休眠唤醒超时时间，ms
 
 static co_timer_t g_wakeup_timer;
 
+#if(KEY_ENBLE)
 static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_KEY_1) | BIT_MASK(HAL_UART_LOG_RX_PIN) | BIT_MASK(HAL_UART_FM33LG_RX_PIN));
+#else
+static uint32_t pin_wakeup_mask = (BIT_MASK(HAL_UART_LOG_RX_PIN) | BIT_MASK(HAL_UART_FM33LG_RX_PIN));
+#endif
 
 /**************************************************************
 *函数功能描述 ：唤醒超时，强制休眠
@@ -65,10 +74,13 @@ static void app_lowpower_wakeup_handler(uint32_t pin_mask)
 {
     log_debug("wake_gpio: %08X\n", pin_mask);
 
+    #if(KEY_ENBLE)
     if(0 != (pin_mask & BIT_MASK(PIN_KEY_1)))
     {
         log_debug("key1 Wakeup\n");
     }
+    #endif
+    
 
     if(0 != (pin_mask & BIT_MASK(HAL_UART_LOG_RX_PIN)))
     {
@@ -86,11 +98,14 @@ static void app_lowpower_wakeup_handler(uint32_t pin_mask)
             , TIMER_ONE_SHOT, app_wakeup_timer_handler, NULL);
 }
 
+#if(KEY_ENBLE)
 static void gpio_handler(uint32_t pin_mask)
 {
     static int counter = 0;
     log_debug("gpio: %08X [%d]\n", pin_mask, counter++);
 }
+#endif
+
 
 //pmu部分从sleep唤醒后不需要重新初始化
 static void pinmux_init(void)
@@ -105,12 +120,14 @@ static void peripheral_init(void)
     // Init GPIO
     gpio_open();
 
+    #if(KEY_ENBLE)
     // key1初始化
     pinmux_config(PIN_KEY_1,  PINMUX_GPIO_MODE_CFG);
     pmu_pin_mode_set(BITMASK(PIN_KEY_1), PMU_PIN_MODE_PU);
     gpio_set_direction(BITMASK(PIN_KEY_1), GPIO_INPUT);
     gpio_set_interrupt(BITMASK(PIN_KEY_1), GPIO_BOTH_EDGE);
     gpio_set_interrupt_callback(gpio_handler);//通用gpio中断回调函数
+    #endif
 
     hal_uart_log_init();
     hal_uart_fm33lg_init();
@@ -141,7 +158,7 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
         case POWER_SLEEP_LEAVE_TOP_HALF://休眠唤醒后重新初始化各类外设
             //GPIO, Timer, UART, I2C, SPI, WDT, Encoder, KPP, I2S,DMA, ADC
             peripheral_init();
-            log_debug("h\n");//为什么这个打印不出来？？
+            //log_debug("h\n");//为什么这个打印不出来？？
             break;
 
         case POWER_SLEEP_LEAVE_BOTTOM_HALF://退出休眠
@@ -166,7 +183,7 @@ static void ble_stack_config(void)
     // ultra sleep mode enable
     co_power_ultra_sleep_mode_enable(false);//不使用ultra deep sleep模式
 
-    pmu_xtal32m_change_param(1);//修改负载电容参数
+    pmu_xtal32m_change_param(1);//修改负载电容参数，需要重新测试确定数值，不同板子参数不同
 
     // Enable sleep, SWD will be closed.
     //co_power_sleep_enable(false);//失能sleep模式
@@ -192,7 +209,10 @@ int main(void)
 	log_debug("Version time:%s\n",APP_VERSION_TIME);
     log_debug("reboot reason:%d\n", pmu_reboot_reason());//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
 	log_debug("APP start\n");//从上电到这里最少要花1000ms
-	log_debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");//后续删除
+    if(0 != pmu_reboot_reason())
+    {
+        sysdump();
+    }
 
     while(1)
     {
