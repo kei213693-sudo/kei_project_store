@@ -22,6 +22,7 @@
 #include "nvds.h"
 #include "mbr.h"
 
+#include "hal_wdt.h"
 #include "hal_uart.h"
 #include "hal_flash.h"
 #include "app_task.h"
@@ -432,6 +433,7 @@ static void app_ble_sys_info_reset(void)
 **************************************************************/
 static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
 {
+	hal_wdt_feed();
     g_stAppBleCtl.u32Pincode = 0;//禁止配对
 	log_debug("pair bond check timerout,cancel pair\n");
 	appm_disconnect(0);//并断开连接
@@ -445,17 +447,19 @@ static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
 **************************************************************/
 static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param)
 {
+	hal_wdt_feed();
 	appm_get_rssi();
 }
 
 /**************************************************************
-*函数功能描述 ：定时获取rssi数值，然后传递给mcu
+*函数功能描述 ：广播停止后，定时重修修改参数再启动
 *函数参数 ：
 *函数返回值 ：
 *备注：
 **************************************************************/
 static void app_ble_adv_updata_timer_handler(co_timer_t *timer, void *param)
 {
+	hal_wdt_feed();
 	appm_advertising_init();
 	appm_adv_start();//启动广播
 }
@@ -471,6 +475,7 @@ static int app_ble_update_param(ke_msg_id_t const msgid,
 								ke_task_id_t const dest_id,
 								ke_task_id_t const src_id)
 {
+	hal_wdt_feed();
 	if(0 == g_stAppBleCtl.u16RssiGetPeriod)
 	{//连接参数没有更新再主动发起
 		struct gapc_conn_param st_conn_param = {(50)*5/6,(50)*5/6,0,(2000)/10};//50ms,50ms,0潜伏时间，2s,写死
@@ -494,6 +499,7 @@ static int app_ble_processRxRec(ke_msg_id_t const msgid,
 								ke_task_id_t const dest_id,
 								ke_task_id_t const src_id)
 {
+	hal_wdt_feed();
 	uint16_t u16Cmd = 0;
 	uint8_t  *pData = hal_uart_fm33lg_rx_buf_addr_get();
 	uint16_t u16Len = hal_uart_fm33lg_rx_buf_len_get();
@@ -524,6 +530,7 @@ static int app_ble_processRxRec(ke_msg_id_t const msgid,
 	
 	hal_uart_fm33lg_rx_buf_reset();
 
+	hal_wdt_feed();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -541,6 +548,7 @@ static int app_ble_processTxRec(ke_msg_id_t const msgid,
                                     ke_task_id_t const dest_id,
                                     ke_task_id_t const src_id)
 {
+	hal_wdt_feed();
 	// log_debug("App ble tx opt:%d\n",msgid);
 
 	for(uint8_t i = 0;i < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));i++)
@@ -554,6 +562,8 @@ static int app_ble_processTxRec(ke_msg_id_t const msgid,
             break;
         }
     }
+
+	hal_wdt_feed();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -689,7 +699,7 @@ static void app_ble_cmdBleBondAddReq(void *pData)
 		{//一个手机都没绑定，根据sn码计算得到配对码
 			//通过md5算法加密sn码得到16bytes的输出结果
 			md5((char *)g_stAppBleCtl.stAppBleSysInfo.sn, md5_out);
-			log_debug_array_ex("md5_out", md5_out, 16);
+			//log_debug_array_ex("md5_out", md5_out, 16);
 
 			//一次将md5_out的bytes0~5取余数转换为0~9的数值，然后赋给pincode的1~6的位置，最终生成一个6位长度的数字
 			g_stAppBleCtl.u32Pincode = ((uint32_t)(md5_out[0] % 10) * 100000) + ((uint32_t)(md5_out[1] % 10) * 10000)
@@ -922,6 +932,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
                                         ke_task_id_t const dest_id,
                                         ke_task_id_t const src_id)
 {
+	hal_wdt_feed();
     //log_debug("app_ble_debug_log_handle:%d %d %d\n",msgid,dest_id,src_id);
 
     uint8_t  *pData = hal_uart_log_rx_buf_addr_get();
@@ -987,14 +998,16 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		}
 		else if(0 == strncmp("sleepOpt",(const char*)pData,8))
 		{//休眠操作
-			uint8_t u8Opt = pData[6] - 0x30;//0不删管理员,1删除所有
+			uint8_t u8Opt = pData[8] - 0x30;//0不删管理员,1删除所有
 			if(0 == u8Opt)
 			{//允许休眠
 				pmu_lowpower_allow(PMU_LP_USER);
+				log_debug("lp allow\n");
 			}
 			else if(1 == u8Opt)
 			{//禁止休眠
 				pmu_lowpower_prevent(PMU_LP_USER);
+				log_debug("lp prevent\n");
 			}
 			else if(2 == u8Opt)
 			{//休眠状态打印，参考co_power_status_t
@@ -1128,6 +1141,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 	//清空接收缓存
 	hal_uart_log_rx_buf_reset();
 
+	hal_wdt_feed();
     return KE_MSG_CONSUMED;
 }
 

@@ -48,15 +48,15 @@ static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_KEY_1) | BIT_MASK(HAL_UART_LOG_R
 **************************************************************/
 static void app_wakeup_timer_handler(co_timer_t *timer, void *param)
 {
-    log_debug("lp status:%08X\n",pmu_lowpower_prevent_status());
+    log_debug("lp status:0x%08X\n",pmu_lowpower_prevent_status());
 
     if(PMU_LP_UART0 & pmu_lowpower_prevent_status())
-    {
+    {//关bit3
         pmu_lowpower_allow(PMU_LP_UART0);
     }
 
     if(PMU_LP_UART1 & pmu_lowpower_prevent_status())
-    {
+    {//关bit4
         pmu_lowpower_allow(PMU_LP_UART1);
     }
 }
@@ -138,8 +138,7 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
 			log_debug("e\n");
             break;
 
-        case POWER_SLEEP_LEAVE_TOP_HALF:
-            //休眠唤醒后重新初始化各类外设
+        case POWER_SLEEP_LEAVE_TOP_HALF://休眠唤醒后重新初始化各类外设
             //GPIO, Timer, UART, I2C, SPI, WDT, Encoder, KPP, I2S,DMA, ADC
             peripheral_init();
             log_debug("h\n");//为什么这个打印不出来？？
@@ -193,6 +192,7 @@ int main(void)
 	log_debug("Version time:%s\n",APP_VERSION_TIME);
     log_debug("reboot reason:%d\n", pmu_reboot_reason());//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
 	log_debug("APP start\n");//从上电到这里最少要花1000ms
+	log_debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");//后续删除
 
     while(1)
     {
