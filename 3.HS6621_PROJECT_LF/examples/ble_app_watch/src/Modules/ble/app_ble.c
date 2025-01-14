@@ -305,6 +305,9 @@ uint8_t *app_ble_admin_mac_get(void)
 **************************************************************/
 void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 {
+	int8_t i8RssiAvg = 0;
+	int8_t i8RssiBufTemp[APP_BLE_RSSI_NUM];//临时存储过滤后的rssi数值
+
 	if(APP_BLE_RSSI_PERIOD_SET == enOpt)
 	{
 		if(NULL != pData)
@@ -315,7 +318,7 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 			g_stAppBleCtl.u16RssiGetPeriod = (param->con_interval)*5/4;
 			if(0 != param->con_latency)
 			{//考虑从机潜伏时间
-				g_stAppBleCtl.u16RssiGetPeriod *= param->con_latency;
+				//g_stAppBleCtl.u16RssiGetPeriod *= param->con_latency;
 			}
 		}
 	}
@@ -347,12 +350,19 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 			//if(g_stAppBleCtl.u8RssiLen >= APP_BLE_RSSI_NUM)
 			if((g_stAppBleCtl.u8RssiLen * g_stAppBleCtl.u16RssiGetPeriod) >= APP_BLE_RSSI_TIME)
 			{//保证不同的连接间隔，传递rssi数值给mcu的时间是固定的
-				int8_t i8RssiAvg = bsp_filter_low_pass_moving_average(g_stAppBleCtl.g_i8RssiBuf,g_stAppBleCtl.u8RssiLen,APP_BLE_RSSI_WINDOW);
+				memset(i8RssiBufTemp,0,APP_BLE_RSSI_NUM);
+				i8RssiAvg = bsp_filter_low_pass_moving_average(g_stAppBleCtl.g_i8RssiBuf,i8RssiBufTemp,g_stAppBleCtl.u8RssiLen,APP_BLE_RSSI_WINDOW);
 				log_debug("rssi(%d) Average:%d dB\n",g_stAppBleCtl.u8RssiLen,i8RssiAvg);
-				// log_debug("rssi data[%d]:",APP_BLE_RSSI_NUM);
-				// for(uint8_t i = 0;i < APP_BLE_RSSI_NUM;i++)
+				// log_debug("rssi in  data[%d]:",g_stAppBleCtl.u8RssiLen);
+				// for(uint8_t i = 0;i < g_stAppBleCtl.u8RssiLen;i++)
 				// {
 				// 	log_debug(" %d",g_stAppBleCtl.g_i8RssiBuf[i]);
+				// }
+				// log_debug("\r\n");
+				// log_debug("rssi out data[%d]:",g_stAppBleCtl.u8RssiLen);
+				// for(uint8_t i = 0;i < g_stAppBleCtl.u8RssiLen;i++)
+				// {
+				// 	log_debug(" %d",i8RssiBufTemp[i]);
 				// }
 				// log_debug("\r\n");
 
@@ -1074,7 +1084,8 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		else if(0 == strncmp("filter",(const char*)pData,6))
 		{//滤波器测试
 			int8_t data[APP_BLE_RSSI_NUM] = {-75,-76,-75,-75,-90,-75,-75,-75};
-			int8_t i8Average = bsp_filter_low_pass_moving_average(data,APP_BLE_RSSI_NUM,APP_BLE_RSSI_WINDOW);
+			int8_t data1[APP_BLE_RSSI_NUM] = {0};
+			int8_t i8Average = bsp_filter_low_pass_moving_average(data,data1,APP_BLE_RSSI_NUM,APP_BLE_RSSI_WINDOW);
 			log_debug("rssi Average:%d dB\n",i8Average);
 		}
 		else if(0 == strncmp("area",(const char*)pData,5))

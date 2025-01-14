@@ -152,7 +152,7 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
     switch(sleep_state)
     {
         case POWER_SLEEP_ENTRY://进入休眠
-			log_debug("e\n");
+			//log_debug("e\n");
             break;
 
         case POWER_SLEEP_LEAVE_TOP_HALF://休眠唤醒后重新初始化各类外设
@@ -162,7 +162,7 @@ static void power_sleep_event_handler(co_power_sleep_state_t sleep_state, co_pow
             break;
 
         case POWER_SLEEP_LEAVE_BOTTOM_HALF://退出休眠
-            log_debug("l\n");
+            //log_debug("l\n");
             break;
     }
 }

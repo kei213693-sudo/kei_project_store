@@ -20,6 +20,6 @@
 /*******************************全局变量的外部声明extern*******************************/
 
 /*******************************全局函数的声明*******************************/
-int8_t bsp_filter_low_pass_moving_average(int8_t *pData, uint32_t u32Len, uint32_t u32WindowSize);
+int8_t bsp_filter_low_pass_moving_average(int8_t *pDataIn, int8_t *pDataOut, uint32_t u32Len, uint32_t u32WindowSize);
 
 #endif /* _BSP_FILTER_H_ */
