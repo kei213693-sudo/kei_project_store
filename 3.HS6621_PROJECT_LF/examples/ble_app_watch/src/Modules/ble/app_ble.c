@@ -741,6 +741,19 @@ static void app_ble_cmdBleBondAddRsp(void *pData)
 	{
 		memcpy(pStData,(const void*)pData,sizeof(Param_t));
 		// pStData->u32Pincode = *((uint32_t*)pData);
+
+		if(0xaaaaaaaa == pStData->u32Pincode)
+		{
+			g_stBleProCtl.tx.head->err = 1;
+		}
+		else if(0x55555555 == pStData->u32Pincode)
+		{
+			g_stBleProCtl.tx.head->err = 2;
+		}
+		else if(0xffffffff == pStData->u32Pincode)
+		{
+			g_stBleProCtl.tx.head->err = 3;
+		}
 	}
 	g_pBspProtocolApi->protocol_alloc_tail(&g_stBleProCtl);
 	
@@ -756,13 +769,15 @@ static void app_ble_cmdBleBondAddRsp(void *pData)
 static void app_ble_cmdBleBondAddReq(void *pData)
 {
 	uint8_t md5_out[16];
+	uint32_t u32Pincode_temp = 0;
 
 	typedef struct Ret_t
 	{
     	uint32_t u32Pincode;//配对码
 	}Ret_t;
 
-	if(g_stAppBleCtl.stAppBleSysInfo.pairNum < APP_BLE_PAIR_NUM_MAX)
+	if((g_stAppBleCtl.stAppBleSysInfo.pairNum < APP_BLE_PAIR_NUM_MAX)//配对数量未达上限
+		&& (APPM_CONNECTED != ke_state_get(APP_BLE_TASK_ID)))//不处于连接状态
 	{
 		if(app_sec_get_bond_status() == 0)
 		{//一个手机都没绑定，根据sn码计算得到配对码
@@ -788,23 +803,33 @@ static void app_ble_cmdBleBondAddReq(void *pData)
 		//修改广播间隔变为快速广播
 		g_stAppBleCtl.u16BondAdvInter = APP_ADV_BOND_INTERVAL;
 		app_ble_adv_updata(&g_stAppBleCtl.u16BondAdvInter);
+		u32Pincode_temp = g_stAppBleCtl.u32Pincode;
 	}
 	else
 	{
-		g_stAppBleCtl.u32Pincode = 0xffffffff;
-		log_debug("pair num is full:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
+		if(g_stAppBleCtl.stAppBleSysInfo.pairNum >= APP_BLE_PAIR_NUM_MAX)
+		{
+			u32Pincode_temp |= 0xaaaaaaaa;
+			log_debug("pair num is full:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
+		}
+		
+		if(APPM_CONNECTED == ke_state_get(APP_BLE_TASK_ID))
+		{
+			u32Pincode_temp |= 0x55555555;
+			log_debug("now is connecting!\n");
+		}
 	}
 
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
 	Ret_t stRet;
-	stRet.u32Pincode = g_stAppBleCtl.u32Pincode;
+	stRet.u32Pincode = u32Pincode_temp;
 	app_ble_cmdBleBondAddRsp((void *)&stRet);
 	#else
 	//转一道，统一交给app_ble_processTxRec（）去调用返回响应的api
 	Ret_t *pStRet = KE_MSG_ALLOC(APP_BLE_OPT_BOND_ADD,APP_BLE_TASK_ID, APP_BLE_TASK_ID,Ret_t);
-    pStRet->u32Pincode = g_stAppBleCtl.u32Pincode;
+    pStRet->u32Pincode = u32Pincode_temp;
     ke_msg_send(pStRet);
 	#endif
 }
@@ -946,9 +971,16 @@ static void app_ble_cmdBleParamSetReq(void *pData)
 	
 	log_debug("Adv inter set:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625转换
 
-	//修改广播参数
-	app_ble_adv_updata(&g_stAppBleCtl.stAppBleSysInfo.AdvInterval);
-
+	if(APPM_CONNECTED == ke_state_get(APP_BLE_TASK_ID))
+	{//建立连接，不能stop、start广播包，等断开连接后再修改
+		g_stAppBleCtl.u16BondAdvInter = 0xffff;
+		log_debug("now is connecting!\n");
+	}
+	else
+	{//修改广播参数
+		app_ble_adv_updata(&g_stAppBleCtl.stAppBleSysInfo.AdvInterval);
+	}
+	
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
 	Ret_t stRet;
@@ -1049,8 +1081,8 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			log_debug("Pair num:%d\n",g_stAppBleCtl.stAppBleSysInfo.pairNum);
 			log_debug_array_ex("Admin Mac Addr", g_stAppBleCtl.stAppBleSysInfo.adminMacAddr, 6);
 			log_debug("AdvInterval:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625
-			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\nrssiBufLen:%d\nrssiSendTime:%d ms\nrssiWindowSize:%d\n"
-					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod
+			log_debug("u32Pincode:%d\nu8AdminFlag:%d\nu16RssiGetPeriod:%d ms\nu16BondAdvInter:%d ms\nrssiBufLen:%d\nrssiSendTime:%d ms\nrssiWindowSize:%d\n"
+					,g_stAppBleCtl.u32Pincode,g_stAppBleCtl.u8AdminFlag,g_stAppBleCtl.u16RssiGetPeriod,g_stAppBleCtl.u16BondAdvInter*5/8
 					,APP_BLE_RSSI_NUM,APP_BLE_RSSI_TIME,APP_BLE_RSSI_WINDOW);
 			
 			log_debug_array_ex("app_env", &app_env, sizeof(app_env));

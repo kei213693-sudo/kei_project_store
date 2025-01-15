@@ -640,6 +640,7 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
         
         // We are now in connected State
         ke_state_set(dest_id, APPM_CONNECTED);
+        ke_state_set(APP_BLE_TASK_ID, APPM_CONNECTED);
 
         #if (BLE_APP_SEC)
         if(is_bond)
@@ -743,6 +744,8 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
     
     // Go to the ready state
     ke_state_set(TASK_APP, APPM_READY);
+    ke_state_set(APP_BLE_TASK_ID, APPM_READY);
+
     APP_HANDLER(gap_disconnected, msgid, param, dest_id, src_id); // APP layer Callback
 
     // Restart Advertising
