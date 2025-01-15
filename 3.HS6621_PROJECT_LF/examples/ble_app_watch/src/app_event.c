@@ -93,6 +93,7 @@ void app_gap_disconnected_handler(struct gapc_disconnect_ind const *param)
     log_debug("----------%s@%d,conhdl:%d,reason:0x%02x\n", __func__, __LINE__,param->conhdl, param->reason);
     app_ble_admin_check(NULL);//清空管理员权限标志
     app_ble_rssi_opt(APP_BLE_RSSI_STOP,NULL);//停止定时获取rssi
+    app_ble_adv_updata_check();//检查是否要修改连接参数，用于配对模式结束后恢复广播间隔
 }
 
 /**

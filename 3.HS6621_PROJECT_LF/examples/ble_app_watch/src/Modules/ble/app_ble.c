@@ -39,6 +39,7 @@ static void app_ble_sys_info_reset(void);
 static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param);
 static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param);
 static void app_ble_adv_updata_timer_handler(co_timer_t *timer, void *param);
+static void app_ble_adv_updata(uint16_t *pAdvInter);
 
 static int app_ble_update_param(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
 static int app_ble_processRxRec(ke_msg_id_t const msgid,void const *param,ke_task_id_t const dest_id,ke_task_id_t const src_id);
@@ -71,8 +72,8 @@ KE_MSG_HANDLER_TAB(app_ble)
 	{APP_BLE_OPT_SN_SET,        (ke_msg_func_t)app_ble_processTxRec},
 	{APP_BLE_OPT_BOND_ADD,      (ke_msg_func_t)app_ble_processTxRec},
 	{APP_BLE_OPT_BOND_DEL,      (ke_msg_func_t)app_ble_processTxRec},
-	{APP_BLE_OPT_PARAM_SET,      (ke_msg_func_t)app_ble_processTxRec},
-	{APP_BLE_OPT_RSSI_SEND,      (ke_msg_func_t)app_ble_processTxRec}
+	{APP_BLE_OPT_PARAM_SET,     (ke_msg_func_t)app_ble_processTxRec},
+	{APP_BLE_OPT_RSSI_SEND,     (ke_msg_func_t)app_ble_processTxRec}
 };
 /**< Defines the place holder for the states of all the task instances. */
 static ke_state_t app_ble_task_state[APP_BLE_IDX_MAX];//任务状态怎么用？
@@ -405,6 +406,44 @@ void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData)
 }
 
 /**************************************************************
+*函数功能描述 ：检查是否需要更新广播参数，如果要，就并执行
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+void app_ble_adv_updata_check(void)
+{
+	if((0 != g_stAppBleCtl.u16BondAdvInter)//广播间隔已经被修改
+		&& (0 == g_stAppBleCtl.u32Pincode))//并且此时已经不是配对模式
+	{
+		g_stAppBleCtl.u16BondAdvInter = 0;
+		app_ble_adv_updata(&g_stAppBleCtl.stAppBleSysInfo.AdvInterval);
+		log_debug("Resume adv interval\n");
+	}
+}
+
+
+/**************************************************************
+*函数功能描述 ：更新广播间隔操作，先删除广播，再启动100ms定时任务重新初始化/创建/启动广播
+*函数参数 ：pAdvInter，指向存储广播间隔的地址
+*函数返回值 ：
+*备注：
+**************************************************************/
+static void app_ble_adv_updata(uint16_t *pAdvInter)
+{
+	if(NULL != pAdvInter)
+	{
+		appm_adv_stop(1);//必须先当前广播包删除，才能修改广播包数据，0代表暂停此次广播，1代表删除此次广播
+		// co_delay_ms(500);//延时不行，状态流程没有切换完成，还是要定时再配置参数，然后start
+		// appm_advertising_init(APP_ADV_MODE_FAST,(uint32_t)g_stAppBleCtl.stAppBleSysInfo.AdvInterval);
+		// appm_adv_start();//启动广播
+		co_timer_set(&g_adv_updata_timer, 100, TIMER_ONE_SHOT//一定要延时足够的时间，等待当前广播包删除完毕，不然新的广播无法正常启动
+			, app_ble_adv_updata_timer_handler, (void *)pAdvInter);
+	}
+}
+
+
+/**************************************************************
 *函数功能描述 ：重置系统信息
 *函数参数 ：
 *函数返回值 ：
@@ -443,10 +482,10 @@ static void app_ble_sys_info_reset(void)
 **************************************************************/
 static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
 {
-	hal_wdt_feed();
     g_stAppBleCtl.u32Pincode = 0;//禁止配对
 	log_debug("pair bond check timerout,cancel pair\n");
-	appm_disconnect(0);//并断开连接
+
+	app_ble_adv_updata_check();//配对失败会断开连接，这里用于没有建立连接的情景
 }
 
 /**************************************************************
@@ -457,7 +496,6 @@ static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
 **************************************************************/
 static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param)
 {
-	hal_wdt_feed();
 	appm_get_rssi();
 }
 
@@ -469,8 +507,10 @@ static void app_ble_rssi_get_timer_handler(co_timer_t *timer, void *param)
 **************************************************************/
 static void app_ble_adv_updata_timer_handler(co_timer_t *timer, void *param)
 {
-	hal_wdt_feed();
-	appm_advertising_init();
+	if(NULL != param)
+	{
+		appm_advertising_init(APP_ADV_MODE_FAST,(uint32_t)(*((uint16_t *)param)));//修改广播参数
+	}
 	appm_adv_start();//启动广播
 }
 
@@ -485,7 +525,6 @@ static int app_ble_update_param(ke_msg_id_t const msgid,
 								ke_task_id_t const dest_id,
 								ke_task_id_t const src_id)
 {
-	hal_wdt_feed();
 	if(0 == g_stAppBleCtl.u16RssiGetPeriod)
 	{//连接参数没有更新再主动发起
 		struct gapc_conn_param st_conn_param = {(50)*5/6,(50)*5/6,0,(2000)/10};//50ms,50ms,0潜伏时间，2s,写死
@@ -509,7 +548,6 @@ static int app_ble_processRxRec(ke_msg_id_t const msgid,
 								ke_task_id_t const dest_id,
 								ke_task_id_t const src_id)
 {
-	hal_wdt_feed();
 	uint16_t u16Cmd = 0;
 	uint8_t  *pData = hal_uart_fm33lg_rx_buf_addr_get();
 	uint16_t u16Len = hal_uart_fm33lg_rx_buf_len_get();
@@ -540,7 +578,6 @@ static int app_ble_processRxRec(ke_msg_id_t const msgid,
 	
 	hal_uart_fm33lg_rx_buf_reset();
 
-	hal_wdt_feed();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -558,7 +595,6 @@ static int app_ble_processTxRec(ke_msg_id_t const msgid,
                                     ke_task_id_t const dest_id,
                                     ke_task_id_t const src_id)
 {
-	hal_wdt_feed();
 	// log_debug("App ble tx opt:%d\n",msgid);
 
 	for(uint8_t i = 0;i < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));i++)
@@ -573,7 +609,6 @@ static int app_ble_processTxRec(ke_msg_id_t const msgid,
         }
     }
 
-	hal_wdt_feed();
 	return (KE_MSG_CONSUMED);
 }
 
@@ -721,10 +756,14 @@ static void app_ble_cmdBleBondAddReq(void *pData)
 			g_stAppBleCtl.u32Pincode = (100000 + (co_rand_word()%900000));
 		}
 		
-		//定时60s检查配对是否成功
+		//定时检查配对是否成功
 		co_timer_set(&g_pair_check_timer, APP_BLE_PAIR_TIMEROUT, TIMER_ONE_SHOT
 					, app_ble_pair_check_timer_handler, NULL);
 		log_debug("Generate pincode:%d\n",g_stAppBleCtl.u32Pincode);
+
+		//修改广播间隔变为快速广播
+		g_stAppBleCtl.u16BondAdvInter = APP_ADV_BOND_INTERVAL;
+		app_ble_adv_updata(&g_stAppBleCtl.u16BondAdvInter);
 	}
 	else
 	{
@@ -884,9 +923,7 @@ static void app_ble_cmdBleParamSetReq(void *pData)
 	log_debug("Adv inter set:%d ms\n",g_stAppBleCtl.stAppBleSysInfo.AdvInterval*5/8);//0.625转换
 
 	//修改广播参数
-	appm_adv_stop(1);//必须先当前广播包删除，才能修改广播包数据，0代表暂停此次广播，1代表删除此次广播
-	co_timer_set(&g_adv_updata_timer, 1000, TIMER_ONE_SHOT//一定要延时足够的时间，等待当前广播包删除完毕，不然新的广播无法正常启动
-		, app_ble_adv_updata_timer_handler, NULL);
+	app_ble_adv_updata(&g_stAppBleCtl.stAppBleSysInfo.AdvInterval);
 
 	#if (APP_BLE_MSG_SWITCH)
 	//直接调用返回响应的api
@@ -942,7 +979,6 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
                                         ke_task_id_t const dest_id,
                                         ke_task_id_t const src_id)
 {
-	hal_wdt_feed();
     //log_debug("app_ble_debug_log_handle:%d %d %d\n",msgid,dest_id,src_id);
 
     uint8_t  *pData = hal_uart_log_rx_buf_addr_get();
@@ -1006,7 +1042,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			//清空ble绑定信息
 			app_sec_remove_bond();
 		}
-		else if(0 == strncmp("sleepOpt",(const char*)pData,8))
+		else if(0 == strncmp("sleepopt",(const char*)pData,8))
 		{//休眠操作
 			uint8_t u8Opt = pData[8] - 0x30;//0不删管理员,1删除所有
 			if(0 == u8Opt)
@@ -1038,7 +1074,7 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 				log_debug("rf power set:%d dB\n",u8Opt);
 			}
 		}
-		else if(0 == strncmp("advOpt",(const char*)pData,6))
+		else if(0 == strncmp("advopt",(const char*)pData,6))
 		{//广播操作
 			uint8_t u8Opt = pData[6] - 0x30;//0不删管理员,1删除所有
 			if(0 == u8Opt)
@@ -1050,6 +1086,10 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 				appm_adv_stop(0);
 			}
 			else if(2 == u8Opt)
+			{
+				appm_adv_stop(2);
+			}
+			else if(3 == u8Opt)
 			{//广播状态打印，参考枚举app_adv_state
 				log_debug("adv state:%d\n",appm_adv_get_state());
 			}
@@ -1058,11 +1098,11 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		{//断开连接
 			appm_disconnect(0);
 		}
-		else if(0 == strncmp("conUpParam",(const char*)pData,10))
+		else if(0 == strncmp("conupparam",(const char*)pData,10))
 		{//连接参数更新
     		ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 10);//100ms后主动发送连接参数更新请求
 		}
-		else if(0 == strncmp("bondPrint",(const char*)pData,9))
+		else if(0 == strncmp("bondprint",(const char*)pData,9))
 		{//打印所有有效配对信息
 			struct app_sec_conn_info_tag info;
 			nvds_tag_len_t length = sizeof(struct app_sec_conn_info_tag);
@@ -1126,9 +1166,16 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			app_ble_cmdBleBondDelReq((void *)&stParam);
 		}
 		else if(0 == strncmp("paramset",(const char*)pData,8))
-		{//参数配置指令，xx*100ms
-			uint16_t u16Value = ((uint16_t)(pData[8] - 0x30) * 10) + (uint16_t)(pData[9] - 0x30);
-			u16Value *= 100;//单位，100ms，例如传入paramset10就是广播间隔为1000ms = 1s
+		{//参数配置指令，xxx*10ms
+			uint16_t u16Value = ((uint16_t)(pData[8] - 0x30) * 100) + ((uint16_t)(pData[9] - 0x30) * 10) + (uint16_t)(pData[10] - 0x30);
+			if((u16Value == 0) || (u16Value > 999))
+			{
+				u16Value = 500;//默认值
+			}
+			else
+			{
+				u16Value *= 10;//单位，10ms，例如传入paramset010就是广播间隔为100ms
+			}
 
 			typedef struct
 			{
@@ -1152,7 +1199,6 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 	//清空接收缓存
 	hal_uart_log_rx_buf_reset();
 
-	hal_wdt_feed();
     return KE_MSG_CONSUMED;
 }
 

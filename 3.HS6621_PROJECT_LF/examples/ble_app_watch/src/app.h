@@ -98,6 +98,8 @@ void app_ancs_recv_msg_handler(struct ancsc_ntf_attr_ind const *param);
 /**
  * Advertising Parameters
  */
+#define APP_ADV_BOND_INTERVAL     0x0028//配对模式广播间隔，25ms
+
 #define APP_ADV_FAST_INTERVAL     0x0320//默认500ms 0x0028   /**< Fast advertising interval (in units of 0.625 ms. This value corresponds to 25 ms.). */
 #define APP_ADV_SLOW_INTERVAL     0x0C80   /**< Slow advertising interval (in units of 0.625 ms. This value corrsponds to 2 seconds). */
 
@@ -250,7 +252,7 @@ uint8_t appm_get_dev_name(uint8_t* name);
 
 void appm_get_rssi(void);
 
-void appm_advertising_init(void);
+void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval);
 
 //#endif //(BLE_APP_PRESENT)
 

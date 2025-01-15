@@ -600,7 +600,7 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
         } break;
 
         case (GAPC_PAIRING_FAILED):
-        {
+        {//配对失败不退出配对模式，配对成功或超时才退出
             //app_sec_send_security_req(0);
             log_debug("pairing failed reason=0x%x\n", param->data.reason);
             appm_disconnect(app_env.conidx);//断开连接

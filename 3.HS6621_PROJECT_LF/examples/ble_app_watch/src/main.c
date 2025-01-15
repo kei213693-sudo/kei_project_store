@@ -41,6 +41,7 @@
 
 #define APP_WAKEUP_TIMEOUT          (300)//休眠唤醒超时时间，ms
 
+static co_timer_t g_wdt_feed_timer;
 static co_timer_t g_wakeup_timer;
 
 #if(KEY_ENBLE)
@@ -48,6 +49,17 @@ static uint32_t pin_wakeup_mask = (BIT_MASK(PIN_KEY_1) | BIT_MASK(HAL_UART_LOG_R
 #else
 static uint32_t pin_wakeup_mask = (BIT_MASK(HAL_UART_LOG_RX_PIN) | BIT_MASK(HAL_UART_FM33LG_RX_PIN));
 #endif
+
+/**************************************************************
+*函数功能描述 ：定时喂狗
+*函数参数 ：
+*函数返回值 ：
+*备注：
+**************************************************************/
+static void app_wdt_feed_timer_handler(co_timer_t *timer, void *param)
+{
+	hal_wdt_feed();
+}
 
 /**************************************************************
 *函数功能描述 ：唤醒超时，强制休眠
@@ -84,13 +96,13 @@ static void app_lowpower_wakeup_handler(uint32_t pin_mask)
 
     if(0 != (pin_mask & BIT_MASK(HAL_UART_LOG_RX_PIN)))
     {
-        log_debug("uart log Wakeup\n");
+        //log_debug("uart log Wakeup\n");
         pmu_lowpower_prevent(PMU_LP_UART0);//先禁止休眠
     }
 
     if(0 != (pin_mask & BIT_MASK(HAL_UART_FM33LG_RX_PIN)))
     {
-        log_debug("uart fm33lg Wakeup\n");
+        //log_debug("uart fm33lg Wakeup\n");
         pmu_lowpower_prevent(PMU_LP_UART1);//先禁止休眠
     }
 
@@ -204,6 +216,9 @@ int main(void)
 
 	app_ble_init();//先初始化自定义任务
     appm_init();//再初始化ble参数和任务
+	
+	//专门使用一个timer任务喂狗
+	co_timer_set(&g_wdt_feed_timer, ((HAL_WDT_TIMEOUT / 3) * 1000), TIMER_REPEAT, app_wdt_feed_timer_handler, NULL);
 
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);

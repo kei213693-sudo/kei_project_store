@@ -101,6 +101,8 @@ typedef struct
     uint8_t  u8AdminFlag;//管理员标志
     uint8_t  u8RssiLen;//rssi接收长度
     uint16_t u16RssiGetPeriod;//获取rssi值的时间间隔，和连接间隔保持一致
+    uint16_t u16BondAdvInter;//绑定状态的快速广播间隔
+    uint8_t res[2];//预留
     int8_t g_i8RssiBuf[APP_BLE_RSSI_NUM];//存储rssi数值，用于过滤
 }app_ble_ctl_t;
 
@@ -119,6 +121,7 @@ extern void app_ble_admin_check(uint8_t *pMacAddr);//控制u8AdminFlag
 extern uint8_t app_ble_admin_get(void);
 extern uint8_t *app_ble_admin_mac_get(void);
 extern void app_ble_rssi_opt(APP_BLE_RSSI_E enOpt,void *pData);//控制u8RssiLen、g_i8RssiBuf、u16RssiGetPeriod
+extern void app_ble_adv_updata_check(void);
 
 
 #endif /* _APP_BLE_H_ */

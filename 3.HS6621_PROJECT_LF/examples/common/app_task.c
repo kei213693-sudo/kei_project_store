@@ -382,7 +382,7 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 extern void appm_pair_advdata_set(void);
                 appm_pair_advdata_set();
             #endif
-                appm_adv_start();
+                appm_adv_start();//初始化时调用启动广播
             }
         }
         break;
@@ -745,7 +745,7 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
     extern void appm_pair_advdata_set(void);
     appm_pair_advdata_set();
 #endif
-    appm_adv_start();
+    appm_adv_start();//断开连接后，重新启动广播
 
     return (KE_MSG_CONSUMED);
 }

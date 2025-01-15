@@ -203,15 +203,18 @@ static void appm_build_adv_data(uint16_t max_length, uint16_t *p_length, uint8_t
     ASSERT_ERR(rem_len >= max_length);
 }
 
-void appm_advertising_init(void)
+//eAdvMode广播模式，一般选direct或fast
+//interval，广播间隔
+void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
 {
+	//log_debug("Adv inter:%d ms\n",interval*5/8);//0.625转换
     //广播参数配置
     struct app_adv_modes_config_tag adv_config;
     adv_config.whitelist_enabled = false;
     adv_config.directed_enabled = false;
     adv_config.directed_timeout = APP_ADV_DIRECTED_TIMEOUT;
     adv_config.fast_enabled = true;
-    adv_config.fast_interval = (uint32_t)app_ble_adv_inter_get();//APP_ADV_FAST_INTERVAL;
+    adv_config.fast_interval = interval;//APP_ADV_FAST_INTERVAL;
     adv_config.fast_timeout = APP_ADV_FAST_TIMEOUT;
     adv_config.slow_enabled = false;
     adv_config.slow_interval = APP_ADV_SLOW_INTERVAL;
@@ -315,7 +318,7 @@ void appm_init(void)
     // Reset the stack
     appm_send_gapm_reset_cmd();
     // start adversting
-    appm_advertising_init();
+    appm_advertising_init(APP_ADV_MODE_FAST,(uint32_t)app_ble_adv_inter_get());
 }
 
 void appm_reg_svc_itf(void)

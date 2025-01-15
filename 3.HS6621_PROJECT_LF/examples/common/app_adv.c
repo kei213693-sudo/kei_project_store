@@ -238,7 +238,7 @@ static void appm_adv_stop_advertising(void)
     app_adv_env.op = GAPM_STOP_ACTIVITY;
 }
 
-
+//设置广播包参数
 static void appm_adv_set_adv_data_cmd(void)
 {
     //log_debug("%s@%d\n", __func__, __LINE__);
@@ -265,6 +265,7 @@ static void appm_adv_set_adv_data_cmd(void)
     app_adv_env.op = GAPM_SET_ADV_DATA;
 }
 
+//设置扫描包参数
 static void appm_adv_set_scan_rsp_data_cmd(void)
 {
     //log_debug("%s@%d\n", __func__, __LINE__);
@@ -329,7 +330,7 @@ static void appm_adv_create_advertising(void)
         #ifdef BLE_APP_ADV_TX_POWER
         p_cmd->adv_param.max_tx_pwr = BLE_APP_ADV_TX_POWER;
         #else
-        p_cmd->adv_param.max_tx_pwr = 0;
+        p_cmd->adv_param.max_tx_pwr = 0;//TODO 是否和rf_tx_power_set有冲突
         #endif
 
         if (app_adv_env.cur_mode == APP_ADV_MODE_DIRECTED) {
@@ -345,9 +346,10 @@ static void appm_adv_create_advertising(void)
             app_adv_env.cur_mode = APP_ADV_MODE_SLOW;
         }
         app_adv_env.next_mode = app_adv_env.cur_mode;
+
         switch(app_adv_env.cur_mode)
         {
-            case APP_ADV_MODE_DIRECTED:
+            case APP_ADV_MODE_DIRECTED://定向广播
                 /*
                  * If the peripheral is already bonded with a central device, use the direct advertising
                  * procedure (BD Address of the peer device is stored in NVDS.
@@ -393,7 +395,7 @@ static void appm_adv_create_advertising(void)
                 p_cmd->adv_param.prim_cfg.adv_intv_min = APP_ADV_DIRECT_INTERVAL;
                 p_cmd->adv_param.prim_cfg.adv_intv_max = APP_ADV_DIRECT_INTERVAL;
                 break;
-            case APP_ADV_MODE_FAST:
+            case APP_ADV_MODE_FAST://快速广播
                 p_cmd->adv_param.prim_cfg.adv_intv_min = app_adv_env.config.fast_interval;
                 p_cmd->adv_param.prim_cfg.adv_intv_max = app_adv_env.config.fast_interval;
                 break;
