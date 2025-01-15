@@ -71,15 +71,15 @@ extern "C"
 #else
 #include "autoconf_release_hs6621c_c1.h"
 #endif
-#elif defined(CONFIG_HS6621CC2_RELEASE)
-#if defined(CONFIG_BLE_ALLROLES)
-#include "autoconf_release_hs6621c_allroles_c2.h"
-#elif defined(CONFIG_BLE_SEC_CON)
-#include "autoconf_release_hs6621c_sc_c2.h"
-#else
-#include "autoconf_release_hs6621c_c2.h"
-#endif
 
+#elif defined(CONFIG_HS6621CC2_RELEASE)
+	#if defined(CONFIG_BLE_ALLROLES)
+		#include "autoconf_release_hs6621c_allroles_c2.h"
+	#elif defined(CONFIG_BLE_SEC_CON)
+		#include "autoconf_release_hs6621c_sc_c2.h"
+	#else
+		#include "autoconf_release_hs6621c_c2.h"
+	#endif
 // HS6621P
 #elif defined(CONFIG_HS6621P1_RELEASE)
 #include "autoconf_release_hs6621p_a1.h"

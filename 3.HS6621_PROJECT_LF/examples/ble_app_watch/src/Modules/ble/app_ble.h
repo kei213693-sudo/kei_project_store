@@ -115,6 +115,7 @@ extern int32_t app_ble_deinit(void);
 extern uint16_t app_ble_adv_inter_get(void);
 extern uint8_t *app_ble_sn_get(void);
 extern uint8_t *app_ble_mac_addr_get(void);
+extern uint8_t app_ble_no_pair_check(void);
 extern uint32_t app_ble_pair_check(void);//控制u32Pincode
 extern void app_ble_pair_succ_opt(uint8_t *pMacAddr);//控制u32Pincode，stAppBleSysInfo的adminMacAddr、pairNum
 extern void app_ble_admin_check(uint8_t *pMacAddr);//控制u8AdminFlag

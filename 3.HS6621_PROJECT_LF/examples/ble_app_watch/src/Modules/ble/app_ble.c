@@ -207,6 +207,23 @@ uint8_t *app_ble_mac_addr_get(void)
 }
 
 /**************************************************************
+*函数功能描述 ：是否配对检查
+*函数参数 ：
+*函数返回值 ：0要广播，1不广播
+*备注：
+**************************************************************/
+uint8_t app_ble_no_pair_check(void)
+{
+	uint8_t u8Ret = 0;
+	if((0 == g_stAppBleCtl.stAppBleSysInfo.pairNum)//没有配对角色
+		&& (0 == g_stAppBleCtl.u32Pincode))//并且此时已经不是配对模式
+	{
+		u8Ret = 1;
+	}
+	return u8Ret;
+}
+
+/**************************************************************
 *函数功能描述 ：判定当前建立连接的手机是否是管理员用户
 *函数参数 ：
 *函数返回值 ：配对码，如果为0就是禁止配对
@@ -485,7 +502,14 @@ static void app_ble_pair_check_timer_handler(co_timer_t *timer, void *param)
     g_stAppBleCtl.u32Pincode = 0;//禁止配对
 	log_debug("pair bond check timerout,cancel pair\n");
 
-	app_ble_adv_updata_check();//配对失败会断开连接，这里用于没有建立连接的情景
+	if(0 == app_ble_no_pair_check())
+	{//如果没有配对过，且不再配对模式了，不广播，接收到启动绑定指令后再广播
+		app_ble_adv_updata_check();//配对失败会断开连接，这里用于没有建立连接的情景
+	}
+	else
+	{
+		appm_adv_stop(1);
+	}
 }
 
 /**************************************************************

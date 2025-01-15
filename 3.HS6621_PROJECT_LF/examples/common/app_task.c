@@ -382,7 +382,10 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 extern void appm_pair_advdata_set(void);
                 appm_pair_advdata_set();
             #endif
-                appm_adv_start();//初始化时调用启动广播
+                if(0 == app_ble_no_pair_check())
+                {//如果没有配对过，且不再配对模式了，不广播，接收到启动绑定指令后再广播
+                    appm_adv_start();//上电初始化时调用
+                }
             }
         }
         break;
@@ -661,8 +664,11 @@ static int gapc_connection_req_ind_handler(ke_msg_id_t const msgid,
         extern void appm_pair_advdata_set(void);
         appm_pair_advdata_set();
     #endif
-        // No connection has been established, restart advertising
-        appm_adv_update_state(true);
+        if(0 == app_ble_no_pair_check())
+        {//如果没有配对过，不广播，接收到启动绑定指令后再广播
+            // No connection has been established, restart advertising
+            appm_adv_update_state(true);
+        }
     }
 
     return (KE_MSG_CONSUMED);
@@ -745,7 +751,10 @@ static int gapc_disconnect_ind_handler(ke_msg_id_t const msgid,
     extern void appm_pair_advdata_set(void);
     appm_pair_advdata_set();
 #endif
-    appm_adv_start();//断开连接后，重新启动广播
+    if(0 == app_ble_no_pair_check())
+    {//如果没有配对过，不广播，接收到启动绑定指令后再广播
+        appm_adv_start();//断开连接后，重新启动广播
+    }
 
     return (KE_MSG_CONSUMED);
 }
