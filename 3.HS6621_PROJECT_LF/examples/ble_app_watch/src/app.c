@@ -167,29 +167,26 @@ extern const struct prf_task_cbs* tspp_server_prf_itf_get(void);
  */
 static void appm_build_adv_data(uint16_t max_length, uint16_t *p_length, uint8_t *p_buf)
 {
-    // Set name
-    {
-        // Device name length
-        *p_buf = app_env.dev_name_len + 1;
-        // Device name flag (check if device name is complete or not)
-        *(p_buf + 1) = '\x09';
-        // Copy device name
-        memcpy(p_buf + 2, app_env.dev_name, app_env.dev_name_len);
-        // Update advertising data length
-        *p_length += (app_env.dev_name_len + 2);
-        p_buf += *p_length;
-    }
+    #if 1// Set name
+    *p_buf = app_env.dev_name_len + 1;// Device name length
+    // Device name flag (check if device name is complete or not)
+    *(p_buf + 1) = '\x09';
+    // Copy device name
+    memcpy(p_buf + 2, app_env.dev_name, app_env.dev_name_len);
+    // Update advertising data length
+    *p_length += (app_env.dev_name_len + 2);
+    p_buf += *p_length;
+    #endif
 
-    #if 0
-    // Set appearance
+    #if 0// Set appearance
     memcpy(p_buf, APP_ADV_DATA_APPEARANCE, APP_ADV_DATA_APPEARANCE_LEN);
     *p_length += APP_ADV_DATA_APPEARANCE_LEN;
     p_buf += *p_length;
     #endif
 
-    // Set list of UUIDs
+    #if 0// Set list of UUIDs
     memcpy(p_buf, APP_ADV_DATA_MANU, APP_ADV_DATA_MANU_LEN);
-    memcpy(&p_buf[4], &app_env.addr.addr[0], 6);
+    memcpy(&p_buf[4], &app_env.addr.addr[0], 6);//插入mac addr
     for(int i=0; i<3; ++i)
     {
         char tmp = p_buf[4+i];
@@ -198,6 +195,13 @@ static void appm_build_adv_data(uint16_t max_length, uint16_t *p_length, uint8_t
     }
     *p_length += APP_ADV_DATA_MANU_LEN;
     p_buf += *p_length;
+    #endif
+
+    #if 1// Set HID Server
+    memcpy(p_buf, APP_SCNRSP_DATA, APP_SCNRSP_DATA_LEN);
+    *p_length += APP_SCNRSP_DATA_LEN;
+    p_buf += *p_length;
+    #endif
 
     // Sanity check
     ASSERT_ERR(rem_len >= max_length);
@@ -221,6 +225,7 @@ void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
     adv_config.slow_timeout = APP_ADV_SLOW_TIMEOUT;
     appm_adv_init(NULL, &adv_config);
 
+/*
     //广播包数据组包
     uint8_t default_adv_data[ADV_DATA_LEN - 3];
     uint16_t adv_len = 0;
@@ -231,6 +236,12 @@ void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
     uint8_t res_data[APP_ADV_MAX_LEN];
     memcpy(res_data, APP_SCNRSP_DATA, APP_SCNRSP_DATA_LEN);
     appm_adv_set_res_data(res_data, APP_SCNRSP_DATA_LEN);
+    */
+
+    uint8_t default_adv_data[ADV_DATA_LEN - 3];
+    uint16_t adv_len = 0;
+    appm_build_adv_data(ADV_DATA_LEN - 3, &adv_len, (uint8_t*)default_adv_data);
+    appm_adv_set_res_data((uint8_t*)default_adv_data, adv_len);
 }
 
 static void appm_send_gapm_reset_cmd(void)
