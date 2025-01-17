@@ -325,15 +325,17 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
         #if (BLE_APP_WHITE_LIST || BLE_APP_PRIVACY)
         case (GAPM_SET_DEV_CONFIG):
         {
-        #if (BLE_APP_WHITE_LIST)
+            #if (BLE_APP_WHITE_LIST)
             appm_whl_cmp_evt_handler(msgid, param, dest_id, src_id);
-        #endif
-        #if (BLE_APP_PRIVACY)
+            #endif
+            
+            #if (BLE_APP_PRIVACY)
             appm_privacy_cmp_evt_handler(msgid, param, dest_id, src_id);
-        #endif
-        #if(BLE_APP_SEC)
-        app_gap_set_loc_irk();
-        #endif
+            #endif
+            
+            #if(BLE_APP_SEC)
+            app_gap_set_loc_irk();
+            #endif
         }
         break;
         #else
@@ -352,6 +354,7 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
         }
         break;
         #endif
+
         #if (BLE_APP_WHITE_LIST)
         case (GAPM_GET_WLIST_SIZE):
         case (GAPM_SET_WL):
@@ -1060,7 +1063,7 @@ static int gapm_list_size_ind_handler(ke_msg_id_t const msgid, struct gapm_list_
                                         ke_task_id_t const dest_id, ke_task_id_t const src_id)
 {
     #if (BLE_APP_WHITE_LIST)
-    //log_debug("white list size=%d\n", param->size);
+    log_debug("white list get size=%d\n", param->size);
     if (param->operation == GAPM_GET_WLIST_SIZE) {
         appm_whl_set_size(param->size);
     }

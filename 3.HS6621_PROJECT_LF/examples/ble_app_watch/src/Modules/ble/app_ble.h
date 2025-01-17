@@ -35,6 +35,8 @@
 
 #define APP_BLE_MSG_SWITCH      (0)//传递信息的方式，1直接内部调用，0重新传给ble task让其再处理
 
+#define APP_DEBUG_SWITCH        (0)//调试指令
+
 /*******************************结构体、枚举******************************/
 typedef enum
 {//app自定义操作
@@ -97,7 +99,7 @@ typedef struct
 typedef struct
 {
     app_ble_sys_info_t stAppBleSysInfo;
-    uint32_t u32Pincode;//配对码
+    uint32_t u32Pincode;//配对码，决定是否进入配对模式
     uint8_t  u8AdminFlag;//管理员标志
     uint8_t  u8RssiLen;//rssi接收长度
     uint16_t u16RssiGetPeriod;//获取rssi值的时间间隔，和连接间隔保持一致

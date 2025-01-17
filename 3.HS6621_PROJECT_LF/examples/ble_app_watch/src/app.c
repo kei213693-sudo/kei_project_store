@@ -214,7 +214,11 @@ void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
 	//log_debug("Adv inter:%d ms\n",interval*5/8);//0.625转换
     //广播参数配置
     struct app_adv_modes_config_tag adv_config;
-    adv_config.whitelist_enabled = false;
+	#if (BLE_APP_WHITE_LIST)
+    adv_config.whitelist_enabled = true;
+	#else
+	adv_config.whitelist_enabled = false;
+	#endif
     adv_config.directed_enabled = false;
     adv_config.directed_timeout = APP_ADV_DIRECTED_TIMEOUT;
     adv_config.fast_enabled = true;
@@ -225,7 +229,8 @@ void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
     adv_config.slow_timeout = APP_ADV_SLOW_TIMEOUT;
     appm_adv_init(NULL, &adv_config);
 
-/*
+    #if 0
+    //名称放在广播包
     //广播包数据组包
     uint8_t default_adv_data[ADV_DATA_LEN - 3];
     uint16_t adv_len = 0;
@@ -236,12 +241,13 @@ void appm_advertising_init(enum app_adv_mode_type eAdvMode,uint32_t interval)
     uint8_t res_data[APP_ADV_MAX_LEN];
     memcpy(res_data, APP_SCNRSP_DATA, APP_SCNRSP_DATA_LEN);
     appm_adv_set_res_data(res_data, APP_SCNRSP_DATA_LEN);
-    */
-
+    #else
+    //名称放在扫描响应包
     uint8_t default_adv_data[ADV_DATA_LEN - 3];
     uint16_t adv_len = 0;
     appm_build_adv_data(ADV_DATA_LEN - 3, &adv_len, (uint8_t*)default_adv_data);
     appm_adv_set_res_data((uint8_t*)default_adv_data, adv_len);
+    #endif
 }
 
 static void appm_send_gapm_reset_cmd(void)

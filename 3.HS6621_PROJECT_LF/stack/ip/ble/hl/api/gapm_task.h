@@ -626,11 +626,11 @@ enum gapm_adv_disc_mode
     /// Mode in non-discoverable
     GAPM_ADV_MODE_NON_DISC = 0,
     /// Mode in general discoverable
-    GAPM_ADV_MODE_GEN_DISC,
+    GAPM_ADV_MODE_GEN_DISC,//通用可发现
     /// Mode in limited discoverable
-    GAPM_ADV_MODE_LIM_DISC,
+    GAPM_ADV_MODE_LIM_DISC,//优先可发现，启动广播后固定时间，例如180s后自动停止
     /// Broadcast mode without presence of AD_TYPE_FLAG in advertising data
-    GAPM_ADV_MODE_BEACON,
+    GAPM_ADV_MODE_BEACON,//广播包中没有flag参数
     GAPM_ADV_MODE_MAX,
 };
 
@@ -751,20 +751,29 @@ enum gapm_phy_type
 /// Advertising properties configurations for legacy advertising
 enum gapm_leg_adv_prop
 {
+    //1、非定向、不可扫描、不可连接
     /// Non connectable non scannable advertising
     GAPM_ADV_PROP_NON_CONN_NON_SCAN_MASK  = 0x0000,
     /// Broadcast non scannable advertising - Discovery mode must be Non Discoverable
     GAPM_ADV_PROP_BROADCAST_NON_SCAN_MASK = GAPM_ADV_PROP_NON_CONN_NON_SCAN_MASK,
+
+    //2、非定向、可扫描、不可连接
     /// Non connectable scannable advertising
     GAPM_ADV_PROP_NON_CONN_SCAN_MASK      = GAPM_ADV_PROP_SCANNABLE_BIT,
     /// Broadcast non scannable advertising - Discovery mode must be Non Discoverable
     GAPM_ADV_PROP_BROADCAST_SCAN_MASK     = GAPM_ADV_PROP_NON_CONN_SCAN_MASK,
+
+    //3、非定向、可扫描、可连接
     /// Undirected connectable advertising
     GAPM_ADV_PROP_UNDIR_CONN_MASK         = GAPM_ADV_PROP_CONNECTABLE_BIT | GAPM_ADV_PROP_SCANNABLE_BIT,
+
+    //4、非定向、可扫描、可连接
     /// Directed connectable advertising
     GAPM_ADV_PROP_DIR_CONN_MASK           = GAPM_ADV_PROP_DIRECTED_BIT | GAPM_ADV_PROP_CONNECTABLE_BIT,
     /// Directed connectable with Low Duty Cycle
     GAPM_ADV_PROP_DIR_CONN_LDC_MASK       = GAPM_ADV_PROP_DIR_CONN_MASK,
+
+    
     /// Directed connectable with High Duty Cycle
     GAPM_ADV_PROP_DIR_CONN_HDC_MASK       = GAPM_ADV_PROP_DIR_CONN_MASK | GAPM_ADV_PROP_HDC_BIT,
 };
@@ -1908,8 +1917,8 @@ struct gapm_list_set_pal_cmd
 };
 
 /*@TRACE
- @trc_ref gapm_operation
- gapm_list_set_cmd = gapm_u_list_set
+@trc_ref gapm_operation
+gapm_list_set_cmd = gapm_u_list_set
 */
 union gapm_u_list_set
 {

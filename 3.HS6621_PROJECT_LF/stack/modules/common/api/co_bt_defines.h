@@ -2215,13 +2215,13 @@ enum adv_channel_map
 enum adv_filter_policy
 {
     ///Allow both scan and connection requests from anyone
-    ADV_ALLOW_SCAN_ANY_CON_ANY    = 0x00,
+    ADV_ALLOW_SCAN_ANY_CON_ANY    = 0x00,//所有设备可以连接和扫描
     ///Allow both scan req from White List devices only and connection req from anyone
-    ADV_ALLOW_SCAN_WLST_CON_ANY,
+    ADV_ALLOW_SCAN_WLST_CON_ANY,//1，白名单设备只能扫描，无法连接；其他设备可以连接
     ///Allow both scan req from anyone and connection req from White List devices only
-    ADV_ALLOW_SCAN_ANY_CON_WLST,
+    ADV_ALLOW_SCAN_ANY_CON_WLST,//2，其他设备只能扫描，无法连接；白名单设备可以连接
     ///Allow scan and connection requests from White List devices only
-    ADV_ALLOW_SCAN_WLST_CON_WLST,
+    ADV_ALLOW_SCAN_WLST_CON_WLST,//3，只有白名单设备可以连接和扫描
 };
 
 ///Advertising enables

@@ -12,6 +12,7 @@
 ".\_build\app_hid.o"
 ".\_build\app_ancsc.o"
 ".\_build\app_onmicro_dfu.o"
+".\_build\app_whl.o"
 ".\_build\simple_server.o"
 ".\_build\simple_server_task.o"
 ".\_build\wechat.o"

@@ -56,14 +56,7 @@
  * TYPE DEFINITIONS
  ****************************************************************************************
  */
-/// the white list env information
-struct app_whl_env_tag
-{
-	/// enable or disable white list function
-    uint8_t enable;
-	/// the white list size
-    uint8_t size;
-};
+
 /*
  * ENUMERATIONS
  ****************************************************************************************
@@ -73,7 +66,7 @@ struct app_whl_env_tag
  * LOCAL VARIABLES DEFINITIONS
  ****************************************************************************************
  */
-static struct app_whl_env_tag app_whl_env;
+struct app_whl_env_tag app_whl_env;
 /*
  * GLOBAL VARIABLE DEFINITIONS
  ****************************************************************************************
@@ -89,6 +82,7 @@ static struct app_whl_env_tag app_whl_env;
  * @brief clear white list
  ****************************************************************************************
  */
+//重新上电时要重写一遍白名单？
 uint8_t appm_whl_set_list(void)
 {
     uint8_t bond_num = 0; // when nvds modify, the bond num get from nvds
@@ -191,29 +185,68 @@ void appm_whl_clear(void)
     cmd->operation = GAPM_SET_WL;
     cmd->size = 0;
     ke_msg_send(cmd);
+
+    struct gapm_list_set_ral_cmd* cmd1 = KE_MSG_ALLOC_DYN(GAPM_LIST_SET_CMD,
+            TASK_GAPM, TASK_APP,
+            gapm_list_set_ral_cmd, sizeof(struct gap_ral_dev_info));
+    cmd1->operation = GAPM_SET_RAL;
+    cmd1->size = 0;
+    ke_msg_send(cmd1);
 }
 
 /**
  ****************************************************************************************
- * @brief add device to white list
+ * @brief add device to white list for public
  * @param[in] device: struct gap_bdaddr
  ****************************************************************************************
  */
 void appm_whl_add_device(uint8_t* device)
 {
-    if (app_whl_env.enable == 0)
+    if((app_whl_env.enable == 0) || (NULL == device))
     {
         return;
     }
 
-    log_debug("whl %02x:%02x:%02x:%02x:%02x:%02x,%d\n", device[0], device[1],device[2],device[3],device[4],device[5],device[6]);
+    log_debug("whl public addr:%02x:%02x:%02x:%02x:%02x:%02x,%d\n", device[0], device[1],device[2],device[3],device[4],device[5],device[6]);
+    
+    //对端设备是公共地址情况直接将addr当作参数存入白名单列表
     struct gapm_list_set_wl_cmd* cmd = KE_MSG_ALLOC_DYN(GAPM_LIST_SET_CMD,
             TASK_GAPM, TASK_APP,
             gapm_list_set_wl_cmd, sizeof(struct gap_bdaddr));
     cmd->operation = GAPM_SET_WL;
-
     cmd->size = 1;
     memcpy(&cmd->wl_info[0], (struct gap_bdaddr*)device, sizeof(struct gap_bdaddr));
+
+    ke_msg_send(cmd);
+}
+
+/**
+ ****************************************************************************************
+ * @brief add device to white list for ral addr
+ * @param[in] 
+ ****************************************************************************************
+ */
+void appm_whl_add_device_ral(struct gap_ral_dev_info *pStData)
+{
+    if((app_whl_env.enable == 0) || (NULL == pStData))
+    {
+        return;
+    }
+
+    log_debug("priv_mode:%d",priv_mode);
+    log_debug_array_ex("whl ral addr", pStData->addr.addr.addr,GAP_BD_ADDR_LEN);
+    log_debug_array_ex("whl peer irk", pStData->peer_irk,GAP_KEY_LEN);
+    log_debug_array_ex("whl local irk", pStData->local_irk,GAP_KEY_LEN);
+
+    //对端设备是可解析随机地址情况
+    struct gapm_list_set_ral_cmd* cmd = KE_MSG_ALLOC_DYN(GAPM_LIST_SET_CMD,
+            TASK_GAPM, TASK_APP,
+            gapm_list_set_ral_cmd, sizeof(struct gap_ral_dev_info));
+    cmd->operation = GAPM_SET_RAL;
+    cmd->size = 1;//本次要添加的条数
+
+    memcpy(&cmd->ral_info[0],pStData,sizeof(struct gap_ral_dev_info));
+
     ke_msg_send(cmd);
 }
 
@@ -246,6 +279,8 @@ int appm_whl_cmp_evt_handler(ke_msg_id_t const msgid,
                                 ke_task_id_t const dest_id,
                                 ke_task_id_t const src_id)
 {
+    log_debug("appm_whl_cmp_evt_handler:%d\n",param->operation);
+
     if (app_whl_env.enable == 0)
     {
         return (KE_MSG_NO_FREE);
@@ -257,6 +292,7 @@ int appm_whl_cmp_evt_handler(ke_msg_id_t const msgid,
                 appm_whl_get_size();
             }
             break;
+
         case (GAPM_GET_WLIST_SIZE):
             {
                 if(appm_whl_set_list() == 0)
@@ -265,14 +301,17 @@ int appm_whl_cmp_evt_handler(ke_msg_id_t const msgid,
                 }
             }
             break;
+
         case (GAPM_SET_WL):
             {
                 return (KE_MSG_NO_FREE);
             }
-            break;
+            //break;//不会执行，屏蔽消除告警
+			
         default:
             break;
     }
+	
     return (KE_MSG_CONSUMED);
 }
 #endif

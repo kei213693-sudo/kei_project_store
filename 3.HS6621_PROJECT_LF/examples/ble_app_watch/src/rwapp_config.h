@@ -84,9 +84,9 @@ extern "C"
 #define BLE_APP_ONMICRO_DFU   1
 
 /// enable/disable white list
-#define BLE_APP_WHITE_LIST   0//失能白名单机制
+#define BLE_APP_WHITE_LIST   0//白名单机制
 /// enable/disable privacy
-#define BLE_APP_PRIVACY      0//失能随机地址
+#define BLE_APP_PRIVACY      0//随机地址
 
 #if BLE_APP_ONMICRO_DFU
 /// the dfu task id

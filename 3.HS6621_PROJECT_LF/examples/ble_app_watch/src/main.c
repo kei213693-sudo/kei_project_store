@@ -98,12 +98,14 @@ static void app_lowpower_wakeup_handler(uint32_t pin_mask)
     {
         //log_debug("uart log Wakeup\n");
         pmu_lowpower_prevent(PMU_LP_UART0);//先禁止休眠
+		hal_uart_log_rx_buf_reset();
     }
 
     if(0 != (pin_mask & BIT_MASK(HAL_UART_FM33LG_RX_PIN)))
     {
         //log_debug("uart fm33lg Wakeup\n");
         pmu_lowpower_prevent(PMU_LP_UART1);//先禁止休眠
+		hal_uart_fm33lg_rx_buf_reset();
     }
 
     co_timer_set(&g_wakeup_timer, APP_WAKEUP_TIMEOUT//等待接收指令的时间长度，暂定300ms
@@ -223,7 +225,7 @@ int main(void)
     log_debug("Version data:%s\n",APP_VERSION_DATE);
 	log_debug("Version time:%s\n",APP_VERSION_TIME);
     log_debug("reboot reason:%d\n", pmu_reboot_reason());//0掉电，1深度睡眠唤醒，2ota升级重启，3主动重启，4看门狗重启，5低电压重启
-	log_debug("APP start\n");//从上电到这里最少要花1000ms
+	log_debug("APP start---------------------------\n");//从上电到这里最少要花1000ms
     if(0 != pmu_reboot_reason())
     {
         sysdump();

@@ -32,6 +32,7 @@
 #include "app_adv.h"
 #include "bsp_filter.h"
 #include "gapc_task.h"
+#include "app_whl.h"
 
 
 /*******************************内部函数的声明*******************************/
@@ -209,7 +210,8 @@ uint8_t *app_ble_mac_addr_get(void)
 /**************************************************************
 *函数功能描述 ：是否配对检查
 *函数参数 ：
-*函数返回值 ：0要广播，1不广播
+*函数返回值 ：0要广播，
+				1不广播
 *备注：
 **************************************************************/
 uint8_t app_ble_no_pair_check(void)
@@ -1049,25 +1051,6 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 		{//强制重启
 			pmu_force_reboot();
 		}
-		// else if(0 == strncmp("task",(const char*)pData,4))
-		// {//task state测试，暂时看不出什么成效
-		// 	extern ke_state_t appm_state[APP_IDX_MAX];//状态列表
-
-		// 	uint8_t u8Opt = pData[4] - 0x30;
-		// 	ke_state_set(APP_BLE_TASK_ID, u8Opt);
-		// 	ke_state_set(TASK_APP, (u8Opt + 1));
-		// 	log_debug("state:%d %d\n",ke_state_get(APP_BLE_TASK_ID),ke_state_get(TASK_APP));
-		// 	log_debug_array_ex("appm_state hex", appm_state, APP_IDX_MAX);
-		// 	log_debug_array_ex("app_ble_task_state hex", app_ble_task_state, APP_BLE_IDX_MAX);
-		// }
-		else if(0 == strncmp("coreuidget",(const char*)pData,10))
-		{//获取芯片uid
-			//demo板子：41 50 32 57 30 31 38 17 00 AB DC 16 56 06 00 78
-			//开发板1： 42 50 30 48 37 37 34 01 00 80 BD 17 56 06 00 78
-			uint8_t uid[16];
-			sfs_read_uid_ex(uid,sizeof(uid));
-			log_debug_array_ex("core uid", uid,sizeof(uid));
-		}
 		else if(0 == strncmp("sysget",(const char*)pData,6))
 		{//打印所有信息
 			log_debug("***************************************************\n");
@@ -1087,6 +1070,9 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			
 			log_debug_array_ex("app_env", &app_env, sizeof(app_env));
 			log_debug_array_ex("app_sec_env", &app_sec_env, sizeof(app_sec_env));
+			#if (BLE_APP_WHITE_LIST)
+			log_debug_array_ex("app_whl_env", &app_whl_env, sizeof(app_whl_env));
+			#endif
 			log_debug("***************************************************\n");
 		}
 		else if(0 == strncmp("sysreset",(const char*)pData,8))
@@ -1097,6 +1083,34 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			memset((uint8_t *)&g_stAppBleCtl.u32Pincode,0x00,sizeof(app_ble_ctl_t) - sizeof(app_ble_sys_info_t));
 			//清空ble绑定信息
 			app_sec_remove_bond();
+			#if (BLE_APP_WHITE_LIST)
+			//清空ble白名单信息
+			appm_whl_clear();
+			#endif
+		}
+		else if(0 == strncmp("bledis",(const char*)pData,6))
+		{//断开连接
+			appm_disconnect(0);
+		}
+		#if(APP_DEBUG_SWITCH)
+		// else if(0 == strncmp("task",(const char*)pData,4))
+		// {//task state测试，暂时看不出什么成效
+		// 	extern ke_state_t appm_state[APP_IDX_MAX];//状态列表
+
+		// 	uint8_t u8Opt = pData[4] - 0x30;
+		// 	ke_state_set(APP_BLE_TASK_ID, u8Opt);
+		// 	ke_state_set(TASK_APP, (u8Opt + 1));
+		// 	log_debug("state:%d %d\n",ke_state_get(APP_BLE_TASK_ID),ke_state_get(TASK_APP));
+		// 	log_debug_array_ex("appm_state hex", appm_state, APP_IDX_MAX);
+		// 	log_debug_array_ex("app_ble_task_state hex", app_ble_task_state, APP_BLE_IDX_MAX);
+		// }
+		else if(0 == strncmp("coreuidget",(const char*)pData,10))
+		{//获取芯片uid
+			//demo板子：41 50 32 57 30 31 38 17 00 AB DC 16 56 06 00 78
+			//开发板1： 42 50 30 48 37 37 34 01 00 80 BD 17 56 06 00 78
+			uint8_t uid[16];
+			sfs_read_uid_ex(uid,sizeof(uid));
+			log_debug_array_ex("core uid", uid,sizeof(uid));
 		}
 		else if(0 == strncmp("sleepopt",(const char*)pData,8))
 		{//休眠操作
@@ -1150,10 +1164,6 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 				log_debug("adv state:%d\n",appm_adv_get_state());
 			}
 		}
-		else if(0 == strncmp("bledis",(const char*)pData,6))
-		{//断开连接
-			appm_disconnect(0);
-		}
 		else if(0 == strncmp("conupparam",(const char*)pData,10))
 		{//连接参数更新
     		ke_timer_set(APP_BLE_OPT_UPDATA_PARAM, APP_BLE_TASK_ID, 10);//100ms后主动发送连接参数更新请求
@@ -1173,6 +1183,16 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 					{
 						log_debug("------Bond device info[%d],type:%d,mac addr",index,info.id_addr.addr_type);
 						log_debug_array_ex("", info.id_addr.addr.addr, GAP_BD_ADDR_LEN);
+
+						log_debug_array_ex("lrk", info.ltk.ltk.key, GAP_KEY_LEN);
+						log_debug("ediv:%d,key_size:%d\n",info.ltk.ediv,info.ltk.key_size);
+						log_debug_array_ex("randnb", info.ltk.randnb.nb, GAP_RAND_NB_LEN);
+
+						log_debug_array_ex("irk", info.irk.irk.key, GAP_KEY_LEN);
+						log_debug("addr type:%d,addr",info.irk.addr.addr_type);
+						log_debug_array_ex("",info.irk.addr.addr.addr, GAP_BD_ADDR_LEN);
+
+						log_debug_array_ex("csrk", &info.csrk, sizeof(struct app_sec_conn_info_tag));
 					}
 				}
 			}
@@ -1191,7 +1211,25 @@ static int app_ble_debug_log_handle(ke_msg_id_t const msgid,
 			mbr_get_free_area(&addr,&len);
 			log_debug("flash free area Addr:0x%x,%d bytes\n",addr,len);
 		}
-		
+		#if (BLE_APP_WHITE_LIST)
+		else if(0 == strncmp("whl",(const char*)pData,3))
+		{//白名单测试
+			uint8_t u8Opt = pData[3] - 0x30;//0不删管理员,1删除所有
+			if(0 == u8Opt)
+			{//设置列表最大值
+				appm_whl_set_size(APP_BLE_PAIR_NUM_MAX);
+			}
+			else if(2 == u8Opt)
+			{//获取列表最大值
+				appm_whl_get_size();
+			}
+			else if(1 == u8Opt)
+			{//清空白名单列表
+				appm_whl_clear();
+			}
+		}
+		#endif
+		#endif
 		//*********************************************以下是用log cmd测试mcu cmd的指令码
 		else if(0 == strncmp("snset",(const char*)pData,5))
 		{//设置sn码，后面加9位字符

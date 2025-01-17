@@ -46,12 +46,14 @@
 #include "nvds.h"                    // NVDS Definitions
 #endif //(NVDS_SUPPORT)
 
+#include "app_ble.h"
+
 /*
  * DEFINES
  ****************************************************************************************
  */
 /// Advertising channel map - 37, 38, 39
-#define APP_ADV_CHMAP           (0x07)
+#define APP_ADV_CHMAP           (ADV_ALL_CHNLS_EN)
 /// advertising direct interval
 #define APP_ADV_DIRECT_INTERVAL 0x20 //must be > 0x20
 /*
@@ -306,27 +308,44 @@ static void appm_adv_create_advertising(void)
         p_cmd->operation = GAPM_CREATE_ADV_ACTIVITY;
 
         // Fill the allocated kernel message
-        p_cmd->own_addr_type = GAPM_STATIC_ADDR;
-#if (BLE_APP_PRIVACY)
-        if (app_sec_get_bond_status()) {
+        p_cmd->own_addr_type = GAPM_STATIC_ADDR;//本地addr类型
+        #if (BLE_APP_PRIVACY)
+        if (app_sec_get_bond_status()) 
+        {
             p_cmd->own_addr_type = GAPM_GEN_RSLV_ADDR;
         }
-#endif
-        p_cmd->adv_param.type = GAPM_ADV_TYPE_LEGACY;
+        #endif
+
+        p_cmd->adv_param.type = GAPM_ADV_TYPE_LEGACY;//传统广播 or 扩展广播
+        //广播类型配置
+        //只设置GAPM_ADV_PROP_CONNECTABLE_BIT无法启动广播，也就是必须要连接必须要扫描
         p_cmd->adv_param.prop = GAPM_ADV_PROP_UNDIR_CONN_MASK;
-        p_cmd->adv_param.filter_pol = ADV_ALLOW_SCAN_ANY_CON_ANY;
-#if (BLE_APP_WHITE_LIST)
-        if (app_sec_get_bond_status()) {
-            p_cmd->adv_param.filter_pol = ADV_ALLOW_SCAN_WLST_CON_WLST;
+        //log_debug("Adv prop:%d\n",p_cmd->adv_param.prop);
+        //广播过滤参数
+        #if (BLE_APP_WHITE_LIST)
+        //if (app_sec_get_bond_status()) 
+        if(0 == app_ble_pair_check())
+        {//非配对模式
+            p_cmd->adv_param.filter_pol = ADV_ALLOW_SCAN_WLST_CON_WLST;//3,只允许白名单设备扫描和连接
         }
-#endif
-        p_cmd->adv_param.prim_cfg.chnl_map = APP_ADV_CHMAP;
-        p_cmd->adv_param.prim_cfg.phy = GAP_PHY_LE_1MBPS;
+        else
+        {//配对模式
+            p_cmd->adv_param.filter_pol = ADV_ALLOW_SCAN_ANY_CON_ANY;//1，白名单设备只能扫描，无法连接；其他设备可以连接
+        }
+        log_debug("Adv filter:%d\n",p_cmd->adv_param.filter_pol);
+        #else
+        p_cmd->adv_param.filter_pol = ADV_ALLOW_SCAN_ANY_CON_ANY;
+        #endif
+
+        p_cmd->adv_param.prim_cfg.chnl_map = APP_ADV_CHMAP;//广播信道选择
+        p_cmd->adv_param.prim_cfg.phy = GAP_PHY_LE_1MBPS;//广播PHY
+        
         #ifdef BLE_APP_ADV_DISC_MODE
         p_cmd->adv_param.disc_mode = BLE_APP_ADV_DISC_MODE;
         #else
         p_cmd->adv_param.disc_mode = GAPM_ADV_MODE_GEN_DISC;
         #endif
+
         #ifdef BLE_APP_ADV_TX_POWER
         p_cmd->adv_param.max_tx_pwr = BLE_APP_ADV_TX_POWER;
         #else
@@ -370,11 +389,11 @@ static void appm_adv_create_advertising(void)
                     {
                         if (nvds_get(NVDS_TAG_BLE_LINK_KEY_LAST-index, &length, (uint8_t *)&info) == NVDS_OK)
                         {
-#if 0//(BLE_APP_PRIVACY)
+                            #if 0//(BLE_APP_PRIVACY)
                             memcpy(&peer_bd_addr, &info.irk.addr, sizeof(struct gap_bdaddr));
-#else
+                            #else
                             memcpy(&peer_bd_addr, &info.id_addr, sizeof(struct gap_bdaddr));
-#endif
+                            #endif
                             break;
                         }
                     }
@@ -640,9 +659,11 @@ void appm_adv_init(struct app_adv_data_tag* adv_data, struct app_adv_modes_confi
         #if (BLE_APP_WHITE_LIST)
         appm_whl_init(app_adv_env.config.whitelist_enabled);
         #endif
+
         #if (BLE_APP_PRIVACY)
         appm_privacy_init(1);
         #endif
+        
         if (config->fast_interval == 0)
         {
             app_adv_env.config.fast_enabled = false;

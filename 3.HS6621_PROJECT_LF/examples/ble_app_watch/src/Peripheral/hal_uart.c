@@ -58,6 +58,7 @@ static void hal_uart_log_rx_callback(uint8_t data)
         co_timer_del(&g_uart_log_timer);//先取消定时器任务
 		co_timer_set(&g_uart_log_timer, HAL_UART_LOG_RX_IRQ_TIMEOUT
                     , TIMER_ONE_SHOT, hal_uart_log_timer_handler, NULL);//再启动
+		
         if(!(PMU_LP_UART0 & pmu_lowpower_prevent_status()))//判定没被置位就置位
         //if(g_stUartFm33lgCtl.rxLen == 1)
         {

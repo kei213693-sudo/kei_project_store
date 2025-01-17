@@ -65,11 +65,19 @@
  * TYPE DEFINITIONS
  ****************************************************************************************
  */
-
+/// the white list env information
+struct app_whl_env_tag
+{
+	/// enable or disable white list function
+    uint8_t enable;
+	/// the white list size
+    uint8_t size;
+};
 /*
  * GLOBAL VARIABLE DECLARATION
  ****************************************************************************************
  */
+extern struct app_whl_env_tag app_whl_env;
 
 
 /*
@@ -91,6 +99,9 @@ void appm_whl_init(uint8_t enable);
  ****************************************************************************************
  */
 void appm_whl_add_device(uint8_t* device);
+
+void appm_whl_add_device_ral(struct gap_ral_dev_info *pStData);
+
 /**
  ****************************************************************************************
  * @brief set white list size
@@ -98,6 +109,9 @@ void appm_whl_add_device(uint8_t* device);
  ****************************************************************************************
  */
 void appm_whl_set_size(uint8_t size);
+
+void appm_whl_get_size(void);
+
 /**
  ****************************************************************************************
  * @brief clear white list

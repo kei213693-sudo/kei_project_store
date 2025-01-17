@@ -555,9 +555,24 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
             #if (BLE_APP_AM0)
             app_am0_send_audio_init(KE_IDX_GET(src_id));
             #endif //(BLE_APP_AM0)
+
             #if (BLE_APP_WHITE_LIST==1 && BLE_APP_PRIVACY == 0)
-            appm_whl_add_device((uint8_t *)gapc_get_bdaddr(0, SMPC_INFO_PEER));
+            // log_debug("peer addr type1:%d\n",app_sec_env.info[conidx].id_addr.addr_type);
+            // if(0 == app_sec_env.info[conidx].id_addr.addr_type)
+            // {//对端设备时可解析随机地址
+            //     struct gap_ral_dev_info stRalInfo;
+            //     memcpy(&stRalInfo.addr, &param->data.irk.addr, sizeof(struct gap_bdaddr));
+            //     stRalInfo.priv_mode = 1;
+            //     memcpy(stRalInfo.peer_irk, param->data.irk.irk.key, GAP_KEY_LEN);
+            //     memcpy(stRalInfo.local_irk, app_env.loc_irk, GAP_KEY_LEN);
+            //     appm_whl_add_device_ral(&stRalInfo);
+            // }
+            // else
+            // {//对端设备是公共地址，获取对端公共地址
+            //     appm_whl_add_device((uint8_t *)gapc_get_bdaddr(0, SMPC_INFO_PEER));//配对成功，将addr放入白名单中
+            // }
             #endif
+
             #if (BLE_APP_HID)
             // Enable HID Service
             app_hid_enable_prf(KE_IDX_GET(src_id));
@@ -586,9 +601,24 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
 #endif // (NVDS_SUPPORT)
             //log_debug_array_ex("irk ", (uint8_t *)&param->data.irk, NVDS_LEN_PEER_IRK);
             //log_debug_array_ex("local irk ", app_env.loc_irk, KEY_LEN);
-#if (BLE_APP_WHITE_LIST)
-            appm_whl_add_device((uint8_t *)&param->data.irk.addr);
-#endif
+
+            #if (BLE_APP_WHITE_LIST)
+            //param->data.irk.addr.addr_type无效，要参考gapc_connection_req_ind_handler回调传入的addr_type
+            if(0 == app_sec_env.info[conidx].id_addr.addr_type)
+            {//对端设备时可解析随机地址
+                struct gap_ral_dev_info stRalInfo;
+                memcpy(&stRalInfo.addr, &param->data.irk.addr, sizeof(struct gap_bdaddr));
+                stRalInfo.priv_mode = 1;
+                memcpy(stRalInfo.peer_irk, param->data.irk.irk.key, GAP_KEY_LEN);
+                memcpy(stRalInfo.local_irk, app_env.loc_irk, GAP_KEY_LEN);
+                appm_whl_add_device_ral(&stRalInfo);
+            }
+            else
+            {//对端设备是公共地址
+                appm_whl_add_device((uint8_t *)&param->data.irk.addr);
+            }
+            #endif
+
 #if (BLE_APP_PRIVACY)
             struct gap_ral_dev_info device;
             memcpy(&device.addr, &param->data.irk.addr, sizeof(struct gap_bdaddr));
@@ -597,6 +627,7 @@ static int gapc_bond_ind_handler(ke_msg_id_t const msgid,
             memcpy(device.local_irk, app_env.loc_irk, GAP_KEY_LEN);
             appm_privacy_add_device((uint8_t*)&device);
 #endif
+
         } break;
 
         case (GAPC_PAIRING_FAILED):
