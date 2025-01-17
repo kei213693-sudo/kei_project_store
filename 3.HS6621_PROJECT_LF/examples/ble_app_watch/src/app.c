@@ -293,8 +293,10 @@ void appm_init(void)
     // if (nvds_get(NVDS_TAG_BD_ADDRESS, &len, &app_env.addr.addr[0]) != NVDS_OK)
     #endif //(NVDS_SUPPORT)
     {
-        memcpy(&app_env.addr.addr[0], app_ble_mac_addr_get(), 6);
-        log_debug_array_ex("Mac Addr", app_env.addr.addr, 6);
+        memcpy(&app_env.addr.addr[0], app_ble_mac_addr_get(), BD_ADDR_LEN);
+        log_debug_array_ex("Mac Addr", &app_env.addr.addr[0], BD_ADDR_LEN);
+        // memcpy((void *)&co_default_bdaddr, app_ble_mac_addr_get(), BD_ADDR_LEN);//不能赋值，不然卡死
+        // log_debug_array_ex("Mac Addr", &co_default_bdaddr, BD_ADDR_LEN);
     }
 
     /*------------------------------------------------------
@@ -450,6 +452,7 @@ void appm_get_rssi(void)
     // Send the message
     ke_msg_send(cmd);
 }
+
 
 #endif //(BLE_APP_PRESENT)
 

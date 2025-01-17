@@ -291,10 +291,6 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 // Enable Slave Preferred Connection Parameters present
                 cmd->att_cfg = GAPM_MASK_ATT_SLV_PREF_CON_PAR_EN;
                 #endif //(BLE_APP_HID)
-
-                // Host privacy disabled by default
-                cmd->privacy_cfg = 0;//GAPM_PRIV_CFG_PRIV_ADDR_BIT;//地址类型
-                memcpy(cmd->addr.addr, &app_env.addr.addr[0], 6);//配置地址参数
                 
                 #if ((NVDS_SUPPORT) && (BLE_APP_SEC))
                 if ((app_sec_get_bond_status()==true) &&//已经绑定过最少一个设备
@@ -310,6 +306,9 @@ static int gapm_cmp_evt_handler(ke_msg_id_t const msgid,
                 #if (BLE_APP_PRIVACY)
                 cmd->privacy_cfg |= GAPM_PRIV_CFG_PRIV_EN_BIT;//配置为随机地址
                 cmd->renew_dur = 0x0384;//更改随机地址的时间
+                #else
+                cmd->privacy_cfg = GAPM_PRIV_CFG_PRIV_ADDR_BIT;;//静态随机地址参数
+                memcpy(cmd->addr.addr, &app_env.addr.addr[0], 6);//配置静态随机地址参数
                 #endif
                 // Send message
                 ke_msg_send(cmd);
