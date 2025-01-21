@@ -42,6 +42,7 @@
 ".\_build\hal_uart.o"
 ".\_build\hal_wdt.o"
 ".\_build\hal_flash.o"
+".\_build\hal_timer.o"
 ".\_build\bsp_protocol.o"
 ".\_build\crc32_1.o"
 ".\_build\bsp_filter.o"

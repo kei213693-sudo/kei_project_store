@@ -7,18 +7,24 @@
 
 /*******************************内部函数的声明*******************************/
 static void hal_uart_log_rx_callback(uint8_t data);
+#if (!HAL_UART_TIME_TYPE)
 static void hal_uart_log_timer_handler(co_timer_t *timer, void *param);
+#endif
 
 static void hal_uart_fm33lg_rx_callback(uint8_t data);
-static void hal_uart_fm33lg_timer_handler(co_timer_t *timer, void *param);
 static void hal_uart_fm33lg_tx_callback(void);
+#if (!HAL_UART_TIME_TYPE)
+static void hal_uart_fm33lg_timer_handler(co_timer_t *timer, void *param);
+#endif
 
 /*******************************内部变量定义*******************************/
 static hal_uart_log_ctl_t g_stUartLogCtl = {0};
 static hal_uart_fm33lg_ctl_t g_stUartFm33lgCtl = {0};
 
+#if (!HAL_UART_TIME_TYPE)
 static co_timer_t g_uart_log_timer;
 static co_timer_t g_uart_fm33lg_timer;
+#endif
 
 /*******************************全局变量定义*******************************/
 /*******************************实际函数的实现*******************************/
@@ -48,6 +54,8 @@ static void hal_uart_log_rx_callback(uint8_t data)
 {
 	if(0 == g_stUartLogCtl.finsh)
 	{
+		//g_stUartLogCtl.irqCount = 0;//每接收一次清空一次计数标志
+
 		g_stUartLogCtl.rxBuf[g_stUartLogCtl.rxLen] = data;
 		g_stUartLogCtl.rxLen++;
 		if(g_stUartLogCtl.rxLen >= HAL_UART_LOG_LEN)
@@ -55,6 +63,12 @@ static void hal_uart_log_rx_callback(uint8_t data)
 			g_stUartLogCtl.rxLen = 0;
 		}
 
+		#if HAL_UART_TIME_TYPE
+        if(g_stUartLogCtl.rxLen == 1)
+        {
+            tim_start(HAL_TIMER_TYPE_UART_LOG);
+        }
+		#else
         co_timer_del(&g_uart_log_timer);//先取消定时器任务
 		co_timer_set(&g_uart_log_timer, HAL_UART_LOG_RX_IRQ_TIMEOUT
                     , TIMER_ONE_SHOT, hal_uart_log_timer_handler, NULL);//再启动
@@ -64,9 +78,36 @@ static void hal_uart_log_rx_callback(uint8_t data)
         {
             pmu_lowpower_prevent(PMU_LP_UART0);//避免进入休眠
         }
+		#endif
     }
 }
 
+#if HAL_UART_TIME_TYPE
+/**************************************************************
+*函数功能描述 ：rx irq检查操作，判断是否存在接收完成
+*函数参数 ：
+*函数返回值 ：
+*备注：TIM中断中调用
+**************************************************************/
+void hal_uart_log_RxIrqCheck(void)
+{
+    if((0 != g_stUartLogCtl.rxLen) && (1 != g_stUartLogCtl.finsh))
+    {
+        //g_stUartLogCtl.irqCount++;
+        //if(g_stUartLogCtl.irqCount >= HAL_UART_LOG_RX_IRQ_TIMEOUT)
+        {//1ms
+            //g_stUartLogCtl.irqCount = 0;
+            g_stUartLogCtl.finsh = 1;
+			ke_timer_set(APP_BLE_OPT_DEBUGLOG, APP_BLE_TASK_ID, 0);//让log task去处理uart数据,此时src_id就是0xff
+            tim_stop(HAL_TIMER_TYPE_UART_LOG);
+            if(PMU_LP_UART0 & pmu_lowpower_prevent_status())
+            {//处理完毕，允许休眠
+                pmu_lowpower_allow(PMU_LP_UART0);
+            }
+        }
+    }
+}
+#else
 /**************************************************************
 *函数功能描述 ：rx irq检查操作，判断是否存在接收完成
 *函数参数 ：
@@ -82,6 +123,7 @@ static void hal_uart_log_timer_handler(co_timer_t *timer, void *param)
         pmu_lowpower_allow(PMU_LP_UART0);
     }
 }
+#endif
 
 //获取rxBuf地址
 uint8_t *hal_uart_log_rx_buf_addr_get(void)
@@ -112,6 +154,7 @@ void hal_uart_log_rx_buf_reset(void)
 {
 	g_stUartLogCtl.finsh = 0;
 	g_stUartLogCtl.rxLen = 0;
+	g_stUartLogCtl.irqCount = 0;
 	memset(g_stUartLogCtl.rxBuf,0,HAL_UART_LOG_LEN);
 }
 
@@ -149,6 +192,12 @@ static void hal_uart_fm33lg_rx_callback(uint8_t data)
 			g_stUartFm33lgCtl.rxLen = 0;
 		}
 
+        #if HAL_UART_TIME_TYPE
+        if(g_stUartFm33lgCtl.rxLen == 1)
+        {
+            tim_start(HAL_TIMER_TYPE_UART_FM33L);
+        }
+		#else
         co_timer_del(&g_uart_fm33lg_timer);//先取消定时器任务
 		co_timer_set(&g_uart_fm33lg_timer, HAL_UART_FM33LG_RX_IRQ_TIMEOUT
                     , TIMER_ONE_SHOT, hal_uart_fm33lg_timer_handler, NULL);//再启动
@@ -157,9 +206,36 @@ static void hal_uart_fm33lg_rx_callback(uint8_t data)
         {//不要每次都调用，该函数会失能中断
             pmu_lowpower_prevent(PMU_LP_UART1);//避免进入休眠
         }
+        #endif
 	}
 }
 
+#if HAL_UART_TIME_TYPE
+/**************************************************************
+*函数功能描述 ：rx irq检查操作，判断是否存在接收完成
+*函数参数 ：
+*函数返回值 ：
+*备注：TIM中断中调用
+**************************************************************/
+void hal_uart_fm33lg_RxIrqCheck(void)
+{
+    if((0 != g_stUartFm33lgCtl.rxLen) && (1 != g_stUartFm33lgCtl.finsh))
+    {
+        //g_stUartFm33lgCtl.irqCount++;
+        //if(g_stUartFm33lgCtl.irqCount >= HAL_UART_FM33LG_RX_IRQ_TIMEOUT)
+        {//5ms
+            //g_stUartFm33lgCtl.irqCount = 0;
+            g_stUartFm33lgCtl.finsh = 1;
+			ke_timer_set(APP_BLE_OPT_MCU_RX, APP_BLE_TASK_ID, 0);//让log task去处理uart数据
+            tim_stop(HAL_TIMER_TYPE_UART_FM33L);
+            if(PMU_LP_UART1 & pmu_lowpower_prevent_status())
+            {//处理完毕，允许休眠
+                pmu_lowpower_allow(PMU_LP_UART1);
+            }
+        }
+    }
+}
+#else
 /**************************************************************
 *函数功能描述 ：rx irq检查操作，判断是否存在接收完成
 *函数参数 ：
@@ -175,6 +251,8 @@ static void hal_uart_fm33lg_timer_handler(co_timer_t *timer, void *param)
         pmu_lowpower_allow(PMU_LP_UART1);
     }
 }
+#endif
+
 
 //获取rxBuf地址
 uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void)
@@ -205,6 +283,7 @@ void hal_uart_fm33lg_rx_buf_reset(void)
 {
 	g_stUartFm33lgCtl.finsh = 0;
 	g_stUartFm33lgCtl.rxLen = 0;
+	g_stUartFm33lgCtl.irqCount = 0;
 	memset(g_stUartFm33lgCtl.rxBuf,0,HAL_UART_FM33LG_LEN);
 }
 

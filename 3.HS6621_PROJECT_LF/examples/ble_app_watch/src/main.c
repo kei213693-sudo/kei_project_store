@@ -28,6 +28,7 @@
 #include "sysdump.h"
 #include "app.h"
 
+#include "hal_timer.h"
 #include "hal_uart.h"
 #include "hal_flash.h"
 #include "hal_wdt.h"
@@ -143,6 +144,7 @@ static void peripheral_init(void)
     gpio_set_interrupt_callback(gpio_handler);//通用gpio中断回调函数
     #endif
 
+	hal_timer_init();//定时中断工作会阻碍休眠，不用
     hal_uart_log_init();
     hal_uart_fm33lg_init();
     hal_flash_init();

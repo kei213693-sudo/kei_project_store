@@ -2,6 +2,7 @@
 #define  _HAL_UART_H_
 /*******************************头文件*******************************/
 #include <stdint.h>
+#include "hal_timer.h"
 
 /*******************************宏定义*******************************/
 //log调试日志串口
@@ -20,6 +21,8 @@
 #define HAL_UART_FM33LG_LEN    	        (128)//tx+rx最大数据长度，确保 >= PROTOCOL_BUFF_SIZE
 #define HAL_UART_FM33LG_RX_IRQ_TIMEOUT  (5)//rx irq超时时间，3ms
 #define HAL_UART_FM33LG_DMA             (0)//1启动DMA模式
+
+#define HAL_UART_TIME_TYPE              (1)//1用外设timer，0用ble stack的定时任务
 
 /*******************************结构体、枚举等******************************/
 typedef struct
@@ -46,12 +49,18 @@ typedef struct
 
 /*******************************全局函数的声明*******************************/
 void hal_uart_log_init(void);
+#if (HAL_UART_TIME_TYPE)
+void hal_uart_log_RxIrqCheck(void);
+#endif
 uint8_t *hal_uart_log_rx_buf_addr_get(void);
 uint16_t hal_uart_log_rx_buf_len_get(void);
 void hal_uart_log_rx_buf_reset(void);
 
 
 void hal_uart_fm33lg_init(void);
+#if (HAL_UART_TIME_TYPE)
+void hal_uart_fm33lg_RxIrqCheck(void);
+#endif
 uint8_t *hal_uart_fm33lg_rx_buf_addr_get(void);
 uint8_t hal_uart_fm33lg_rx_buf_len_get(void);
 void hal_uart_fm33lg_rx_buf_reset(void);

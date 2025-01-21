@@ -35,7 +35,7 @@
 
 #define APP_BLE_MSG_SWITCH      (0)//传递信息的方式，1直接内部调用，0重新传给ble task让其再处理
 
-#define APP_DEBUG_SWITCH        (0)//调试指令
+#define APP_DEBUG_SWITCH        (1)//调试指令
 
 /*******************************结构体、枚举******************************/
 typedef enum
