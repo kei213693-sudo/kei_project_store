@@ -11,7 +11,7 @@
 #define HAL_UART_LOG_RX_PIN             6
 #define HAL_UART_LOG_BAUDRATE           115200
 #define HAL_UART_LOG_LEN    	        (32)
-#define HAL_UART_LOG_RX_IRQ_TIMEOUT     (3)//rx irq超时时间，5ms		//115200传输一个bytes需要8/115200 = 69.4us的时间，所以定时1ms没有数据传来就判定一次数据传输完成
+#define HAL_UART_LOG_RX_IRQ_TIMEOUT     (3)//rx irq超时时间，5ms		//115200传输一个bytes需要(8 + 1)/115200 = 69.4us的时间，所以定时1ms没有数据传来就判定一次数据传输完成
 
 //MCU通信串口
 #define HAL_UART_FM33LG_TYPE            HS_UART1//uart1支持DMA、16深度FIFO，uart0都不支持

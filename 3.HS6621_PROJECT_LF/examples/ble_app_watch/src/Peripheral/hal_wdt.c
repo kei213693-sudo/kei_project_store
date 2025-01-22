@@ -3,8 +3,14 @@
 #include "peripheral.h"
 
 /*******************************内部函数的声明*******************************/
+#if (HAL_WDT_TIMEOUT)
+static void app_wdt_feed_timer_handler(co_timer_t *timer, void *param);
+#endif
 
 /*******************************内部变量定义*******************************/
+#if (HAL_WDT_TIMEOUT)
+static co_timer_t g_wdt_feed_timer;
+#endif
 
 /*******************************全局变量定义*******************************/
 /*******************************实际函数的实现*******************************/
@@ -18,6 +24,11 @@
 void hal_wdt_init(void)
 {
     wdt_enable(HAL_WDT_TIMEOUT);
+	
+	#if (HAL_WDT_TIMEOUT)
+	//看门狗启动的话，专门使用一个timer任务喂狗
+	co_timer_set(&g_wdt_feed_timer, ((HAL_WDT_TIMEOUT / 3) * 1000), TIMER_REPEAT, app_wdt_feed_timer_handler, NULL);
+	#endif
 }
 
 /**************************************************************
@@ -29,6 +40,10 @@ void hal_wdt_init(void)
 void hal_wdt_deinit(void)
 {
     wdt_enable(0);
+	
+	#if (HAL_WDT_TIMEOUT)
+	co_timer_del(&g_wdt_feed_timer);
+	#endif
 }
 
 /**************************************************************
@@ -41,4 +56,17 @@ void hal_wdt_feed(void)
 {
     wdt_keepalive();
 }
+
+#if (HAL_WDT_TIMEOUT)
+/**************************************************************
+*函数功能描述 ：定时喂狗
+*函数参数 ：
+*函数返回值 ：
+*备注：如果初始化为0，但是有调用喂狗，就会导致看门狗重新启动
+**************************************************************/
+static void app_wdt_feed_timer_handler(co_timer_t *timer, void *param)
+{
+	hal_wdt_feed();
+}
+#endif
 

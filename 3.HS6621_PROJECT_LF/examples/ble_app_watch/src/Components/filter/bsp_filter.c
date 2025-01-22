@@ -49,11 +49,11 @@ int8_t bsp_filter_low_pass_moving_average(int8_t *pDataIn, int8_t *pDataOut, uin
             {
                 if((j >= 0) && (j < i32Len))
                 {//假设u32WindowSize为3
-                //out[0] = (in[0])/1
-                //out[1] = (in[1] + in[0])/2
-                //out[2] = (in[2] + in[1] + in[0])/3
-                //out[3] = (in[3] + in[2] + in[1])/3
-                //out[i] = (in[i] + in[i-1] + in[i-2])/3
+					//out[0] = (in[0])/1
+					//out[1] = (in[1] + in[0])/2
+					//out[2] = (in[2] + in[1] + in[0])/3
+					//out[3] = (in[3] + in[2] + in[1])/3
+					//out[i] = (in[i] + in[i-1] + in[i-2])/3
                     i32Count++;//累加值计数
                     i32Sum += (int32_t)(*(pDataIn + j));
                 }
