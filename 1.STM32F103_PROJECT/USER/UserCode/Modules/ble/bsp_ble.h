@@ -2,7 +2,6 @@
  * bsp_ble.h
  *
  *  Created on: 2023年6月19日
- *      Author: F704011834_
  *	  Abstract: ble驱动模块，实现ble底层驱动接口
  */
 #ifndef _BSP_BLE_H_

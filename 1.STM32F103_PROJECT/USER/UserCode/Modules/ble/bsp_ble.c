@@ -2,7 +2,6 @@
  * bsp_ble.c
  *
  *  Created on: 2023年6月19日
- *      Author: F704011834_
  *	  Abstract: ble驱动模块，实现ble底层驱动接口；
                 这些接口需要根据不同的ble环境重新编写，特别是ble模组和ble芯片差别较大，要多多注意
  */

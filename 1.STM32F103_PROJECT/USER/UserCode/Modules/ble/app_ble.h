@@ -2,7 +2,6 @@
  * app_ble.h
  *
  *  Created on: 2023年6月19日
- *      Author: F704011834_
  *	  Abstract: ble模块，实现ble应用逻辑
  */
 #ifndef _APP_BLE_H_

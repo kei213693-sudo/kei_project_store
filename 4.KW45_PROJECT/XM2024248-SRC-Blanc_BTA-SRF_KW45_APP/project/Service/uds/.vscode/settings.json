@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "e2para.h": "c",
+        "typedefs.h": "c",
+        "uds_pub.h": "c",
+        "dfp.h": "c",
+        "dsm_dtcbitctl.h": "c"
+    }
+}

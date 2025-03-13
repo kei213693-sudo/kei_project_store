@@ -74,10 +74,10 @@ static void app_log_task(void* pvParameters)
     {
         if(1 == ulTaskNotifyTake(pdTRUE,portMAX_DELAY))//相当于二值信号量接收
         {
-            uint8_t *pData = uart_rx_irq_get_buf_addr();
+            uint8_t *pData = uart_rx_buf_addr_get();
             if(NULL != pData)
             {
-                uint16_t u16Len = uart_rx_irq_get_len();
+                uint16_t u16Len = uart_rx_buf_len_get();
                 bsp_log_cmd_handle(pData,u16Len);//处理各类串口指令
                 uart_rx_irq_restart();
             }

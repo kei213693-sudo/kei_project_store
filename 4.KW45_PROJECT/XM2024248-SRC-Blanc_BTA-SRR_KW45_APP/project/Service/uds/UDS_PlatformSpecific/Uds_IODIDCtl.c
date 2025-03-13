@@ -1,0 +1,103 @@
+/*
+ * Copyright (c) 2021，上海福宇龙汽车科技有限公司
+ * All rights reserved.
+ * 文件名称: Uds_IODIDCtl.c
+ * 摘要:
+ * 当前版本: V1.0.0 Chenjianbo
+ * Date: 2024-05-30
+ * 历史版本: Vx.x.x，编写者/修改者，修改时间，修改内容（重大发布时，总结重点变更内容）
+ */
+
+/* This file was automatically generated */
+#include "uds_confpriv.h"
+#include "Uds_IODIDCtl.h"
+#include "uds_priv.h"
+
+extern uint8_t rub_DidDataOperBuf[UDS_C_DID_DATA_OPERATE_BUF_SIZE];
+
+#ifdef UDS_ENABLE_INPUTOUTPUTCONTROLBYIDENTIFIER
+    /* 0x2F InputOutputControlByIdentifier
+       Note : this table is located in the rom, can not be changed dynamically
+              if a new did which is need to control InputOutput , then must update this table
+              before build the whole of project again;
+
+     */
+
+UDS_CONFIG_TYPE UDS_IoCtrlIdxTblRcd_t Uds_g_IoCtrlByDidIdxTable[] = {
+/*      dataIdentifier             DataSize            AccessAttribute      StartIndex,  NumOfEntry    */
+/*0u */{0x1001                    ,0x1                 ,0x1044               ,0x0         ,0x1},
+/*1u */{0x1002                    ,0x1                 ,0x1044               ,0x1         ,0x1},
+/*2u */{0x1005                    ,0x2                 ,0x1044               ,0x2         ,0x1},
+/*3u */{0x1010                    ,0x1                 ,0x1044               ,0x3         ,0x1},
+/*4u */{0x1020                    ,0x1                 ,0x1044               ,0x4         ,0x1},
+/*This Line indicate the end of the data table , do not delete */
+/*FFu*/{UDS_C_DID_END_OF_TBL_FFFF, 0x00u,              0x0000u,             0x00u,       0x00u     }
+}; /* end of table : UDS_CONFIG_TYPE UDS_IoCtrlIdxTblRcd_t Uds_g_IoCtrlByDidIdxTable[]  */
+
+
+
+UDS_CONFIG_TYPE UDS_IoCtrlMngtDatTblRcd_t Uds_g_IoCtrlByDidMngtTable[UDS_2FIOCTRL_MNGT_RCD_MAX_NUM] = {
+/*      pDataBuf                    IoCtrlBitmapMask               pFuncPtrToIoCtrl               */
+/* 0u */{rub_DidDataOperBuf,        0xFF,                          UDS_ITF_IMP_IOCTRL_1001_FF},
+/* 1u */{rub_DidDataOperBuf,        0xFF,                          UDS_ITF_IMP_IOCTRL_1002_FF},
+/* 2u */{rub_DidDataOperBuf,        0xFF,                          UDS_ITF_IMP_IOCTRL_1005_FF},
+/* 3u */{rub_DidDataOperBuf,        0xFF,                          UDS_ITF_IMP_IOCTRL_1010_FF},
+/* 4u */{rub_DidDataOperBuf,        0xFF,                          UDS_ITF_IMP_IOCTRL_1020_FF},
+}; /* end of table : UDS_CONFIG_TYPE UDS_IoCtrlMngtDatTblRcd_t Uds_g_IoCtrlByDidMngtTable[]  */
+
+
+
+uint8_t rub_IODidDataBuf[6];
+uint8_t rub_IODidDataOperBuf[5];
+
+
+
+
+
+
+
+
+
+/****High pressure solenoid valve 减压器电磁阀****/
+void UDS_ITF_IMP_IOCTRL_1001_FF(uint8_t i_IoCtrlOption, uint8_t *iP_IoCtrlParam)
+{
+    rub_IODidDataOperBuf[0] = i_IoCtrlOption;
+    rub_IODidDataBuf[0] = iP_IoCtrlParam[0];
+}
+
+
+/****Air conditioning compressor relay 空调压缩机继电器****/
+void UDS_ITF_IMP_IOCTRL_1002_FF(uint8_t i_IoCtrlOption, uint8_t *iP_IoCtrlParam)
+{
+    rub_IODidDataOperBuf[1] = i_IoCtrlOption;
+    rub_IODidDataBuf[1] = iP_IoCtrlParam[0];
+}
+
+
+/****Throttle Actuator 节气门执行器****/
+void UDS_ITF_IMP_IOCTRL_1005_FF(uint8_t i_IoCtrlOption, uint8_t *iP_IoCtrlParam)
+{
+    rub_IODidDataOperBuf[2] = i_IoCtrlOption;
+    rub_IODidDataBuf[2] = iP_IoCtrlParam[0];
+    rub_IODidDataBuf[3] = iP_IoCtrlParam[1];
+}
+
+
+/****MIL灯控制****/
+void UDS_ITF_IMP_IOCTRL_1010_FF(uint8_t i_IoCtrlOption, uint8_t *iP_IoCtrlParam)
+{
+    rub_IODidDataOperBuf[3] = i_IoCtrlOption;
+    rub_IODidDataBuf[4] = iP_IoCtrlParam[0];
+}
+
+
+/****Idle speed Control 怠速转速控制****/
+void UDS_ITF_IMP_IOCTRL_1020_FF(uint8_t i_IoCtrlOption, uint8_t *iP_IoCtrlParam)
+{
+    rub_IODidDataOperBuf[4] = i_IoCtrlOption;
+    rub_IODidDataBuf[5] = iP_IoCtrlParam[0];
+}
+
+
+
+#endif // end of #ifdef UDS_ENABLE_INPUTOUTPUTCONTROLBYIDENTIFIER

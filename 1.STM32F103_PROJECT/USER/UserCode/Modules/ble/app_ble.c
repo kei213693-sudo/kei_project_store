@@ -2,7 +2,6 @@
  * app_ble.c
  *
  *  Created on: 2023年6月19日
- *      Author: F704011834_
  *	  Abstract: ble模块，实现ble应用逻辑
  */
 /*******************************头文件*******************************/
@@ -300,10 +299,9 @@ static void app_ble_processStackRec(APP_BLE_QUEUE_REC_T stRec)
 **************************************************************/
 static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T stRec)
 {
-    uint8_t u8Count = 0;
     bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble tx opt:%d",stRec.enOpt);
 
-    for(u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
+    for(uint8_t u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
     {
         if(stRec.enOpt == g_stBleCmdFucTab[u8Count].enOpt)
         {//判断事件类型
@@ -324,10 +322,9 @@ static void app_ble_processTxRec(APP_BLE_QUEUE_REC_T stRec)
 **************************************************************/
 static void app_ble_processRxRec(APP_BLE_QUEUE_REC_T stRec)
 {
-    uint8_t u8Count = 0;
     bsp_log_print(BSP_LOG_MODULE_BLE,BSP_LOG_TYPE_INFO,"App ble rx opt:%d",stRec.enOpt);
 
-    for(u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
+    for(uint8_t u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
     {
         if(stRec.enOpt == g_stBleCmdFucTab[u8Count].enOpt)
         {//判断事件类型
@@ -389,7 +386,7 @@ void app_ble_protocol_rx(uint8_t *pBuf,uint32_t len)
         for(u8Count = 0;u8Count < (sizeof(g_stBleCmdFucTab)/sizeof(g_stBleCmdFucTab[0]));u8Count++)
         {
             if(u16Cmd == g_stBleCmdFucTab[u8Count].enCmdRx)
-            {//判断指令码，获取opt码，然后/将buf中的净荷数据提取出来传入队列中
+            {//判断指令码，获取opt码，然后将buf中的净荷数据提取出来传入队列中
                 app_ble_opt_put(APP_BLE_RX_EVENTS,g_stBleCmdFucTab[u8Count].enOpt,(uint8_t *)g_stBleProCtl.rx.buf
                             ,(g_stBleProCtl.rx.head->len - sizeof(protocol_head_t) - sizeof(protocol_tail_t)));
             }

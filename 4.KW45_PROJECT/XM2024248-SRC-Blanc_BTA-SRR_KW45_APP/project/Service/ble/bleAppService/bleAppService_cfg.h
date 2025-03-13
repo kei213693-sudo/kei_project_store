@@ -1,0 +1,13 @@
+/*
+ * bleAppService_cfg.h
+ *
+ *  Created on: 2024年8月28日
+ *      Author: F704012276_
+ */
+
+#ifndef BLE_BLEAPPSERVICE_BLEAPPSERVICE_CFG_H_
+#define BLE_BLEAPPSERVICE_BLEAPPSERVICE_CFG_H_
+
+
+
+#endif /* BLE_BLEAPPSERVICE_BLEAPPSERVICE_CFG_H_ */

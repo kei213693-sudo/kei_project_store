@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "autosar_nm.h": "c",
+        "hal_rte.h": "c",
+        "blemanagergatt_cfg.h": "c",
+        "alps_nt3_bta_srr_1229_bl051_v_1_0.h": "c",
+        "app_preinclude.h": "c"
+    }
+}

@@ -38,8 +38,8 @@ extern UART_HandleTypeDef UART1_Handler; 	//UART¾ä±ú
 void uart_init(u32 bound);
 void LOG_UART_RxIrqCheck(void);
 void uart_rx_irq_restart(void);
-uint8_t *uart_rx_irq_get_buf_addr(void);
-uint16_t uart_rx_irq_get_len(void);
+uint8_t *uart_rx_buf_addr_get(void);
+uint16_t uart_rx_buf_len_get(void);
 
 int uart_tx_data(int8_t* data, uint32_t len, uint32_t mstime);
 int uart_rx_data(int8_t* data, uint32_t len, uint32_t mstime);

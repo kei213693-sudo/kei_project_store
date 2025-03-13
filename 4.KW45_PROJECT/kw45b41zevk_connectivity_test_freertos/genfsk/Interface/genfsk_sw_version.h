@@ -1,0 +1,15 @@
+/*
+Copyright 2019-2020 NXP
+All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
+*/
+#ifndef GENFSK_SW_VERSION_H
+#define GENFSK_SW_VERSION_H
+
+#define XCVR_TAG "REL_XCVR_RW610_2.0.16_RFP2_RC1"
+#define XCVR_SHA1 "1a3e668191fbcb4942ecc70292750e294416c99f (Tue Dec 12 12:46:03 2023 -0600)"
+#define GENFSK_TAG "REL_GENFSK_K4W1_4.0.16_RC2"
+#define GENFSK_SHA1 "e0fe07a1e47254cc5e2d5111cc5cc448907f3bbc (Thu Dec 14 18:02:20 2023 +0100)"
+#define GENFSK_DATE "Thu Dec 14 18:02:20 2023 +0100"
+
+#endif

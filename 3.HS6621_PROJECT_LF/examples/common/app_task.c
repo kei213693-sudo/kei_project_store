@@ -1129,8 +1129,8 @@ KE_MSG_HANDLER_TAB(appm)
     {GAPC_CONNECTION_REQ_IND,   (ke_msg_func_t)gapc_connection_req_ind_handler},//建立连接
     {GAPC_CMP_EVT,              (ke_msg_func_t)gapc_cmp_evt_handler},
     {GAPC_DISCONNECT_IND,       (ke_msg_func_t)gapc_disconnect_ind_handler},//断开连接
-    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},//slave收到主机发送“连接参数更新指令”回调函数，需要返回确定
-    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},//最终连接参数更新完成后进入
+    {GAPC_PARAM_UPDATE_REQ_IND, (ke_msg_func_t)gapc_param_update_req_ind_handler},//主/从，收到“连接参数更新指令”回调函数，需要返回确定
+    {GAPC_PARAM_UPDATED_IND,    (ke_msg_func_t)gapc_param_update_ind_handler},//从机收到连接参数更新最终确认指令后进入处理
     {GAPC_LE_PKT_SIZE_IND,      (ke_msg_func_t)gapc_pkt_size_ind_handler},
     {GATTC_MTU_CHANGED_IND,     (ke_msg_func_t)gattc_mtu_changed_ind_handler},//mtu交换完成
     {APP_AUDIO_RX_CMD,          (ke_msg_func_t)app_i2s_rx_data_handler},

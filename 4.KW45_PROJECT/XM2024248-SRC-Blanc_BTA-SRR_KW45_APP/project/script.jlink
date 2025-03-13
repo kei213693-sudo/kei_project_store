@@ -1,0 +1,7 @@
+ExitOnError 1
+r
+h
+loadfile "C:\Users\lj152\Documents\Git_Code\lijing_project_store\2.KW45_PROJECT\XM2024248-SRC-Blanc_BTA-SRR_KW45_APP\project\Debug\XM2024248_SRC_Blanc_BTA_SRR_KW45_APP.hex"
+qc
+
+qc

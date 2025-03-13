@@ -1,0 +1,38 @@
+PRIMARY_SERVICE(service_gatt, gBleSig_GenericAttributeProfile_d)//0x0001
+        CHARACTERISTIC(char_service_changed, gBleSig_GattServiceChanged_d, (gGattCharPropIndicate_c) )//0x0002
+            VALUE(value_service_changed, gBleSig_GattServiceChanged_d, (gPermissionNone_c), 4, 0x00, 0x00, 0x00, 0x00)//0x0003
+            CCCD(cccd_service_changed)//0x0004
+
+PRIMARY_SERVICE_UUID128(SK_BLE_GATT, uuid_service_SK_BLE_GATT)//0x0005
+	CHARACTERISTIC_UUID128(SK_TX, uuid_char_SK_TX, (gGattCharPropWrite_c) )//0x0006
+		VALUE_UUID128_VARLEN(value_SK_TX, uuid_char_SK_TX, (gPermissionFlagWritable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0x00)//0x0007
+	CHARACTERISTIC_UUID128(SK_RX, uuid_char_SK_RX, (gGattCharPropNotify_c) )
+		VALUE_UUID128_VARLEN(value_SK_RX, uuid_char_SK_RX, (gPermissionFlagReadable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0x00)
+		CCCD(cccd_SK_RX)
+	CHARACTERISTIC_UUID128(SKP_RX, uuid_char_SKP_RX, (gGattCharPropNotify_c) )
+		VALUE_UUID128_VARLEN(value_SKP_RX, uuid_char_SKP_RX, (gPermissionFlagReadable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0x00)
+		CCCD(cccd_SKP_RX)
+	CHARACTERISTIC_UUID128(SKF_HB, uuid_char_SKF_HB, (gGattCharPropWrite_c|gGattCharPropNotify_c) )
+		VALUE_UUID128_VARLEN(value_SKF_HB, uuid_char_SKF_HB, (gPermissionFlagReadable_c|gPermissionFlagWritable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0x00)
+		CCCD(cccd_SKF_HB)
+//
+//PRIMARY_SERVICE(service_dk, gBleSig_CCC_DK_UUID_d)
+//    CHARACTERISTIC_UUID128(char_vehicle_psm, uuid_char_vehicle_psm, (gGattCharPropRead_c) )
+//            VALUE_UUID128(value_vehicle_psm, uuid_char_vehicle_psm, (gPermissionFlagReadable_c), 2, MSB2(gDK_DefaultVehiclePsm_c), LSB2(gDK_DefaultVehiclePsm_c))
+//    CHARACTERISTIC(char_tx_power_level, gBleSig_TxPower_d, (gGattCharPropRead_c) )
+//            VALUE(value_tx_power_level, gBleSig_TxPower_d, (gPermissionFlagReadable_c), 1, 0x01)
+//    CHARACTERISTIC_UUID128(char_antenna_id, uuid_char_antenna_id, (gGattCharPropRead_c) )
+//            VALUE_UUID128(value_antenna_id, uuid_char_antenna_id, (gPermissionFlagReadable_c), 2, 0x02, 0x03)
+//
+//PRIMARY_SERVICE(service_test, gBleSig_wirteNotify_test_d)
+//	CHARACTERISTIC(char_notify_test, 0xA003, (gGattCharPropNotify_c) )
+//		VALUE_VARLEN(val_notify_test, 0xA003, (gPermissionFlagReadable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0x00)
+//		CCCD(cccd_notify_test)
+//	CHARACTERISTIC(char_manuf_name, gBleSig_ManufacturerNameString_d, (gGattCharPropRead_c|gGattCharPropWrite_c) )
+//		VALUE(value_manuf_name, gBleSig_ManufacturerNameString_d, (gPermissionFlagReadable_c|gPermissionFlagWritable_c), sizeof(MANUFACTURER_NAME)-1, MANUFACTURER_NAME)
+//	CHARACTERISTIC(char_write_test, 0xA002, (gGattCharPropWrite_c|gGattCharPropRead_c) )
+//		VALUE_VARLEN(val_write_test, 0xA002, (gPermissionFlagWritable_c|gPermissionFlagReadable_c), gAttMaxWriteDataSize_d(gAttMaxMtu_c), 0x1, 0xFF)
+//	CHARACTERISTIC_UUID128(char_robot_direction, uuid_char_robot_direction, (gGattCharPropRead_c) )
+//		VALUE_UUID128(value_robot_direction, uuid_char_robot_direction, (gPermissionFlagReadable_c), 2, 0x02, 0x03)
+//	CHARACTERISTIC(char_scan_interval_window, gBleSig_ScanIntervalWindow_d, (gGattCharPropWrite_c) )
+//		VALUE(val_scan_interval_window, gBleSig_ScanIntervalWindow_d, (gPermissionFlagWritable_c), 4, 0x00, 0x00, 0x00, 0x00)

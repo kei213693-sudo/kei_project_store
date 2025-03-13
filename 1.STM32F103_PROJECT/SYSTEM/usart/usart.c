@@ -276,7 +276,7 @@ void uart_rx_irq_restart(void)
 }
 
 //获取rxbuf地址
-uint8_t *uart_rx_irq_get_buf_addr(void)
+uint8_t *uart_rx_buf_addr_get(void)
 {
 	if(g_stLogUartRxCtl.finsh == 1)
     {
@@ -288,7 +288,7 @@ uint8_t *uart_rx_irq_get_buf_addr(void)
     }
 }
 //获取rxbuf长度
-uint16_t uart_rx_irq_get_len(void)
+uint16_t uart_rx_buf_len_get(void)
 {
 	if(g_stLogUartRxCtl.finsh == 1)
     {

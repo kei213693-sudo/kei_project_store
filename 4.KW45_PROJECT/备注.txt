@@ -1,0 +1,7 @@
+KW45的代码开发空间，使用MCUXpressoIDE打开，里面存放了如下代码工程：
+
+1、SDK包源码：官方未更改直接解压的软件包，可以查看各类说明文档。
+2、kw45b41zevk_connectivity_test_freertos：信道监听工程。
+3、kw45b41zevk_wireless_uart_freertos：多主多从参考例程工程。
+4、XM2024248-SRC-Blanc_BTA-SRF_KW45_APP：SRF代码工程。
+5、XM2024248-SRC-Blanc_BTA-SRR_KW45_APP：SRR代码工程。

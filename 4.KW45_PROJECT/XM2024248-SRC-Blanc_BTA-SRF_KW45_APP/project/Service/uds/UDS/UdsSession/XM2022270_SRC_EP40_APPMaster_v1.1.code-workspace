@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "../../../../.."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"includes.h": "c",
+			"uart_api.h": "c",
+			"uart_test.h": "c",
+			"comsm.h": "c",
+			"autosar_nm_cfg.h": "c",
+			"canfdtx.h": "c",
+			"uart_app.h": "c",
+			"r_typedefs.h": "c",
+			"r7f701690.dvf.h": "c"
+		}
+	}
+}

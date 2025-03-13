@@ -41,7 +41,7 @@ extern "C"
 #define APP_DFLT_DEVICE_NAME_LEN        (sizeof(APP_DFLT_DEVICE_NAME)-1)
 
 /// uuid in adv
-#define APP_ADV_DATA_MANU       "\x09\xFF\xF0\xFF\x01\x02\x03\x04\x05\x06"
+#define APP_AD_DATA_MANU       "\x09\xFF\xF0\xFF\x01\x02\x03\x04\x05\x06"
 /// uuid len
 #define APP_ADV_DATA_MANU_LEN   (10)
 
@@ -53,9 +53,12 @@ extern "C"
 /// scan resposne data
 #define APP_SCNRSP_DATA         "\x03\x03\x12\x18"//"\x03\x03\x12\x18\x11\x07\xd0\x00\x2d\x12\x1e\x4b\x0f\xa4\x99\x4e\xce\xb5\x31\xf4\x05\x79"
 /// scan resposne data len
-#define APP_SCNRSP_DATA_LEN     (4)//(22)
+#define APP_SCNRSP_DATA_LEN   (4)//(22)
 
-
+/// scan resposne data
+#define APP_TENC_DATA         "\x03\x03\xE7\xFE"
+/// scan resposne data len
+#define APP_TENC_DATA_LEN     (4)
 
 /// enable/disable security connect
 #define BLE_APP_SEC          1//使能配对

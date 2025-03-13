@@ -1,0 +1,136 @@
+/* This file was automatically generated */
+#include "uds_confpriv.h"
+#include "Uds_RtDIDCtl.h"
+#include "uds_priv.h"
+
+
+#ifdef UDS_ENABLE_ROUTINECONTROL
+    /* 0x31 RoutineControl service data Managing table 
+        Note : this table is located in the rom, can not be changed dynamically
+               if a new did which is need to perform routine control  , then must update this table 
+               before build the whole of project again 
+               for this table, due to the number of attributes is greater than 10 , so split as two rows. 
+    */
+    
+UDS_CONFIG_TYPE UDS_RtnCtrlMngtDatTblRcd_t Uds_g_RtnCtrlMngtDataTable[] = {
+/* routineIdentifier  AccessAttribute  ValidArgumentNum  RtnRunLimitTime   ExpectedPosResult  pFuncPtrStart                pFuncPtrStop                   pFuncPtrGetResult              pFuncPtrRtnCheck                pFuncPtrIsRtnFinished */ 
+/*0u */{0xFF01        ,0x1             ,14              ,10000             ,1                ,UDS_C_RID_FP_START_RTN_FF01,  UDS_C_RID_FP_STOP_RTN_FF01,  UDS_C_RID_FP_RESULT_RTN_FF01,  UDS_C_RID_FP_CHECK_RTN_FF01,  UDS_C_RID_FP_FINISH_RTN_FF01},
+/*1u */{0xFF00        ,0x1             ,12              ,10000             ,1                ,UDS_C_RID_FP_START_RTN_FF00,  UDS_C_RID_FP_STOP_RTN_FF00,  UDS_C_RID_FP_RESULT_RTN_FF00,  UDS_C_RID_FP_CHECK_RTN_FF00,  UDS_C_RID_FP_FINISH_RTN_FF00},
+/*2u */{0x0203        ,0x101             ,4              ,10000             ,1                ,UDS_C_RID_FP_START_RTN_0203,  UDS_C_RID_FP_STOP_RTN_0203,  UDS_C_RID_FP_RESULT_RTN_0203,  UDS_C_RID_FP_CHECK_RTN_0203,  UDS_C_RID_FP_FINISH_RTN_0203},
+/*3u */{0x0202        ,0x101             ,388              ,10000             ,1                ,UDS_C_RID_FP_START_RTN_0202,  UDS_C_RID_FP_STOP_RTN_0202,  UDS_C_RID_FP_RESULT_RTN_0202,  UDS_C_RID_FP_CHECK_RTN_0202,  UDS_C_RID_FP_FINISH_RTN_0202},
+/* These last one Lines indicate the end of the data table , do not delete*/
+/*FFu*/{0xFFFFu       , 0x0000u        , 0x00u         ,0x0000u         ,              0x00u,NULL                          ,NULL                         ,             NULL,      NULL,       NULL  }
+}; /* end of table : UDS_CONFIG_TYPE UDS_RtnCtrlMngtDatTblRcd_t Uds_g_RtnCtrlMngtDataTable[]  */
+#endif /* end of #ifdef UDS_ENABLE_ROUTINECONTROL */
+
+uint8_t UDS_C_RID_FP_START_RTN_FF01(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+void UDS_C_RID_FP_STOP_RTN_FF01(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_RESULT_RTN_FF01(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_CHECK_RTN_FF01(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_FINISH_RTN_FF01(void)
+{
+ return ;
+}
+
+
+uint8_t UDS_C_RID_FP_START_RTN_FF00(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+void UDS_C_RID_FP_STOP_RTN_FF00(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_RESULT_RTN_FF00(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_CHECK_RTN_FF00(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_FINISH_RTN_FF00(void)
+{
+ return ;
+}
+
+
+uint8_t UDS_C_RID_FP_START_RTN_0203(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+void UDS_C_RID_FP_STOP_RTN_0203(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_RESULT_RTN_0203(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_CHECK_RTN_0203(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_FINISH_RTN_0203(void)
+{
+ return ;
+}
+
+
+uint8_t UDS_C_RID_FP_START_RTN_0202(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+void UDS_C_RID_FP_STOP_RTN_0202(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_RESULT_RTN_0202(void)
+{
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_CHECK_RTN_0202(uint8_t *p_RtnCtrlOpt)
+{
+ (void)p_RtnCtrlOpt;
+ return ;
+}
+
+uint8_t UDS_C_RID_FP_FINISH_RTN_0202(void)
+{
+ return ;
+}
+
