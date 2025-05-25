@@ -1,0 +1,19 @@
+{
+    //Ctrl+Shift+B，快速在终端上运行脚本
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run BAT Script",
+            "type": "shell",
+            "command": "cmd /c ${file}",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared"
+            }
+        }
+    ]
+}
