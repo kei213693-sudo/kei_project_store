@@ -1,4 +1,3 @@
-# Cmac的py脚本源码例子
 import logging
 import binascii
 import re
@@ -120,7 +119,7 @@ class FileSign():
     @staticmethod
     def checkSum(*strHex: str) -> str:
         '''
-            计算s19文件某一行数据的叫颜值
+            计算s19文件某一行数据的校验值
             :param strHex: s19数据内容，可以是列表
             :return: 16进制检验值
         '''
@@ -140,6 +139,7 @@ class FileSign():
         return f'00{checkedSum}'[-2:]
 
 def main(source_folder: str, output_folder: str):
+
 
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -170,5 +170,3 @@ if __name__ == '__main__':
     output_folder = './output'
     main(source_folder, output_folder)
     
-
-.

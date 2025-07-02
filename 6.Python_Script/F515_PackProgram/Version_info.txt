@@ -1,0 +1,14 @@
+BOOT参数：
+#define BOOTLOADER_VERSION     {"BT:B.10"}
+
+APP参数：
+#define SUPP_SOFT_VERSION               "SW:2.03.B"
+#define SW_VER_YEAR 					"25"
+#define SW_VER_MONTH                    "06"
+#define SW_VER_DATE                     "03"
+#define SYS_SUPP_IDENDIFIER_ID          "1452"
+#define REVISE_NUM                      "01"
+#define VEH_MANU_SPAR_PART_NUM          "7900072-SZ02"          //F187
+#define ECU_NAME                        "BLE"                   //F197
+#define VEH_SUPP_HARD_VERSION           "HW:B.1.2"              //F089
+#define SYS_SUPP_SOFT_VERSION           "SW:BLE.2.53.02       "  //0216
