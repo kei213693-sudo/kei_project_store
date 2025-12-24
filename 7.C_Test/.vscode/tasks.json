@@ -1,0 +1,33 @@
+// 定义构建、测试、清理等自动化任务
+// 配置编译器、编译参数和输出文件
+{
+    "tasks": [
+        {
+            "type": "cppbuild", // 任务类型，cppbuild 用于 C/C++ 构建任务
+            "label": "C/C++: gcc.exe 生成活动文件",
+            "command": "D:\\LenovoSoftstore\\Install\\msys64\\ucrt64\\bin\\gcc.exe", // 编译器命令路径
+            "args": [
+                "-fdiagnostics-color=always", // 启用彩色诊断输出
+                "-g", // 生成调试信息
+                "-I", // 指定头文件搜索路径
+                "${workspaceFolder}/Src/Common/Crypto", // 外部库头文件路径
+                "${workspaceFolder}/main.c", // 主源文件
+                "${workspaceFolder}/Src/Common/Crypto/aes_api.c", // main.c要用到的外部函数源文件
+                "-o", // 指定输出可执行文件路径
+                "${workspaceFolder}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}" // 当前工作目录，设置为 TestWorkspace 文件夹
+            },
+            "problemMatcher": [
+                "$gcc" // 问题匹配器，用于解析编译输出并显示在问题面板
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "编译器生成的任务。"
+        }
+    ],
+    "version": "2.0.0"
+}

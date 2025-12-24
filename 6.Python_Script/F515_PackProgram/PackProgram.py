@@ -1,5 +1,5 @@
 """
-PackProgram.py 用于F515项目代码打包
+TestScript.py 用于Python脚本学习调试
 编码格式coding: utf-8 适用于处理中文
 """
 
@@ -718,8 +718,8 @@ def ble_version_modify() -> bool:
 
 # ble app工程路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE\DigiKey_Master_V2.uvprojx
 # ble app生成代码路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE\output\DigiKey_Master_V2.hex
-# ble boot工程路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\uds_bootloader_ble_master.uvprojx
-# ble boot生成代码路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\output\uds_bootloader_ble_master.hex
+# ble boot工程路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\F2A_boot_loader.uvprojx
+# ble boot生成代码路径：F515\05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\output\F2A_boot_loader.hex
 def ble_build() -> bool:
     """
     功能:编译BLE APP和BOOT的工程
@@ -733,7 +733,7 @@ def ble_build() -> bool:
         {
             "name": "BLE_BOOT",
             "path": parent_dir
-            + r"05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\uds_bootloader_ble_master.uvprojx",
+            + r"05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\F2A_boot_loader.uvprojx",
             "target_name": None,
         },
         {
@@ -794,7 +794,7 @@ def ble_program_cmac() -> bool:
 
     # 调用Tool.exe脚本签名
     script_path = (
-        parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool\tool.exe"
+        parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool\app_fill_tool.exe"
     )
     if not os.path.exists(script_path):
         print(f"未找到脚本: {script_path}")
@@ -833,46 +833,48 @@ def ble_program_cmac() -> bool:
         return False
 
 
-def ble_merge_file_hexview(dest_path) -> bool:
+def ble_merge_file_jflash(dest_path) -> bool:
     """
-    功能:使用HexView合并5个文件,在特定区域填充0x02,并导出为新的hex文件
+    功能:使用jflash合并5个文件,并导出为新的hex文件
     参数:
         dest_path (str): 输出文件路径(.hex)
     返回:
         True: 成功
         False: 失败
     """
+    # 查找JFlash.exe路径
+    jflash_exe_path = find_jflash_path()
+    if jflash_exe_path is None:
+        print("[ERROR] 未找到JFlash.exe，请安装SEGGER J-Flash软件")
+        return False
+        
     # ble app签名bin程序生成ble_app.hex和ble_app_back.hex
     convert_bin_with_jflash(
         bin_file=script_dir + r"input\out_ble_app.bin",
-        base_address=0x36000,
+        base_address=0x2C000,
         output_format="hex",
         output_file=script_dir + r"input\ble_app.hex",
     )
 
     convert_bin_with_jflash(
         bin_file=script_dir + r"input\out_ble_app.bin",
-        base_address=0x5E000,
+        base_address=0x54000,
         output_format="hex",
         output_file=script_dir + r"input\ble_app_back.hex",
     )
 
-    hexview_path = script_dir + r"s2_cmac_20250407\HexView\hexview.exe"
     file_1_path = (
         parent_dir
-        + r"05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\sdk\bundles\exp\ING9188xx\platform_entry.hex"
+        + r"05_SourceCode\IKM_BLE\F515_IKM_BLE\sdk\bundles\exp\ING9188xx\platform_entry.hex"
     )
     file_2_path = (
         parent_dir
-        + r"05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\output\uds_bootloader_ble_master.hex"
+        + r"05_SourceCode\IKM_BLE\F515_IKM_BLE_BOOT\output\F2A_boot_loader.hex"
     )
     file_3_path = script_dir + r"input\ble_app.hex"
     file_4_path = parent_dir + r"05_SourceCode\IKM_BLE\F515_BQB\output\F515_BQB.hex"
     file_5_path = script_dir + r"input\ble_app_back.hex"
 
-    if not os.path.exists(hexview_path):
-        print(f"找不到可执行文件: {hexview_path}")
-        return False
     if not os.path.exists(file_1_path):
         print(f"找不到输入文件: {file_1_path}")
         return False
@@ -888,39 +890,53 @@ def ble_merge_file_hexview(dest_path) -> bool:
     if not os.path.exists(file_5_path):
         print(f"找不到输入文件: {file_5_path}")
         return False
-
-    # 构造指令
-    command = (
-        f"/s "  # 静默模式
-        f"/MT:{file_1_path};0x00000000+{file_2_path};0x00000000+{file_3_path};0x00000000+{file_4_path};0x00000000+{file_5_path};0x00000000 "  # 合并五个文件
-        f"/FR:0x00034000-0x00034001 "  # 定义区域
-        f"/FP:0x02 "  # 设置填充值
-        f"/XI:32 "  # 导出为Intel-Hex,每行32字节（自动选择记录类型,Rectype=0）
-        f"-o {dest_path}"  # 输出路径,改为-o方式
-    )
-
-    # 执行HexView命令
+    
     try:
-        subprocess.run(
-            [hexview_path] + command.split(),  # 将命令拆分为参数列表
-            check=True,
+        # 构造指令
+        cmd = [
+            f'"{jflash_exe_path}"',  # 双引号包裹路径处理空格
+            # f'-openprj"{project_file}"', # 打开某个指定的.jflash的工程文件，这里我们只需要转换文件格式，不需要connect芯片去烧录，所以不指定，这样运行时会打开一个默认项目，兼容不同的芯片
+            f'-open"{file_1_path}"',  # 逗号分隔地址
+            f'-merge"{file_2_path}"',  # 合并第2个文件
+            f'-merge"{file_3_path}"',  # 合并第3个文件
+            f'-merge"{file_4_path}"',  # 合并第4个文件
+            f'-merge"{file_5_path}"',  # 合并第5个文件
+            f'-saveas"{dest_path}"',
+            "-hide",  # 隐藏GUI界面
+            "-exit",  # 退出 J-Flash
+        ]
+        full_cmd = " ".join(cmd)
+        
+        # 执行命令
+        result = subprocess.run(
+            full_cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
-            timeout=30,  # 设置超时时间,s
+            encoding="utf-8",
+            errors="replace",
+            timeout=30,  # 30秒超时
         )
-        # print(f"HexView执行成功,输出文件: {dest_path}")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"命令执行失败: {e.stderr}")
-        # 打印完整的命令行,便于调试
-        print(f"执行的命令: {' '.join([hexview_path] + command.split())}")
-        return False
+        
+        # 验证结果
+        if os.path.isfile(dest_path):
+            # print(f"[SUCCESS] 转换成功! 输出文件: {dest_path}")
+            return True
+        else:
+            print("[ERROR] 转换失败，输出文件未生成")
+            print(f"[CMD] 执行命令: {full_cmd}")
+            # 错误诊断
+            if "could not open file" in result.stdout:
+                print("[DIAG] 无法打开输入文件")
+            elif "Unsupported file format" in result.stdout:
+                print("[DIAG] 不支持的文件格式")
+            return False
+
     except subprocess.TimeoutExpired:
-        print("HexView执行超时,请检查文件大小和复杂度")
+        print("[ERROR] 命令执行超时")
         return False
     except Exception as e:
-        print(f"发生未知错误: {str(e)}")
+        print(f"[ERROR] 执行命令时出错: {e}")
         return False
 
 
@@ -940,7 +956,7 @@ def factory_file_output() -> bool:
         return False
 
     # 合并ble的boot和app(crc32签名过的)
-    if not ble_merge_file_hexview(script_dir + r"output\factory_ble_boot_app_bqb.hex"):
+    if not ble_merge_file_jflash(script_dir + r"output\factory_ble_boot_app_bqb.hex"):
         print("factory_ble_boot_app_bqb.hex程序打包失败！")
         return False
 
@@ -988,8 +1004,7 @@ def factory_file_output() -> bool:
     else:
         return True
 
-
-def ota_file_output() -> bool:
+def ota_file_output_mcu() -> bool:
     """
     功能:输出OTA素材包(用于生成OTA升级包)
     参数:无
@@ -997,7 +1012,7 @@ def ota_file_output() -> bool:
         True: 成功
         False: 失败
     """
-    print("8、开始打包ota程序")
+    print("8、开始打包ota mcu程序")
 
     # 将DigiKey_AC7840X_cmac.s19复制到OTA素材包内,并重命名2_BLE_APP_0MCU_B01.s19
     if not file_copy(
@@ -1020,30 +1035,115 @@ def ota_file_output() -> bool:
     ):
         print("重命名2_BLE_APP_0MCU_B01.s19失败！")
         return False
-
-    # 将ble的out_ble_app.bin签名文件，2_BLE_APP_1BT_B01.s19文件，地址从0x70000开始，然后再将2_BLE_APP_1BT_B01.s19文件复制到OTA素材包内
-    if os.path.exists(  # 源文件存在就先删除
-        script_dir + r"output\OTA素材包\2_BLE_APP_1BT_B01.s19"
-    ):
-        file_delete(script_dir + r"output\OTA素材包", "2_BLE_APP_1BT_B01.s19")
-
-    if not convert_bin_with_jflash(
-        bin_file=script_dir + r"input\out_ble_app.bin",
-        base_address=0x70000,
-        output_format="s19",
-        output_file=script_dir + r"output\OTA素材包\2_BLE_APP_1BT_B01.s19",
-    ):
-        print("生成2_BLE_APP_1BT_B01.s19失败！")
-        return False
     else:
         return True
+
+def ota_file_output_ble() -> bool:
+    """
+    功能:输出BLE OTA素材包(用于生成OTA升级包)
+    参数:无
+    返回:
+        True: 成功
+        False: 失败
+    """
+    print("9、开始打包ota ble程序")
+
+    # copy ble app、协议栈、bqb三个bin文件代码到tool文件夹
+    ble_app_src_path = parent_dir + r"05_SourceCode\IKM_BLE\F515_IKM_BLE"
+    ble_bqb_src_path = parent_dir + r"05_SourceCode\IKM_BLE\F515_BQB"
+    ble_platform_src_path = parent_dir + r"05_SourceCode\IKM_BLE\F515_IKM_BLE\sdk\bundles\exp\ING9188xx"
+    ble_app_dest_path = parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool"
+    if not file_copy(ble_app_src_path, ble_app_dest_path, "DigiKey_Master_V2.bin"):
+        print("复制DigiKey_Master_V2.bin到{ble_app_dest_path}失败！")
+        return False
+        
+    # 存在就删掉
+    if os.path.exists(ble_app_dest_path + r"\ble_app.bin"):
+        file_delete(ble_app_dest_path, "ble_app.bin")
+        
+    # 重命名
+    if not file_rename(ble_app_dest_path, "DigiKey_Master_V2.bin", "ble_app.bin"):
+        print("重命名{ble_app_dest_path}的DigiKey_Master_V2.bin失败！")
+        return False
+        
+    if not file_copy(ble_bqb_src_path, ble_app_dest_path, "F515_BQB.bin"):
+        print("F515_BQB.bin到{ble_app_dest_path}失败！")
+        return False
+        
+    if not file_copy(ble_platform_src_path, ble_app_dest_path, "platform.bin"):
+        print("platform.bin到{ble_app_dest_path}失败！")
+        return False
+        
+    # 调用platform_up_tool.exe脚本签名
+    script_path = (
+        parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool\platform_up_tool.exe"
+    )
+    if not os.path.exists(script_path):
+        print(f"未找到脚本: {script_path}")
+        return False
+        
+    try:
+        # 执行命令
+        result = subprocess.run(
+            [script_path],
+            capture_output=True,
+            text=True,
+            cwd=ble_app_dest_path,  # 设置工作目录为tool.exe路径
+        )
+
+        # 检查返回码
+        if result.returncode == 0:
+            # print(f"成功执行: {script_path}")
+            if os.path.exists(  # 源文件存在就先删除
+                    parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool\out_ble_app_ota.bin"
+                ):
+                    file_delete(parent_dir + r"05_SourceCode\Tools\BLE_F515_app_Fill_Tool\tool", "out_ble_app_ota.bin")
+                    
+            if not file_rename(ble_app_dest_path, "out_ble_app.bin", "out_ble_app_ota.bin"):
+                print("重命名{ble_app_dest_path}out_ble_app.bin失败！")
+                return False
+        
+            # 将生成的签名文件,复制到input文件夹中
+            ble_app_mac_src_path = ble_app_dest_path
+            ble_app_mac_dest_path = script_dir + r"input"
+            if not file_copy(
+                ble_app_mac_src_path, ble_app_mac_dest_path, "out_ble_app_ota.bin"
+            ):
+                print("复制out_ble_app_ota.bin失败！")
+                return False
+            else:
+                # 将ble的out_ble_app.bin签名文件，2_BLE_APP_1BT_B01.s19文件，地址从0x700000开始，然后再将2_BLE_APP_1BT_B01.s19文件复制到OTA素材包内
+                if os.path.exists(  # 源文件存在就先删除
+                    script_dir + r"output\OTA素材包\2_BLE_APP_1BT_B01.s19"
+                ):
+                    file_delete(script_dir + r"output\OTA素材包", "2_BLE_APP_1BT_B01.s19")
+
+                if not convert_bin_with_jflash(
+                    bin_file=script_dir + r"input\out_ble_app_ota.bin",
+                    base_address=0x700000,
+                    output_format="s19",
+                    output_file=script_dir + r"output\OTA素材包\2_BLE_APP_1BT_B01.s19",
+                ):
+                    print("生成2_BLE_APP_1BT_B01_test.s19失败！")
+                    return False
+                else:
+                    return True
+        else:
+            print(f"Tool.exe执行失败，返回码: {result.returncode}")
+            if result.stderr:
+                print(f"标准错误:\n{result.stderr}")
+            return False
+
+    except Exception as e:
+        print(f"执行exe时发生错误: {e}")
+        return False
 
 
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}] Run Start！")
 
     result_value = True
-
+    
     if result_value is True:
         result_value = mcu_version_modify()  # 修改mcu的版本信息
 
@@ -1061,18 +1161,20 @@ def main():
 
     if result_value is True:
         result_value = ble_program_cmac()  # 给ble app程序签名
-
+    
     if result_value is True:
         result_value = factory_file_output()  # 生成工厂刷写压缩包
 
     if result_value is True:
-        result_value = ota_file_output()  # 生成OTA包素材文件
-
+        result_value = ota_file_output_mcu()  # 生成OTA包素材文件
+        
+    if result_value is True:
+        result_value = ota_file_output_ble()  # 生成OTA包素材文件
+    
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]}] Run End！")
 
     # 退出python解释器
     if result_value is True:
-        input("打包成功")
         return True
     else:
         input("打包失败,请查看日志信息检查原因！！！")

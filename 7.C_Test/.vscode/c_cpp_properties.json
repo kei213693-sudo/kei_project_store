@@ -1,0 +1,21 @@
+// 一般用于添加包含路径，用于代码编译
+{
+    "configurations": [
+        {
+            "name": "windows-gcc-x64",
+            "includePath": [
+                "${workspaceFolder}/**", // main.c所处的路径
+                "${workspaceFolder}/Src/Common/Crypto" // 外部库头文件路径
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "10.0.19041.0",
+            "cStandard": "c17",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

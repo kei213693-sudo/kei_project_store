@@ -1,0 +1,15 @@
+// 覆盖用户设置的工作区特定配置
+// 配置编辑器行为和扩展设置
+{
+    "C_Cpp.default.compilerPath": "D:\\LenovoSoftstore\\Install\\msys64\\ucrt64\\bin\\gcc.exe",
+    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+    "C_Cpp.autocomplete": "default",
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.h": "c"
+    },
+    "files.exclude": {
+        "**/*.exe": true,
+        "**/*.o": true
+    }
+}
