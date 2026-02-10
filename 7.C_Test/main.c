@@ -3,7 +3,7 @@
 #include "aes_api.h"
 
 #define SCANF_TEST 0
-#define AES_TEST 0
+#define AES_TEST 1
 
 void printf_hex(uint8_t *pData, uint32_t length)
 {

@@ -1,48 +1,50 @@
+// 配置调试会话
+// 设置断点、变量监视等调试功能
 {
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "C/C++: gcc.exe 调试活动文件",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/main.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "MIMode": "gdb",
+      "name": "C/C++: gcc.exe 调试活动文件", // 调试配置名称
+      "type": "cppdbg", // 调试器类型，cppdbg 表示 C/C++ 调试器
+      "request": "launch", // 调试请求类型：launch(启动程序) 或 attach(附加到进程)
+      "program": "${workspaceFolder}/main.exe", // 要调试的可执行文件路径
+      "args": [], // 传递给程序的命令行参数数组
+      "stopAtEntry": false, // 是否在程序入口点暂停
+      "cwd": "${workspaceFolder}", // 程序的工作目录
+      "MIMode": "gdb", // 调试器接口模式，使用 GDB
       "miDebuggerPath": "D:\\LenovoSoftstore\\Install\\msys64\\ucrt64\\bin\\gdb.exe",
-      "setupCommands": [
+      "setupCommands": [ // 启动调试会话时要执行的命令
         {
-          "description": "为 gdb 启用整齐打印",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
+          "description": "为 gdb 启用整齐打印", // 命令描述
+          "text": "-enable-pretty-printing", // GDB 命令
+          "ignoreFailures": true // 如果命令失败是否忽略
         },
         {
-          "description": "将 Disassembly Flavor 设为 Intel",
-          "text": "-gdb-set disassembly-flavor intel",
+          "description": "将 Disassembly Flavor 设为 Intel", // 设置反汇编风格
+          "text": "-gdb-set disassembly-flavor intel", // GDB 命令
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "C/C++: gcc.exe 生成活动文件",
-      "environment": [],
-      "externalConsole": false,
-      "logging": {
-        "trace": false,
-        "traceResponse": false,
-        "engineLogging": false
+      "preLaunchTask": "C/C++: gcc.exe 生成活动文件", // 启动调试前要执行的任务
+      "environment": [], // 程序运行时的环境变量数组
+      "externalConsole": false, // 是否使用外部控制台窗口
+      "logging": { // 调试器日志配置
+        "trace": false, // 是否启用跟踪日志
+        "traceResponse": false, // 是否记录调试器响应
+        "engineLogging": false // 是否记录引擎日志
       }
     },
     {
-      "name": "C/C++: gcc.exe 调试活动文件 (外部控制台)",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/main.exe",
-      "args": [],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "MIMode": "gdb",
-      "miDebuggerPath": "D:\\SoftWare\\mingw64\\bin\\gdb.exe",
-      "setupCommands": [
+      "name": "C/C++: gcc.exe 调试活动文件 (外部控制台)", // 调试配置名称
+      "type": "cppdbg", // 调试器类型
+      "request": "launch", // 调试请求类型
+      "program": "${workspaceFolder}/main.exe", // 要调试的可执行文件路径
+      "args": [], // 传递给程序的命令行参数数组
+      "stopAtEntry": false, // 是否在程序入口点暂停
+      "cwd": "${workspaceFolder}", // 程序的工作目录
+      "MIMode": "gdb", // 调试器接口模式
+      "miDebuggerPath": "D:\\SoftWare\\mingw64\\bin\\gdb.exe", // GDB 调试器路径
+      "setupCommands": [ // 启动调试会话时要执行的命令
         {
           "description": "为 gdb 启用整齐打印",
           "text": "-enable-pretty-printing",
@@ -54,9 +56,9 @@
           "ignoreFailures": true
         }
       ],
-      "preLaunchTask": "C/C++: gcc.exe 生成活动文件",
-      "environment": [],
-      "externalConsole": true,
+      "preLaunchTask": "C/C++: gcc.exe 生成活动文件", // 启动调试前要执行的任务
+      "environment": [], // 程序运行时的环境变量数组
+      "externalConsole": true, // 使用外部控制台窗口
       "logging": {
         "trace": false,
         "traceResponse": false,

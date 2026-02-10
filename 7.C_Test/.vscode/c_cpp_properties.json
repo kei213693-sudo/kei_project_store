@@ -5,7 +5,7 @@
             "name": "windows-gcc-x64",
             "includePath": [
                 "${workspaceFolder}/**", // main.c所处的路径
-                "${workspaceFolder}/Src/Common/Crypto" // 外部库头文件路径
+                "${workspaceFolder}/Src/Common/Crypto" // 要调用的外部源文件所在路径，C_Test和Src这两个文件夹属于同一个Vs Code工作区
             ],
             "defines": [
                 "_DEBUG",
